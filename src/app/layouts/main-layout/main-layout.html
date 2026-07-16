@@ -1,0 +1,11 @@
+<a class="skip-to-main" href="#main-content">Skip to main content</a>
+
+<section class="application-shell">
+  <main id="main-content" tabindex="-1">
+    <router-outlet />
+  </main>
+</section>
+
+<div class="sr-only" aria-live="polite" aria-atomic="true">
+  {{ announcementMessage() }}
+</div>
