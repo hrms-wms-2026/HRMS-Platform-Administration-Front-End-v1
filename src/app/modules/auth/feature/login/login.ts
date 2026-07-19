@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { SessionService } from '../../../../core/auth/session.service';
+import { PermissionStore } from '../../../../core/permissions/permission.store';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ export class Login {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly sessionService = inject(SessionService);
+  private readonly permissionStore = inject(PermissionStore);
   private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
@@ -35,6 +37,7 @@ export class Login {
     this.authService.login(this.loginForm.getRawValue()).subscribe({
       next: (context) => {
         this.sessionService.setSession(context);
+        this.permissionStore.setAuthorizationContext(context);
         this.loading.set(false);
         this.router.navigateByUrl('/');
       },

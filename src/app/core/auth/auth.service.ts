@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from '../config/api-endpoints';
 import { AuthContext } from './auth-context.model';
 import { environment } from '../../../environments/environment';
 import { SessionService } from './session.service';
+import { PermissionStore } from '../permissions/permission.store';
 
 export interface LoginRequest {
   email: string;
@@ -15,6 +16,7 @@ export interface LoginRequest {
 export class AuthService {
   private http = inject(HttpClient);
   private readonly sessionService = inject(SessionService);
+  private readonly permissionStore = inject(PermissionStore);
   private readonly baseUrl = environment.apiUrl;
 
   login(request: LoginRequest): Observable<AuthContext> {
@@ -40,6 +42,11 @@ export class AuthService {
   logout(): Observable<void> {
     return this.http
       .post<void>(`${this.baseUrl}${API_ENDPOINTS.auth.logout}`, {}, { withCredentials: true })
-      .pipe(tap(() => this.sessionService.clearSession()));
+      .pipe(
+        tap(() => {
+          this.sessionService.clearSession();
+          this.permissionStore.clear();
+        }),
+      );
   }
 }
