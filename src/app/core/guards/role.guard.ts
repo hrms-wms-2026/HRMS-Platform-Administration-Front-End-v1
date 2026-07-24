@@ -7,9 +7,9 @@ export const roleGuard: CanActivateFn = (route) => {
   const router = inject(Router);
 
   const requiredRoles = route.data['roles'] as string[];
-  const userRoles = sessionService.currentUser()?.roles ?? [];
+  const userRole = sessionService.currentUser()?.platformRole;
 
-  return requiredRoles.some((role) => userRoles.includes(role))
+  return userRole !== undefined && requiredRoles.includes(userRole)
     ? true
     : router.createUrlTree(['/access-denied']);
 };

@@ -1,17 +1,124 @@
-<form class="login-form" [formGroup]="loginForm" (ngSubmit)="submit()">
-  <h1>Login</h1>
+<div class="w-full max-w-md rounded-2xl bg-white p-10 shadow-2xl">
+  <div class="mb-8 text-center">
+    <p class="text-3xl font-extrabold tracking-tight text-blue-700">ONEVO</p>
+    <p class="mt-1 text-sm font-medium text-slate-500">Platform Administration</p>
+  </div>
 
-  <label for="email">Email</label>
-  <input id="email" type="email" formControlName="email" autocomplete="username" />
+  <form class="flex flex-col gap-5" [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+    @if (errorMessage()) {
+      <div
+        class="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+        role="alert"
+      >
+        <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.63-1.516 2.63H3.72c-1.347 0-2.189-1.463-1.516-2.63L8.485 2.495ZM10 6a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 6Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        {{ errorMessage() }}
+      </div>
+    }
 
-  <label for="password">Password</label>
-  <input id="password" type="password" formControlName="password" autocomplete="current-password" />
+    <div>
+      <label for="email" class="sr-only">Email</label>
+      <div class="relative">
+        <svg
+          class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z"
+          />
+          <path
+            d="M19 8.839l-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z"
+          />
+        </svg>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="username"
+          placeholder="Enter your email"
+          class="w-full rounded-lg border border-slate-300 py-3 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+      </div>
+    </div>
 
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-  }
+    <div>
+      <label for="password" class="sr-only">Password</label>
+      <div class="relative">
+        <svg
+          class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 1a4 4 0 0 0-4 4v2H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1V5a4 4 0 0 0-4-4Zm2 6V5a2 2 0 1 0-4 0v2h4Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <input
+          id="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+          class="w-full rounded-lg border border-slate-300 py-3 pl-10 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+        <button
+          type="button"
+          (click)="togglePasswordVisibility()"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        >
+          @if (showPassword()) {
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.29 10.29 0 0 0 3.507-4.454.75.75 0 0 0 0-.564C18.402 6.523 14.585 4 10 4a9.9 9.9 0 0 0-4.512 1.074L3.28 2.22ZM7.53 6.47l1.653 1.653a2.5 2.5 0 0 1 3.194 3.194l1.653 1.653a4 4 0 0 0-6.5-6.5Z"
+              />
+              <path
+                d="M2.06 8.223a10.28 10.28 0 0 0-.766 1.209.75.75 0 0 0 0 .564C2.898 13.477 6.715 16 11.3 16a9.87 9.87 0 0 0 3.29-.564l-1.244-1.244a4 4 0 0 1-5.16-5.16L6.056 6.902A10.34 10.34 0 0 0 2.06 8.223Z"
+              />
+            </svg>
+          } @else {
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+              <path
+                fill-rule="evenodd"
+                d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.147.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          }
+        </button>
+      </div>
+    </div>
 
-  <button type="submit" [disabled]="loading()">
-    {{ loading() ? 'Signing in...' : 'Sign in' }}
-  </button>
-</form>
+    <label class="flex select-none items-center gap-2 text-sm text-slate-600">
+      <input
+        type="checkbox"
+        formControlName="rememberEmail"
+        class="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600/30"
+      />
+      Remember my email
+    </label>
+
+    <button
+      type="submit"
+      [disabled]="!canSubmit() || loginForm.invalid"
+      class="w-full rounded-lg bg-blue-700 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {{ loading() ? 'Signing in…' : 'Sign In' }}
+    </button>
+
+    <p class="text-center text-sm">
+      <button type="button" class="font-medium text-blue-700 hover:underline">Forgot Password?</button>
+    </p>
+  </form>
+</div>

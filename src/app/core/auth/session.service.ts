@@ -11,7 +11,11 @@ export class SessionService {
   readonly isAuthenticated = this._isAuthenticated.asReadonly();
 
   setSession(context: AuthContext): void {
-    this._currentUser.set(context.user);
+    this._currentUser.set({
+      id: context.userId,
+      email: context.email,
+      platformRole: context.platformRole,
+    });
     this._isAuthenticated.set(true);
   }
 
