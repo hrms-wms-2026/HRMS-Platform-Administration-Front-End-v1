@@ -109,13 +109,14 @@
       Remember my email
     </label>
 
-    <button
+    <app-button
       type="submit"
-      [disabled]="!canSubmit() || loginForm.invalid"
-      class="w-full rounded-lg bg-blue-700 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {{ loading() ? 'Signing in…' : 'Sign In' }}
-    </button>
+      label="Sign In"
+      loadingText="Signing in…"
+      [loading]="loading()"
+      [disabled]="loginForm.invalid"
+      [fullWidth]="true"
+    />
 
     <p class="text-center text-sm">
       <button type="button" class="font-medium text-blue-700 hover:underline">Forgot Password?</button>

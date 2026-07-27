@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -6,12 +6,13 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { SessionService } from '../../../../core/auth/session.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { environment } from '../../../../../environments/environment';
+import { Button } from '../../../../shared/ui/button/button';
 
 const REMEMBERED_EMAIL_KEY = 'onevo_admin_remembered_email';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Button],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -31,8 +32,6 @@ export class Login {
     password: ['', Validators.required],
     rememberEmail: [this.readRememberedEmail() !== null],
   });
-
-  protected readonly canSubmit = computed(() => !this.loading());
 
   togglePasswordVisibility(): void {
     this.showPassword.update((visible) => !visible);

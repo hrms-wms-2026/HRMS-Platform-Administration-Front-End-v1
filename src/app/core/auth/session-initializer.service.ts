@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { catchError, firstValueFrom, of } from 'rxjs';
+import { catchError, firstValueFrom, of, timeout } from 'rxjs';
 import { AuthService } from './auth.service';
 import { SessionService } from './session.service';
 import { PermissionStore } from '../permissions/permission.store';
+
+const SESSION_BOOTSTRAP_TIMEOUT_MS = 3000;
 
 @Injectable({ providedIn: 'root' })
 export class SessionInitializerService {
@@ -12,7 +14,10 @@ export class SessionInitializerService {
 
   async initialize(): Promise<void> {
     const context = await firstValueFrom(
-      this.authService.loadContext().pipe(catchError(() => of(null))),
+      this.authService.loadContext().pipe(
+        timeout(SESSION_BOOTSTRAP_TIMEOUT_MS),
+        catchError(() => of(null)),
+      ),
     );
 
     if (context) {
