@@ -8,6 +8,9 @@
         <app-status-badge [label]="user.platformRole" tone="neutral" />
       </div>
     }
+    <a routerLink="/settings/mfa" class="text-sm font-medium text-slate-600 hover:text-blue-700">
+      Security
+    </a>
     <app-button label="Logout" variant="secondary" (clicked)="logout()" />
   </div>
 </nav>

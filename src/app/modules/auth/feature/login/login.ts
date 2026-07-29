@@ -52,11 +52,18 @@ export class Login {
 
     this.authService.login({ email, password }).subscribe({
       next: (context) => {
-        this.logDebug('Login succeeded', { userId: context.userId, role: context.platformRole });
         this.rememberEmail(rememberEmail, email);
+        this.loading.set(false);
+
+        if (context.mfaRequired) {
+          this.logDebug('Login succeeded, MFA required', { email });
+          this.router.navigateByUrl('/auth/mfa-verify');
+          return;
+        }
+
+        this.logDebug('Login succeeded', { userId: context.userId, role: context.platformRole });
         this.sessionService.setSession(context);
         this.permissionStore.setAuthorizationContext(context);
-        this.loading.set(false);
         this.router.navigateByUrl('/');
       },
       error: (error: HttpErrorResponse) => {

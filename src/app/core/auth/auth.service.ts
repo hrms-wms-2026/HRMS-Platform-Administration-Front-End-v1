@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
 import { API_ENDPOINTS } from '../config/api-endpoints';
 import { AuthContext } from './auth-context.model';
+import { MfaSetupResponse } from './mfa-setup-response.model';
 import { SessionService } from './session.service';
 import { PermissionStore } from '../permissions/permission.store';
 import { environment } from '../../../environments/environment';
@@ -12,12 +13,13 @@ export interface LoginRequest {
   password: string;
 }
 
-/** Wire shape returned by admin/v1/auth/login and admin/v1/auth/context. */
+/** Wire shape returned by admin/v1/auth/login, /me, and /mfa/verify. */
 interface AdminSessionResponse {
   platform_user_id: string;
   email: string;
   platform_role: string;
   expires_at: string;
+  mfa_required: boolean;
 }
 
 function toAuthContext(response: AdminSessionResponse): AuthContext {
@@ -26,6 +28,7 @@ function toAuthContext(response: AdminSessionResponse): AuthContext {
     email: response.email,
     platformRole: response.platform_role,
     expiresAt: response.expires_at,
+    mfaRequired: response.mfa_required,
     permissions: [],
     scopes: {},
     entitlements: [],
@@ -72,5 +75,31 @@ export class AuthService {
           this.permissionStore.clear();
         }),
       );
+  }
+
+  enableMfa(): Observable<MfaSetupResponse> {
+    return this.http.post<MfaSetupResponse>(
+      `${this.baseUrl}${API_ENDPOINTS.auth.mfaEnable}`,
+      {},
+      { withCredentials: true },
+    );
+  }
+
+  confirmMfaSetup(code: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(
+      `${this.baseUrl}${API_ENDPOINTS.auth.mfaConfirmSetup}`,
+      { code },
+      { withCredentials: true },
+    );
+  }
+
+  verifyMfa(code: string): Observable<AuthContext> {
+    return this.http
+      .post<AdminSessionResponse>(
+        `${this.baseUrl}${API_ENDPOINTS.auth.mfaVerify}`,
+        { code },
+        { withCredentials: true },
+      )
+      .pipe(map(toAuthContext));
   }
 }

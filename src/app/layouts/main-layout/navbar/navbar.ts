@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SessionService } from '../../../core/auth/session.service';
 import { Button } from '../../../shared/ui/button/button';
@@ -7,7 +7,7 @@ import { StatusBadge } from '../../../shared/ui/status-badge/status-badge';
 
 @Component({
   selector: 'app-navbar',
-  imports: [Button, StatusBadge],
+  imports: [Button, StatusBadge, RouterLink],
   templateUrl: './navbar.html',
 })
 export class Navbar {
