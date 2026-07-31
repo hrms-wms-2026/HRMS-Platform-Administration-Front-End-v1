@@ -1,8 +1,10 @@
 import {
   ApplicationConfig,
+  Injector,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   inject,
+  runInInjectionContext,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
@@ -16,8 +18,11 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withFetch()),
     provideAppInitializer(() => {
-      const initializer = inject(SessionInitializerService);
-      return initializer.initialize();
+      const injector = inject(Injector);
+      return runInInjectionContext(injector, () => {
+        const initializer = inject(SessionInitializerService);
+        return initializer.initialize();
+      });
     }),
   ],
 };

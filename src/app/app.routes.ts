@@ -14,7 +14,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./layouts/auth-layout/auth-layout').then((m) => m.AuthLayout),
     children: [
-      // login and onboarding routes
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./modules/auth/feature/login/login').then((m) => m.Login),
+      },
     ],
   },
 ];
