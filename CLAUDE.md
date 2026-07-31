@@ -115,7 +115,26 @@ There is currently no session-restore endpoint (`GET /admin/v1/auth/me` or `/con
 admin API — only `login`, `logout`, `google-callback` exist under `AdminAuth`. Until backend adds
 one, `SessionInitializerService.initialize()` will always fail to restore a session after a page
 refresh, even with a valid cookie. This is expected for now, not a frontend bug — don't "fix" it
-by guessing a path.
+by guessing a path. `SessionInitializerService` wraps this call in a 3s `timeout()` for exactly
+this reason — see [`session-initializer.service.ts`](src/app/core/auth/session-initializer.service.ts).
+
+### CSRF cookie/header names (verified against live backend, 2026-07-27)
+The admin API does **not** use the Angular-default `XSRF-TOKEN` cookie / `X-XSRF-TOKEN` header
+convention. It sets a cookie named **`admin_csrf`** on login and expects it echoed back as an
+**`X-CSRF-Token`** header on mutating requests (see backend's `CsrfProtectionMiddleware.cs`).
+[`csrf.interceptor.ts`](src/app/core/interceptors/csrf.interceptor.ts) uses these exact names —
+don't "helpfully" change them back to the Angular default, that was the original bug. The session
+cookie itself (`admin_session`) is HttpOnly and not readable from `document.cookie`, by design —
+only the CSRF cookie needs to be JS-readable, for the double-submit-cookie pattern to work. Since
+login itself is CSRF-exempt (no session exists yet), this class of bug won't show up until a real
+authenticated mutating request (create/update/delete) is built and tested.
+
+### First verified end-to-end login (2026-07-27)
+Login was confirmed working full-stack for the first time this session — `dev@onevo.io` seed
+credentials (from backend `appsettings.Development.json`, `DevAdmin` section) → `POST
+/admin/v1/auth/login` → `200` → session cookie set → redirected to `/`. The blank page after
+redirect is expected, not a bug — `MainLayout`'s `<router-outlet>` has no child routes yet (no
+navbar/dashboard built until Phase 9's shell and Phase 10's reference module land).
 
 ## Component conventions
 

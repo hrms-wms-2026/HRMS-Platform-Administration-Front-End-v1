@@ -8,7 +8,17 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./layouts/main-layout/main-layout').then((m) => m.MainLayout),
     children: [
-      // authenticated business routes
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./modules/dashboard/feature/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'settings/mfa',
+        loadComponent: () =>
+          import('./modules/auth/feature/mfa-setup/mfa-setup').then((m) => m.MfaSetup),
+      },
     ],
   },
   {
@@ -20,6 +30,11 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () =>
           import('./modules/auth/feature/login/login').then((m) => m.Login),
+      },
+      {
+        path: 'mfa-verify',
+        loadComponent: () =>
+          import('./modules/auth/feature/mfa-verify/mfa-verify').then((m) => m.MfaVerify),
       },
     ],
   },

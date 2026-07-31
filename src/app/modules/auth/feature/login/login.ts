@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -6,12 +6,13 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { SessionService } from '../../../../core/auth/session.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { environment } from '../../../../../environments/environment';
+import { Button } from '../../../../shared/ui/button/button';
 
 const REMEMBERED_EMAIL_KEY = 'onevo_admin_remembered_email';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Button],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -32,8 +33,6 @@ export class Login {
     rememberEmail: [this.readRememberedEmail() !== null],
   });
 
-  protected readonly canSubmit = computed(() => !this.loading());
-
   togglePasswordVisibility(): void {
     this.showPassword.update((visible) => !visible);
   }
@@ -53,11 +52,18 @@ export class Login {
 
     this.authService.login({ email, password }).subscribe({
       next: (context) => {
-        this.logDebug('Login succeeded', { userId: context.userId, role: context.platformRole });
         this.rememberEmail(rememberEmail, email);
+        this.loading.set(false);
+
+        if (context.mfaRequired) {
+          this.logDebug('Login succeeded, MFA required', { email });
+          this.router.navigateByUrl('/auth/mfa-verify');
+          return;
+        }
+
+        this.logDebug('Login succeeded', { userId: context.userId, role: context.platformRole });
         this.sessionService.setSession(context);
         this.permissionStore.setAuthorizationContext(context);
-        this.loading.set(false);
         this.router.navigateByUrl('/');
       },
       error: (error: HttpErrorResponse) => {

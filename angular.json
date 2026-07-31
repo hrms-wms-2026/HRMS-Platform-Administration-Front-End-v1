@@ -82,6 +82,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": ["admin.localhost"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "platform-administration:build:production"
