@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { toDataURL } from 'qrcode';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { MfaSetupResponse } from '../../../../core/auth/mfa-setup-response.model';
 import { Button } from '../../../../shared/ui/button/button';
@@ -17,6 +18,8 @@ export class MfaSetup {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly setupResponse = signal<MfaSetupResponse | null>(null);
+  protected readonly qrCodeDataUrl = signal<string | null>(null);
+  protected readonly showManualKey = signal(false);
   protected readonly confirmed = signal(false);
 
   protected readonly codeForm = this.formBuilder.nonNullable.group({
@@ -30,13 +33,30 @@ export class MfaSetup {
     this.authService.enableMfa().subscribe({
       next: (response) => {
         this.setupResponse.set(response);
+        this.showManualKey.set(false);
         this.loading.set(false);
+        void this.renderQrCode(response.qrCodeUri);
       },
       error: (error: HttpErrorResponse) => {
         this.loading.set(false);
         this.errorMessage.set(this.messageForError(error));
       },
     });
+  }
+
+  toggleManualKey(): void {
+    this.showManualKey.update((visible) => !visible);
+  }
+
+  private async renderQrCode(qrCodeUri: string): Promise<void> {
+    try {
+      this.qrCodeDataUrl.set(await toDataURL(qrCodeUri, { width: 220, margin: 1 }));
+    } catch {
+      // QR rendering is a convenience over the manual key, which always works -
+      // fall back to the manual-entry disclosure instead of blocking setup.
+      this.qrCodeDataUrl.set(null);
+      this.showManualKey.set(true);
+    }
   }
 
   confirmSetup(): void {
