@@ -15,6 +15,13 @@ export const routes: Routes = [
           import('./modules/dashboard/feature/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
+        path: 'users',
+        loadComponent: () =>
+          import('./modules/platform-users/feature/platform-users-list/platform-users-list').then(
+            (m) => m.PlatformUsersList,
+          ),
+      },
+      {
         path: 'settings/mfa',
         loadComponent: () =>
           import('./modules/auth/feature/mfa-setup/mfa-setup').then((m) => m.MfaSetup),
