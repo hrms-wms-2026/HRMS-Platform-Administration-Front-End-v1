@@ -20,6 +20,7 @@ interface AdminSessionResponse {
   platform_role: string;
   expires_at: string;
   mfa_required: boolean;
+  permissions?: string[];
 }
 
 function toAuthContext(response: AdminSessionResponse): AuthContext {
@@ -29,7 +30,7 @@ function toAuthContext(response: AdminSessionResponse): AuthContext {
     platformRole: response.platform_role,
     expiresAt: response.expires_at,
     mfaRequired: response.mfa_required,
-    permissions: [],
+    permissions: response.permissions ?? [],
     scopes: {},
     entitlements: [],
   };
