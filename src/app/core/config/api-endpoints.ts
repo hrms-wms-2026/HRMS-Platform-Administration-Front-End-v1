@@ -8,4 +8,7 @@ export const API_ENDPOINTS = {
     mfaConfirmSetup: '/auth/mfa/confirm-setup',
     mfaVerify: '/auth/mfa/verify',
   },
+  platformUsers: {
+    list: '/platform-access/users',
+  },
 } as const;
