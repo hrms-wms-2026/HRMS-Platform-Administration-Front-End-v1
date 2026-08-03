@@ -35,10 +35,9 @@ jobs:
       - name: Test - Unit (Jest)
         run: npx jest --ci --coverage=false
 
-  # Known gap: no playwright.config.ts or e2e spec files exist in this repo yet,
-  # and nothing here starts the backend or the frontend for Playwright to drive.
-  # This job is a placeholder until that's built out - non-blocking (continue-on-error)
-  # so it isn't part of the required status check for branch protection.
+  # Known gap: nothing here starts the backend or the frontend for Playwright to drive,
+  # so e2e/ only has a placeholder spec for now. Non-blocking (continue-on-error) so it
+  # isn't part of the required status check for branch protection.
   e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
