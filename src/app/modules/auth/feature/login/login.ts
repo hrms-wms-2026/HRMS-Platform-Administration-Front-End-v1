@@ -37,6 +37,10 @@ export class Login {
     this.showPassword.update((visible) => !visible);
   }
 
+  goToForgotPassword(): void {
+    this.router.navigateByUrl('/auth/forgot-password');
+  }
+
   submit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
