@@ -94,6 +94,22 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.auth.forgotPassword}`,
+      { email },
+      { withCredentials: true },
+    );
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.auth.resetPassword}`,
+      { token, newPassword },
+      { withCredentials: true },
+    );
+  }
+
   verifyMfa(code: string): Observable<AuthContext> {
     return this.http
       .post<AdminSessionResponse>(
