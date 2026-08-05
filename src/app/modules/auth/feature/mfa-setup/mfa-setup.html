@@ -1,0 +1,89 @@
+<div class="mx-auto w-full max-w-lg rounded-2xl bg-white p-8 shadow-sm">
+  <h2 class="mb-1 text-lg font-semibold text-slate-900">Two-Factor Authentication</h2>
+  <p class="mb-6 text-sm text-slate-500">
+    Add an extra layer of security to your account using an authenticator app.
+  </p>
+
+  @if (errorMessage()) {
+    <div
+      class="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+      role="alert"
+    >
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (confirmed()) {
+    <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+      Two-factor authentication is now enabled on your account.
+    </div>
+  } @else if (setupResponse(); as setup) {
+    <div class="flex flex-col gap-4">
+      <div>
+        <p class="mb-1.5 text-sm font-medium text-slate-700">1. Scan this QR code with your authenticator app</p>
+        <p class="mb-3 text-xs text-slate-500">
+          Google Authenticator / Microsoft Authenticator / Authy → Add account → Scan a QR code.
+        </p>
+
+        @if (qrCodeDataUrl(); as qrCodeDataUrl) {
+          <div class="flex justify-center rounded-lg bg-slate-50 p-4">
+            <img [src]="qrCodeDataUrl" width="220" height="220" alt="Scan this QR code in your authenticator app" />
+          </div>
+        }
+
+        <button
+          type="button"
+          (click)="toggleManualKey()"
+          class="mt-2 text-xs font-medium text-blue-700 hover:underline"
+        >
+          {{ showManualKey() ? 'Hide manual key' : "Can't scan? Enter key manually" }}
+        </button>
+
+        @if (showManualKey()) {
+          <div class="mt-2">
+            <p class="rounded-lg bg-slate-50 px-4 py-3 text-center font-mono text-sm tracking-wider text-slate-900">
+              {{ setup.secret }}
+            </p>
+            <p class="mt-1.5 text-xs text-slate-500">
+              Add account → Enter a setup key. Use "Time based".
+            </p>
+          </div>
+        }
+      </div>
+
+      <form class="flex flex-col gap-3" [formGroup]="codeForm" (ngSubmit)="confirmSetup()" novalidate>
+        <div>
+          <label for="code" class="mb-1.5 block text-sm font-medium text-slate-700">
+            2. Enter the 6-digit code it generates
+          </label>
+          <input
+            id="code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            formControlName="code"
+            placeholder="123456"
+            class="w-full rounded-lg border border-slate-300 px-3 py-3 text-center text-lg tracking-[0.5em] text-slate-900 placeholder:tracking-normal placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+        </div>
+
+        <app-button
+          type="submit"
+          label="Confirm and enable"
+          loadingText="Confirming…"
+          [loading]="loading()"
+          [disabled]="codeForm.invalid"
+        />
+      </form>
+    </div>
+  } @else {
+    <app-button
+      type="button"
+      label="Set up two-factor authentication"
+      loadingText="Starting…"
+      [loading]="loading()"
+      (clicked)="startSetup()"
+    />
+  }
+</div>

@@ -1,0 +1,17 @@
+<a class="skip-to-main" href="#main-content">Skip to main content</a>
+
+<app-navbar />
+
+<section class="application-shell flex">
+  <app-sidebar />
+
+  <main id="main-content" tabindex="-1" class="flex-1 p-6">
+    <router-outlet />
+  </main>
+</section>
+
+<app-toast-container />
+
+<div class="sr-only" aria-live="polite" aria-atomic="true">
+  {{ announcementMessage() }}
+</div>
