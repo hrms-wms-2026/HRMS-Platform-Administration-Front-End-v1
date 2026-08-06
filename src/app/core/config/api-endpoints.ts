@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     mfaVerify: '/auth/mfa/verify',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
+    acceptInvite: '/auth/accept-invite',
   },
   platformUsers: {
     list: '/platform-access/users',
