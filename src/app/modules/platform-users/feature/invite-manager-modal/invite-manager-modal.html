@@ -1,0 +1,64 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+    <h2 class="text-lg font-semibold text-slate-900">Invite Platform Manager</h2>
+
+    <form class="mt-6 flex flex-col gap-4" [formGroup]="inviteForm" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <div
+          class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          role="alert"
+        >
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div>
+        <label for="invite-fullName" class="text-sm font-medium text-slate-700">Full name</label>
+        <input
+          id="invite-fullName"
+          type="text"
+          formControlName="fullName"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+      </div>
+
+      <div>
+        <label for="invite-email" class="text-sm font-medium text-slate-700">Email address</label>
+        <input
+          id="invite-email"
+          type="email"
+          formControlName="email"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+      </div>
+
+      <fieldset>
+        <legend class="text-sm font-medium text-slate-700">Assign roles</legend>
+        <div class="mt-2 flex flex-col gap-2">
+          @for (role of roles(); track role.id) {
+            <label class="flex select-none items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                [checked]="selectedRoleIds().includes(role.id)"
+                (change)="toggleRole(role.id)"
+                class="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600/30"
+              />
+              {{ role.name }}
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <div class="mt-2 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancel()"
+          class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+        >
+          Cancel
+        </button>
+        <app-button type="submit" label="Send Invitation" loadingText="Sending…" [loading]="loading()" [disabled]="inviteFormInvalid" />
+      </div>
+    </form>
+  </div>
+</div>
