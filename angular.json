@@ -83,7 +83,10 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": ["admin.localhost"]
+            "allowedHosts": ["admin.localhost"],
+            "ssl": true,
+            "sslCert": ".certs/localhost-cert.pem",
+            "sslKey": ".certs/localhost-key.pem"
           },
           "configurations": {
             "production": {
