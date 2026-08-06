@@ -1,100 +1,124 @@
-# Invite Platform Manager — Design (Frontend)
+# Invite Platform Manager — Design (Frontend, v2)
 
 ## Goal
 
-First of three sub-projects under "Invite Platform Manager & Configure Access".
-Replaces `platform-users-list`'s "Invite Manager" button stub
-(`onInviteManagerClicked()`, currently just shows an "Invite Manager is coming soon."
-toast) with a real invite form, and shows pending invites in the same users table.
+Sub-project 2 of "Invite Platform Manager & Configure Access". Replaces
+`platform-users-list`'s "Invite Manager" button stub with a real invite form, shows
+pending invites in the same users table, and builds the invited person's
+accept-invite experience (unauthenticated: set password → access activated).
 
-Companion backend spec: `HRMS-Backend-v1` repo,
-`docs/superpowers/specs/2026-08-06-invite-platform-manager-design.md`.
+Companion backend spec: `HRMS-Backend-v1` repo, same filename under
+`docs/superpowers/specs/`.
+
+**Release rule (from the backend spec):** invite-sending and invite-acceptance ship
+together — this spec covers both, in that order, as two tasks in the implementation
+plan.
 
 ## Scope
 
-Frontend only. Explicitly **out of scope**: the accept-invite screen (separate
-sub-project — the email link points at `/auth/accept-invite?token=...`, but that
-route/screen is built later, not here) and any role-editing UI for already-active
-users ("Configure Access" sub-project).
+Frontend only. Out of scope: role creation/permission-editing UI ("Configure Access").
 
 ## Existing pieces this builds on
 
-- `platform-users-list.ts` / `.html`
-  (`src/app/modules/platform-users/feature/platform-users-list/`): the list screen,
-  `canInvite` computed signal already gated on `permissionStore.hasPermission('platform.accounts.manage')`,
-  `statusFilter` signal currently typed `'all' | 'active' | 'inactive'`.
-- `PlatformUsersService` (`src/app/modules/platform-users/data/platform-users.service.ts`)
-  and `PlatformUser` model — the `list()` call this screen already uses.
-- Shared UI: `Button`, `StatusBadge`, `Loader`, `ErrorBanner`, `EmptyState`,
-  `Pagination` (`src/app/shared/ui/`) — reuse as-is, no new shared components needed
-  for the modal shell (build a page-local modal, not a new shared primitive).
-- `NotificationService` — already used for the "coming soon" toast; reuse for
-  success/error toasts on invite submit.
+- `platform-users-list.ts`/`.html`: `canInvite` computed signal already gated on
+  `platform.accounts.manage`; `statusFilter` signal currently
+  `'all' | 'active' | 'inactive'`.
+- `PlatformUsersService` / `PlatformUser` model.
+- Auth-flow screens (`forgot-password`, `reset-password`) under
+  `modules/auth/feature/` — the accept-invite screens follow the exact same
+  reactive-forms + signals + `AuthLayout` pattern, since the invited person isn't
+  logged in, same as those two.
+- `AuthLayout` (`layouts/auth-layout/`) — accept-invite renders inside this, not
+  `MainLayout`, matching login/forgot-password/reset-password.
 
 ## Changes
 
 ### `PlatformUser` model / `Status` field
 
-`isActive: boolean` becomes `status: 'active' | 'inactive' | 'pending'` (matches the
-backend response change in the companion spec). `platform-users-list.ts`'s
-`statusFilter` signal type and its `matchesStatus` computed logic in `filteredUsers`
-extend to the third value.
+`isActive: boolean` → `status: 'active' | 'inactive' | 'pending'` (matches the backend
+response change). `statusFilter` signal type and `filteredUsers`'s `matchesStatus`
+logic extend to the third value.
 
 ### `PlatformUsersService`
 
-Two new methods, following the existing method style in that service:
 - `invite(email: string, fullName: string, roleIds: string[]): Observable<void>` —
   `POST /admin/v1/platform-access/users/invite`.
 - `revokeInvite(inviteId: string): Observable<void>` —
   `POST /admin/v1/platform-access/invites/{inviteId}/revoke`.
+- `listRoles(): Observable<PlatformRoleSummary[]>` —
+  `GET /admin/v1/platform-access/roles` (id + name, for the invite form's role
+  checkboxes).
 
-A third method to fetch the role list for the invite form's multi-select:
-- `listRoles(): Observable<PlatformRoleSummary[]>` — `GET /admin/v1/platform-access/roles`
-  (id + name only, matching what the role checkboxes need).
+### `AuthService` (new methods, unauthenticated — mirrors `forgotPassword`/`resetPassword`)
+
+- `acceptInvite(token: string, password: string): Observable<void>` —
+  `POST /admin/v1/auth/accept-invite`.
 
 ### Invite modal
 
-New standalone component, `src/app/modules/platform-users/feature/invite-manager-modal/invite-manager-modal.ts`
-(+ `.html`, `.spec.ts`), following the reactive-forms pattern already used by
-`forgot-password.ts` (`FormBuilder.nonNullable.group`, `Validators`, a `loading` /
-`errorMessage` signal pair).
+New standalone component,
+`src/app/modules/platform-users/feature/invite-manager-modal/invite-manager-modal.ts`
+(+ `.html`, `.spec.ts`), reactive-forms pattern from `forgot-password.ts`
+(`FormBuilder.nonNullable.group`, `loading`/`errorMessage` signals).
 
-- Fields: email (required, email format), full name (required), roles
-  (checkbox list populated from `listRoles()`, at least one required — form-level
-  validator, since the backend also enforces this and the UI should catch it first).
-- Submit → `PlatformUsersService.invite(...)`. On success: close the modal, show a
-  success toast via `NotificationService`, and refresh `platform-users-list`'s user
-  list so the new pending row appears immediately.
-- On error: inline error message in the modal (reuse the same
-  `role="alert"` banner pattern from `login.html`), not a toast — the user needs to
-  see it while still looking at the form to fix it (e.g. duplicate email).
+- Fields: email (required, email format), full name (required), roles (checkboxes
+  from `listRoles()`, at least one required — client-side validator backing the
+  backend's own rejection).
+- Submit → `PlatformUsersService.invite(...)`. Success: close modal, success toast via
+  `NotificationService`, `platform-users-list`'s `loadUsers()` refresh so the new
+  pending row appears.
+- Error: inline banner in the modal (same `role="alert"` pattern as `login.html`), not
+  a toast — user needs to see it while fixing the form (e.g. duplicate email).
 
 ### `platform-users-list.ts` changes
 
-- `onInviteManagerClicked()` opens the invite modal (a `visible` signal toggling the
-  modal component in the template) instead of showing the "coming soon" toast.
-- On the modal's successful-invite output, call the existing `loadUsers()` to refresh.
-- Pending rows: `StatusBadge` already takes a status string — pass `'pending'` through
-  for invite rows and give it a distinct color in `StatusBadge` if it doesn't already
-  handle a third state (check `shared/ui/status-badge/status-badge.ts` at
-  implementation time; extend its variant map if needed, rather than special-casing
-  pending styling inline in `platform-users-list.html`).
-- Pending rows get a "Revoke" action instead of whatever action real users get in that
-  row (e.g. no "view details" for a row with no real account yet) — exact per-row
-  action-menu wiring is an implementation detail for the plan, not fixed here.
+- `onInviteManagerClicked()` opens the modal instead of the "coming soon" toast.
+- Modal's successful-invite output triggers `loadUsers()`.
+- `StatusBadge` gets a third variant for `'pending'` (check
+  `shared/ui/status-badge/status-badge.ts`'s variant map at implementation time;
+  extend it there rather than special-casing pending styling inline in the list
+  template).
+- Pending rows get a "Revoke" action instead of whatever action real users get in
+  that row.
+
+### Accept-invite screens (new `auth` module screens, mirroring `forgot-password`/`reset-password`)
+
+Two screens, both under `modules/auth/feature/`, both routed under the existing
+`AuthLayout` children in `app.routes.ts` (alongside `login`, `mfa-verify`,
+`forgot-password`, `reset-password`):
+
+1. **`accept-invite`** (`path: 'accept-invite'`) — reads `?token=` from the route,
+   shows a set-password form (password + confirm-password fields, same validators
+   `ResetPassword` already uses — check `reset-password.ts` for the exact rule set
+   and reuse it rather than redefining password strength rules in a second place).
+   Submit → `AuthService.acceptInvite(token, password)`.
+   - Success: navigate to a confirmation state (either a third route,
+     `access-activated`, or a `submitted` signal flipping the same component's
+     template to a success view — follow whichever `forgot-password.ts` already
+     established for its own post-submit state, for consistency within the module).
+   - Error states, distinct messages (matches the backend's distinct usability-check
+     messages, unlike the generic reset-password error): "This invitation has already
+     been accepted", "This invitation has been revoked", "This invitation has
+     expired", "Invitation not found" (bad/tampered token) — each with a "Go to
+     sign in" link, since none of them are retryable from this screen.
+2. Confirmation view: "Access activated" message + a "Sign in" button/link to
+   `/auth/login`. No auto-login (backend spec's explicit decision) — the person signs
+   in normally with the password they just set.
 
 ## Testing
 
 - `invite-manager-modal.spec.ts`: form validation (email format, full name required,
-  at least one role required), successful submit calls `PlatformUsersService.invite`
-  with the right arguments and emits a success event, failed submit shows the inline
-  error and does not close the modal.
-- `platform-users-list.spec.ts` additions: clicking "Invite Manager" opens the modal;
-  a successful invite (simulated via the modal's output) triggers a list reload;
-  pending rows render with the "pending" status badge and a revoke action.
+  at least one role required), successful submit calls the service correctly and
+  emits a success event, failed submit shows the inline error without closing.
+- `platform-users-list.spec.ts` additions: "Invite Manager" opens the modal;
+  successful invite triggers reload; pending rows show the pending badge + revoke
+  action.
+- `accept-invite.spec.ts`: renders the set-password form with the token from the
+  route; each of the four distinct error cases (not found / accepted / revoked /
+  expired) renders its specific message; successful submit shows the confirmation
+  view.
 
-## Out of scope (explicitly deferred to other sub-projects)
+## Out of scope
 
-- `/auth/accept-invite` screen.
-- Role-editing UI for existing active users.
+- Role creation / permission-editing UI.
 - Resend-invite UI.
