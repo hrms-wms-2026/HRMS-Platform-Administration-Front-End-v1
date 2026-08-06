@@ -18,6 +18,10 @@ export class Navbar {
   protected readonly currentUser = this.sessionService.currentUser;
 
   logout(): void {
+    if (!confirm('Are you sure you want to log out?')) {
+      return;
+    }
+
     this.authService.logout().subscribe({
       next: () => this.router.navigateByUrl('/auth/login'),
       error: () => this.router.navigateByUrl('/auth/login'),
