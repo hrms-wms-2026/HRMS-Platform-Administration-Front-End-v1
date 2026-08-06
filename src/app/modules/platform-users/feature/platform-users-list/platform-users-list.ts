@@ -51,8 +51,7 @@ export class PlatformUsersList implements OnInit {
         user.fullName.toLowerCase().includes(search) ||
         user.email.toLowerCase().includes(search);
       const matchesRole = role.length === 0 || user.role === role;
-      const matchesStatus =
-        status === 'all' || (status === 'active' ? user.isActive : !user.isActive);
+      const matchesStatus = status === 'all' || user.status === status;
       return matchesSearch && matchesRole && matchesStatus;
     });
   });

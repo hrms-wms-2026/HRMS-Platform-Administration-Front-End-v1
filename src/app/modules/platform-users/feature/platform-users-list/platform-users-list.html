@@ -76,8 +76,8 @@
               <td class="py-3 pr-4 text-slate-600">{{ user.role || '—' }}</td>
               <td class="py-3 pr-4">
                 <app-status-badge
-                  [label]="user.isActive ? 'Active' : 'Inactive'"
-                  [tone]="user.isActive ? 'success' : 'danger'"
+                  [label]="user.status === 'active' ? 'Active' : 'Inactive'"
+                  [tone]="user.status === 'active' ? 'success' : 'danger'"
                 />
               </td>
             </tr>

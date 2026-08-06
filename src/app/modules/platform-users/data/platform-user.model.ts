@@ -3,7 +3,7 @@ export interface PlatformUser {
   email: string;
   fullName: string;
   role: string;
-  isActive: boolean;
+  status: 'active' | 'inactive' | 'pending';
   createdAt: string;
   lastLoginAt: string | null;
 }

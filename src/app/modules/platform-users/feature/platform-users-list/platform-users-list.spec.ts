@@ -13,7 +13,7 @@ function buildUsers(count: number): PlatformUser[] {
     email: `user${i}@onevo.io`,
     fullName: `User ${i}`,
     role: i % 2 === 0 ? 'Platform Manager' : 'Support Manager',
-    isActive: i % 3 !== 0,
+    status: i % 3 !== 0 ? 'active' : 'inactive',
     createdAt: '2026-08-01T00:00:00Z',
     lastLoginAt: null,
   }));
@@ -109,7 +109,7 @@ describe('PlatformUsersList', () => {
 
     component['onStatusFilterChange']('inactive');
 
-    expect(component['filteredUsers']().every((u) => !u.isActive)).toBe(true);
+    expect(component['filteredUsers']().every((u) => u.status === 'inactive')).toBe(true);
   });
 
   it('paginates results at 20 per page', () => {

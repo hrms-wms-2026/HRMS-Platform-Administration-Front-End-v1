@@ -29,7 +29,7 @@ describe('PlatformUsersService', () => {
         email: 'a@onevo.io',
         fullName: 'A',
         role: 'Platform Manager',
-        isActive: true,
+        status: 'active',
         createdAt: '2026-08-01T00:00:00Z',
         lastLoginAt: null,
       },
@@ -43,5 +43,34 @@ describe('PlatformUsersService', () => {
     expect(req.request.method).toBe('GET');
     expect(req.request.withCredentials).toBe(true);
     req.flush(mockUsers);
+  });
+
+  it('invite posts email, fullName, and roleIds', () => {
+    service.invite('new@example.com', 'New Manager', ['role-1', 'role-2']).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/users/invite`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      email: 'new@example.com',
+      fullName: 'New Manager',
+      roleIds: ['role-1', 'role-2'],
+    });
+    req.flush(null);
+  });
+
+  it('revokeInvite posts to the user-scoped revoke-invite path', () => {
+    service.revokeInvite('user-123').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/users/user-123/revoke-invite`);
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+  });
+
+  it('listRoles fetches the roles list', () => {
+    service.listRoles().subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/roles`);
+    expect(req.request.method).toBe('GET');
+    req.flush([{ id: 'role-1', name: 'Manager' }]);
   });
 });
