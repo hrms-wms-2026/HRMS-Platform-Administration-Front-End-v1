@@ -150,9 +150,16 @@ describe('Login', () => {
     expect(localStorage.getItem(REMEMBERED_EMAIL_KEY)).toBe('old@onevo.io');
   });
 
-  it('does not render a Forgot Password control (removed - not needed for the admin console)', () => {
+  it('navigates to forgot-password when Forgot password is clicked', () => {
     const fixture = createComponent();
 
-    expect(fixture.nativeElement.textContent).not.toContain('Forgot Password');
+    const forgotPasswordButton = Array.from(
+      fixture.nativeElement.querySelectorAll('button'),
+    ).find((el) => (el as HTMLButtonElement).textContent?.includes('Forgot password'));
+    expect(forgotPasswordButton).toBeDefined();
+
+    (forgotPasswordButton as HTMLButtonElement).click();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/forgot-password');
   });
 });

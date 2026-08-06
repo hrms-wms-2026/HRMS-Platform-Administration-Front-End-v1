@@ -43,6 +43,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./modules/auth/feature/mfa-verify/mfa-verify').then((m) => m.MfaVerify),
       },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./modules/auth/feature/forgot-password/forgot-password').then(
+            (m) => m.ForgotPassword,
+          ),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./modules/auth/feature/reset-password/reset-password').then(
+            (m) => m.ResetPassword,
+          ),
+      },
     ],
   },
 ];
