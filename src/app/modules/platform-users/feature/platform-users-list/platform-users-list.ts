@@ -9,12 +9,13 @@ import { Loader } from '../../../../shared/ui/loader/loader';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
+import { InviteManagerModal } from '../invite-manager-modal/invite-manager-modal';
 
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-platform-users-list',
-  imports: [Button, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination],
+  imports: [Button, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, InviteManagerModal],
   templateUrl: './platform-users-list.html',
 })
 export class PlatformUsersList implements OnInit {
@@ -87,8 +88,30 @@ export class PlatformUsersList implements OnInit {
     this.currentPage.set(page);
   }
 
+  protected readonly showInviteModal = signal(false);
+
   protected onInviteManagerClicked(): void {
-    this.notificationService.info('Invite Manager is coming soon.');
+    this.showInviteModal.set(true);
+  }
+
+  protected onInviteModalClosed(): void {
+    this.showInviteModal.set(false);
+  }
+
+  protected onInviteSuccess(): void {
+    this.showInviteModal.set(false);
+    this.notificationService.success('Invitation sent.');
+    this.loadUsers();
+  }
+
+  protected revokeInvite(userId: string): void {
+    this.usersService.revokeInvite(userId).subscribe({
+      next: () => {
+        this.notificationService.success('Invitation revoked.');
+        this.loadUsers();
+      },
+      error: () => this.notificationService.error('Could not revoke the invitation.'),
+    });
   }
 
   protected initials(fullName: string): string {
