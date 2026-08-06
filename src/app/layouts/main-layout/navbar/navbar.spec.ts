@@ -8,7 +8,6 @@ import { SessionService } from '../../../core/auth/session.service';
 describe('Navbar', () => {
   let authService: { logout: jest.Mock };
   let router: { navigateByUrl: jest.Mock };
-  let confirmSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     authService = { logout: jest.fn() };
@@ -25,35 +24,42 @@ describe('Navbar', () => {
     }).compileComponents();
   });
 
-  afterEach(() => {
-    confirmSpy?.mockRestore();
-  });
-
   function createComponent() {
     const fixture = TestBed.createComponent(Navbar);
     fixture.detectChanges();
     return fixture;
   }
 
-  it('logs out when the confirmation dialog is accepted', () => {
-    confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
-    authService.logout.mockReturnValue(of(undefined));
+  it('opens the logout confirmation modal when Logout is clicked', () => {
     const fixture = createComponent();
+    const component = fixture.componentInstance;
 
-    fixture.componentInstance.logout();
+    component['onLogoutClicked']();
 
-    expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to log out?');
-    expect(authService.logout).toHaveBeenCalled();
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
+    expect(component['showLogoutConfirm']()).toBe(true);
   });
 
-  it('does not log out when the confirmation dialog is declined', () => {
-    confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false);
+  it('closes the modal without logging out when cancelled', () => {
     const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component['onLogoutClicked']();
 
-    fixture.componentInstance.logout();
+    component['onLogoutCancelled']();
 
+    expect(component['showLogoutConfirm']()).toBe(false);
     expect(authService.logout).not.toHaveBeenCalled();
-    expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it('logs out and navigates to login when confirmed', () => {
+    authService.logout.mockReturnValue(of(undefined));
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component['onLogoutClicked']();
+
+    component['onLogoutConfirmed']();
+
+    expect(component['showLogoutConfirm']()).toBe(false);
+    expect(authService.logout).toHaveBeenCalled();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
   });
 });
