@@ -73,4 +73,31 @@ describe('PlatformUsersService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([{ id: 'role-1', name: 'Manager' }]);
   });
+
+  it('getUserById fetches the user detail', () => {
+    service.getUserById('user-1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/users/user-1`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush({
+      id: 'user-1',
+      email: 'a@onevo.io',
+      fullName: 'A',
+      status: 'active',
+      createdAt: '2026-08-01T00:00:00Z',
+      lastLoginAt: null,
+      roles: [{ id: 'role-1', name: 'Manager' }],
+    });
+  });
+
+  it('updateUserRoles puts the new role id set', () => {
+    service.updateUserRoles('user-1', ['role-1', 'role-2']).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/users/user-1/roles`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ roleIds: ['role-1', 'role-2'] });
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(null);
+  });
 });

@@ -15,6 +15,8 @@ export const API_ENDPOINTS = {
     list: '/platform-access/users',
     invite: '/platform-access/users/invite',
     revokeInvite: (platformUserId: string) => `/platform-access/users/${platformUserId}/revoke-invite`,
+    byId: (platformUserId: string) => `/platform-access/users/${platformUserId}`,
+    updateRoles: (platformUserId: string) => `/platform-access/users/${platformUserId}/roles`,
   },
   platformRoles: {
     list: '/platform-access/roles',
