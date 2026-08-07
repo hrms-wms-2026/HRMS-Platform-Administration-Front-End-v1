@@ -38,7 +38,7 @@ describe('Sidebar', () => {
     expect(hrefs).toContain('/users');
   });
 
-  it('renders Roles & Permissions, Audit Logs, and Settings as non-navigable with a Coming soon badge', () => {
+  it('renders Roles & Permissions, Audit Logs, and Settings as non-navigable', () => {
     const fixture = setup();
     const disabledLabels = ['Roles & Permissions', 'Audit Logs', 'Settings'];
 
@@ -49,16 +49,6 @@ describe('Sidebar', () => {
 
       expect(item).toBeTruthy();
       expect(item!.nativeElement.querySelector('a')).toBeNull();
-      expect(item!.nativeElement.textContent).toContain('Coming soon');
     }
-  });
-
-  it('has no Coming soon badge on the Dashboard or Users links', () => {
-    const fixture = setup();
-    const dashboardItem = fixture.debugElement
-      .queryAll(By.css('[data-sidebar-item]'))
-      .find((el) => el.nativeElement.textContent.includes('Dashboard'));
-
-    expect(dashboardItem!.nativeElement.textContent).not.toContain('Coming soon');
   });
 });
