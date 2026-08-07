@@ -30,6 +30,11 @@ export const routes: Routes = [
           import('./modules/roles/feature/roles-list/roles-list').then((m) => m.RolesList),
       },
       {
+        path: 'roles/:id',
+        loadComponent: () =>
+          import('./modules/roles/feature/role-detail/role-detail').then((m) => m.RoleDetail),
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./modules/platform-users/feature/platform-users-list/platform-users-list').then(
