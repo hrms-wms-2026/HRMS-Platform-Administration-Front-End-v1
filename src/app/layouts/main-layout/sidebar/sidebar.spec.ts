@@ -29,12 +29,13 @@ describe('Sidebar', () => {
     expect(fixture.nativeElement.textContent).toContain('Platform');
   });
 
-  it('renders Dashboard and Users as real navigable links', () => {
+  it('renders Dashboard, Tenants, and Users as real navigable links', () => {
     const fixture = setup();
     const links = fixture.debugElement.queryAll(By.css('a'));
     const hrefs = links.map((link) => link.nativeElement.getAttribute('href'));
 
     expect(hrefs).toContain('/');
+    expect(hrefs).toContain('/tenants');
     expect(hrefs).toContain('/users');
   });
 
