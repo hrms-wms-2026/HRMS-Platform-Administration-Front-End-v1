@@ -25,6 +25,11 @@ export const routes: Routes = [
           import('./modules/tenants/feature/tenant-detail/tenant-detail').then((m) => m.TenantDetailComponent),
       },
       {
+        path: 'roles',
+        loadComponent: () =>
+          import('./modules/roles/feature/roles-list/roles-list').then((m) => m.RolesList),
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./modules/platform-users/feature/platform-users-list/platform-users-list').then(
