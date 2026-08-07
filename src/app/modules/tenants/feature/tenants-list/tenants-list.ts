@@ -4,7 +4,6 @@ import { RouterLink } from '@angular/router';
 import { TenantsService } from '../../data/tenants.service';
 import { TenantListItem } from '../../data/tenant.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
-import { Button } from '../../../../shared/ui/button/button';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { Loader } from '../../../../shared/ui/loader/loader';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
@@ -24,7 +23,7 @@ const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> 
 
 @Component({
   selector: 'app-tenants-list',
-  imports: [RouterLink, Button, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, DatePipe],
+  imports: [RouterLink, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, DatePipe],
   templateUrl: './tenants-list.html',
 })
 export class TenantsList implements OnInit {

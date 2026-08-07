@@ -1,0 +1,66 @@
+@if (loading()) {
+  <app-loader label="Loading…" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadTenant()" />
+} @else if (tenant(); as t) {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900">{{ t.companyName }}</h1>
+        <p class="mt-1 text-sm text-slate-500">{{ t.slug }}</p>
+      </div>
+      <app-status-badge [label]="t.status" tone="neutral" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Industry</p>
+        <p class="text-slate-900">{{ t.industryProfile }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Company Size</p>
+        <p class="text-slate-900">{{ t.companySizeRange }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Legal Entity Name</p>
+        <p class="text-slate-900">{{ t.legalEntityName || '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Registration Number</p>
+        <p class="text-slate-900">{{ t.registrationNumber || '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Country</p>
+        <p class="text-slate-900">{{ t.country || '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Currency</p>
+        <p class="text-slate-900">{{ t.currency || '—' }}</p>
+      </div>
+    </div>
+
+    @if (availableActions().length > 0) {
+      <div class="flex gap-3 border-t border-slate-100 pt-4">
+        @for (action of availableActions(); track action.action) {
+          <app-button
+            [label]="action.label"
+            [variant]="action.confirmVariant"
+            (clicked)="startAction(action)"
+          />
+        }
+      </div>
+    }
+  </div>
+
+  @if (pendingAction(); as action) {
+    <app-confirmation-dialog
+      [open]="true"
+      [title]="action.label + ' tenant?'"
+      message="Are you sure you want to {{ action.label.toLowerCase() }} this tenant?"
+      [confirmLabel]="action.label"
+      [confirmVariant]="action.confirmVariant"
+      (confirm)="confirmAction()"
+      (cancel)="cancelAction()"
+    />
+  }
+}
