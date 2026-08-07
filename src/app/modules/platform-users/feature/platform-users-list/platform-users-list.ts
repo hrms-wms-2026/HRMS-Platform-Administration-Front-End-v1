@@ -10,12 +10,13 @@ import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
 import { InviteManagerModal } from '../invite-manager-modal/invite-manager-modal';
+import { UserProfileDrawer } from '../user-profile-drawer/user-profile-drawer';
 
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-platform-users-list',
-  imports: [Button, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, InviteManagerModal],
+  imports: [Button, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, InviteManagerModal, UserProfileDrawer],
   templateUrl: './platform-users-list.html',
 })
 export class PlatformUsersList implements OnInit {
@@ -112,6 +113,20 @@ export class PlatformUsersList implements OnInit {
       },
       error: () => this.notificationService.error('Could not revoke the invitation.'),
     });
+  }
+
+  protected readonly selectedUserId = signal<string | null>(null);
+
+  protected openProfile(userId: string): void {
+    this.selectedUserId.set(userId);
+  }
+
+  protected closeProfile(): void {
+    this.selectedUserId.set(null);
+  }
+
+  protected onProfileUpdated(): void {
+    this.loadUsers();
   }
 
   protected initials(fullName: string): string {

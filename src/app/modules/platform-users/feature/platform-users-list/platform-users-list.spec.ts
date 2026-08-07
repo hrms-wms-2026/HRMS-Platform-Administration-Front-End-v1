@@ -198,6 +198,29 @@ describe('PlatformUsersList', () => {
     expect(loadUsersSpy).toHaveBeenCalled();
   });
 
+  it('opens the profile drawer with the clicked user id on row click', () => {
+    permissionStore.setAuthorizationContext(buildAuthContext(['platform.accounts.read']));
+    usersService.list.mockReturnValue(of(buildUsers(1)));
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['openProfile']('id-0');
+
+    expect(component['selectedUserId']()).toBe('id-0');
+  });
+
+  it('clears the selected user id on drawer close', () => {
+    permissionStore.setAuthorizationContext(buildAuthContext(['platform.accounts.read']));
+    usersService.list.mockReturnValue(of(buildUsers(1)));
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['openProfile']('id-0');
+    component['closeProfile']();
+
+    expect(component['selectedUserId']()).toBeNull();
+  });
+
   it('shows an error message when the list request fails', () => {
     permissionStore.setAuthorizationContext(buildAuthContext(['platform.accounts.read']));
     usersService.list.mockReturnValue(throwError(() => new Error('network error')));
