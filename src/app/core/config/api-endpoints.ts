@@ -19,4 +19,9 @@ export const API_ENDPOINTS = {
   platformRoles: {
     list: '/platform-access/roles',
   },
+  tenants: {
+    list: '/tenants',
+    byId: (id: string) => `/tenants/${id}`,
+    status: (id: string) => `/tenants/${id}/status`,
+  },
 } as const;
