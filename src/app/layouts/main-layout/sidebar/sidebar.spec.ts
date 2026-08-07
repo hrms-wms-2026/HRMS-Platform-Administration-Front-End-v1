@@ -29,7 +29,7 @@ describe('Sidebar', () => {
     expect(fixture.nativeElement.textContent).toContain('Platform');
   });
 
-  it('renders Dashboard, Tenants, and Users as real navigable links', () => {
+  it('renders Dashboard, Tenants, Users, and Roles & Permissions as real navigable links', () => {
     const fixture = setup();
     const links = fixture.debugElement.queryAll(By.css('a'));
     const hrefs = links.map((link) => link.nativeElement.getAttribute('href'));
@@ -37,11 +37,12 @@ describe('Sidebar', () => {
     expect(hrefs).toContain('/');
     expect(hrefs).toContain('/tenants');
     expect(hrefs).toContain('/users');
+    expect(hrefs).toContain('/roles');
   });
 
-  it('renders Roles & Permissions, Audit Logs, and Settings as non-navigable', () => {
+  it('renders Audit Logs and Settings as non-navigable', () => {
     const fixture = setup();
-    const disabledLabels = ['Roles & Permissions', 'Audit Logs', 'Settings'];
+    const disabledLabels = ['Audit Logs', 'Settings'];
 
     for (const label of disabledLabels) {
       const item = fixture.debugElement

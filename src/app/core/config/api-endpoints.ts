@@ -24,4 +24,10 @@ export const API_ENDPOINTS = {
     byId: (id: string) => `/tenants/${id}`,
     status: (id: string) => `/tenants/${id}/status`,
   },
+  roles: {
+    list: '/platform-access/roles',
+    byId: (id: string) => `/platform-access/roles/${id}`,
+    permissions: '/platform-access/permissions',
+    updatePermissions: (id: string) => `/platform-access/roles/${id}/permissions`,
+  },
 } as const;
