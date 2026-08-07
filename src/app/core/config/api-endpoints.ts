@@ -9,8 +9,14 @@ export const API_ENDPOINTS = {
     mfaVerify: '/auth/mfa/verify',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
+    acceptInvite: '/auth/accept-invite',
   },
   platformUsers: {
     list: '/platform-access/users',
+    invite: '/platform-access/users/invite',
+    revokeInvite: (platformUserId: string) => `/platform-access/users/${platformUserId}/revoke-invite`,
+  },
+  platformRoles: {
+    list: '/platform-access/roles',
   },
 } as const;

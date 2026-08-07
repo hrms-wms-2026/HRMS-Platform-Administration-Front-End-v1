@@ -13,7 +13,7 @@ function buildUsers(count: number): PlatformUser[] {
     email: `user${i}@onevo.io`,
     fullName: `User ${i}`,
     role: i % 2 === 0 ? 'Platform Manager' : 'Support Manager',
-    isActive: i % 3 !== 0,
+    status: i % 3 !== 0 ? 'active' : 'inactive',
     createdAt: '2026-08-01T00:00:00Z',
     lastLoginAt: null,
   }));
@@ -33,8 +33,8 @@ function buildAuthContext(permissions: string[]): AuthContext {
 }
 
 describe('PlatformUsersList', () => {
-  let usersService: { list: jest.Mock };
-  let notificationService: { info: jest.Mock };
+  let usersService: { list: jest.Mock; revokeInvite: jest.Mock };
+  let notificationService: { info: jest.Mock; success: jest.Mock; error: jest.Mock };
   let permissionStore: PermissionStore;
 
   function createComponent() {
@@ -44,8 +44,8 @@ describe('PlatformUsersList', () => {
   }
 
   beforeEach(async () => {
-    usersService = { list: jest.fn() };
-    notificationService = { info: jest.fn() };
+    usersService = { list: jest.fn(), revokeInvite: jest.fn() };
+    notificationService = { info: jest.fn(), success: jest.fn(), error: jest.fn() };
 
     await TestBed.configureTestingModule({
       imports: [PlatformUsersList],
@@ -109,7 +109,7 @@ describe('PlatformUsersList', () => {
 
     component['onStatusFilterChange']('inactive');
 
-    expect(component['filteredUsers']().every((u) => !u.isActive)).toBe(true);
+    expect(component['filteredUsers']().every((u) => u.status === 'inactive')).toBe(true);
   });
 
   it('paginates results at 20 per page', () => {
@@ -155,7 +155,7 @@ describe('PlatformUsersList', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Invite Manager');
   });
 
-  it('shows a "coming soon" notification when Invite Manager is clicked', () => {
+  it('opens the invite modal when Invite Manager is clicked', () => {
     permissionStore.setAuthorizationContext(
       buildAuthContext(['platform.accounts.read', 'platform.accounts.manage']),
     );
@@ -165,7 +165,37 @@ describe('PlatformUsersList', () => {
 
     component['onInviteManagerClicked']();
 
-    expect(notificationService.info).toHaveBeenCalledWith('Invite Manager is coming soon.');
+    expect(component['showInviteModal']()).toBe(true);
+  });
+
+  it('reloads users when the modal emits invited', () => {
+    permissionStore.setAuthorizationContext(
+      buildAuthContext(['platform.accounts.read', 'platform.accounts.manage']),
+    );
+    usersService.list.mockReturnValue(of([]));
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    const loadUsersSpy = jest.spyOn(component, 'loadUsers');
+
+    component['onInviteManagerClicked']();
+    component['onInviteSuccess']();
+
+    expect(component['showInviteModal']()).toBe(false);
+    expect(loadUsersSpy).toHaveBeenCalled();
+  });
+
+  it('revokes a pending invite', () => {
+    permissionStore.setAuthorizationContext(buildAuthContext(['platform.accounts.read']));
+    usersService.list.mockReturnValue(of([]));
+    usersService.revokeInvite.mockReturnValue(of(undefined));
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    const loadUsersSpy = jest.spyOn(component, 'loadUsers');
+
+    component['revokeInvite']('user-id-1');
+
+    expect(usersService.revokeInvite).toHaveBeenCalledWith('user-id-1');
+    expect(loadUsersSpy).toHaveBeenCalled();
   });
 
   it('shows an error message when the list request fails', () => {

@@ -44,6 +44,9 @@ __screenshots__/
 # mkcert local dev certificates
 .certs/
 
+# Superpowers brainstorming companion mockups
+.superpowers/
+
 # System files
 .DS_Store
 Thumbs.db

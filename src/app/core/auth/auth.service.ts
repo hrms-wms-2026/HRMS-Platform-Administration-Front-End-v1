@@ -110,6 +110,14 @@ export class AuthService {
     );
   }
 
+  acceptInvite(token: string, password: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.auth.acceptInvite}`,
+      { token, password },
+      { withCredentials: true },
+    );
+  }
+
   verifyMfa(code: string): Observable<AuthContext> {
     return this.http
       .post<AdminSessionResponse>(
