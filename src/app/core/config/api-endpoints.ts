@@ -23,11 +23,17 @@ export const API_ENDPOINTS = {
     list: '/tenants',
     byId: (id: string) => `/tenants/${id}`,
     status: (id: string) => `/tenants/${id}/status`,
+    validate: '/tenants/validate',
+    provisioningSummary: (id: string) => `/tenants/${id}/provisioning-summary`,
+    confirmProvisioning: (id: string) => `/tenants/${id}/provision/confirm`,
   },
   roles: {
     list: '/platform-access/roles',
     byId: (id: string) => `/platform-access/roles/${id}`,
     permissions: '/platform-access/permissions',
     updatePermissions: (id: string) => `/platform-access/roles/${id}/permissions`,
+  },
+  subscriptionPlans: {
+    list: '/subscription-plans',
   },
 } as const;
