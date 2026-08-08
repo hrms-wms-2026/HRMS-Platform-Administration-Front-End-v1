@@ -76,4 +76,18 @@ describe('TenantsList', () => {
     });
     jest.useRealTimers();
   });
+
+  it('hides the Create Tenant link without platform.tenants.manage', () => {
+    const fixture = setup(['platform.tenants.read']);
+    tenantsService.list.mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 20 }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Create Tenant');
+  });
+
+  it('shows the Create Tenant link with platform.tenants.manage', () => {
+    const fixture = setup(['platform.tenants.read', 'platform.tenants.manage']);
+    tenantsService.list.mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 20 }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Create Tenant');
+  });
 });

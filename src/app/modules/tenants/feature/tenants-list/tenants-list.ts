@@ -9,6 +9,7 @@ import { Loader } from '../../../../shared/ui/loader/loader';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
+import { Button } from '../../../../shared/ui/button/button';
 
 const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -23,7 +24,7 @@ const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> 
 
 @Component({
   selector: 'app-tenants-list',
-  imports: [RouterLink, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, DatePipe],
+  imports: [RouterLink, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, DatePipe, Button],
   templateUrl: './tenants-list.html',
 })
 export class TenantsList implements OnInit {
@@ -33,6 +34,7 @@ export class TenantsList implements OnInit {
   protected readonly pageSize = PAGE_SIZE;
 
   protected readonly canView = computed(() => this.permissionStore.hasPermission('platform.tenants.read'));
+  protected readonly canManage = computed(() => this.permissionStore.hasPermission('platform.tenants.manage'));
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
