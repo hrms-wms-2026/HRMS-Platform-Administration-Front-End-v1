@@ -13,10 +13,6 @@
   top: 0.5rem;
 }
 
-.application-shell {
-  min-height: 100vh;
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
