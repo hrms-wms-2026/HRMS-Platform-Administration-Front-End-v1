@@ -59,14 +59,6 @@ export class AuthService {
       .pipe(map(toAuthContext));
   }
 
-  refresh(): Observable<void> {
-    return this.http.post<void>(
-      `${this.baseUrl}${API_ENDPOINTS.auth.refresh}`,
-      {},
-      { withCredentials: true },
-    );
-  }
-
   logout(): Observable<void> {
     return this.http
       .post<void>(`${this.baseUrl}${API_ENDPOINTS.auth.logout}`, {}, { withCredentials: true })
