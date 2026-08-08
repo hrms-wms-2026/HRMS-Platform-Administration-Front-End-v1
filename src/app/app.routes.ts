@@ -20,6 +20,11 @@ export const routes: Routes = [
           import('./modules/tenants/feature/tenants-list/tenants-list').then((m) => m.TenantsList),
       },
       {
+        path: 'tenants/new',
+        loadComponent: () =>
+          import('./modules/tenants/feature/tenant-wizard/tenant-wizard').then((m) => m.TenantWizard),
+      },
+      {
         path: 'tenants/:id',
         loadComponent: () =>
           import('./modules/tenants/feature/tenant-detail/tenant-detail').then((m) => m.TenantDetailComponent),

@@ -1,0 +1,176 @@
+<div class="mx-auto flex max-w-3xl flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-slate-900">Create Tenant</h1>
+    <p class="mt-1 text-sm text-slate-500">Step {{ currentStep() }} of 4</p>
+  </div>
+
+  @if (currentStep() === 1) {
+    <form [formGroup]="companyForm" class="flex flex-col gap-4">
+      <div>
+        <label class="text-sm font-medium text-slate-700">Company Name</label>
+        <input
+          type="text"
+          [value]="companyForm.controls.companyName.value"
+          (input)="onCompanyNameChanged($any($event.target).value)"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-700">Slug</label>
+        <input
+          type="text"
+          [value]="companyForm.controls.slug.value"
+          (input)="onSlugChanged($any($event.target).value)"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
+        @if (slugConflict(); as conflict) {
+          <p class="mt-1 text-xs text-red-700">{{ conflict }}</p>
+        }
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm font-medium text-slate-700">Industry</label>
+          <select formControlName="industryProfile" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            @for (option of industryOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-700">Company Size</label>
+          <select formControlName="companySizeRange" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            @for (option of companySizeOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-700">Legal Entity Name</label>
+        <input type="text" formControlName="legalEntityName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="text-sm font-medium text-slate-700">Registration Number (optional)</label>
+        <input type="text" formControlName="registrationNumber" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      </div>
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="text-sm font-medium text-slate-700">Country</label>
+          <select formControlName="country" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Select…</option>
+            @for (option of countryOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-700">Timezone</label>
+          <select formControlName="timezone" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Select…</option>
+            @for (option of timezoneOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-700">Currency</label>
+          <select formControlName="currency" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Select…</option>
+            @for (option of currencyOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </form>
+  }
+
+  @if (currentStep() === 2) {
+    @if (loadingPlans()) {
+      <app-loader label="Loading plans…" />
+    } @else if (plansError(); as message) {
+      <app-error-banner [message]="message" />
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (plan of plans(); track plan.id) {
+          <button
+            type="button"
+            (click)="selectPlan(plan.id)"
+            class="flex items-center justify-between rounded-lg border p-4 text-left"
+            [class.border-indigo-600]="selectedPlanId() === plan.id"
+            [class.border-slate-200]="selectedPlanId() !== plan.id"
+          >
+            <div>
+              <p class="font-semibold text-slate-900">{{ plan.name }}</p>
+              <p class="text-sm text-slate-500">{{ plan.tier }} · {{ plan.companySizeRange }}</p>
+            </div>
+            <p class="text-sm text-slate-900">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</p>
+          </button>
+        }
+      </div>
+      <form [formGroup]="subscriptionForm" class="mt-4 flex gap-4">
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" formControlName="billingCycle" value="monthly" />
+          Monthly
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="radio" formControlName="billingCycle" value="annual" />
+          Annual
+        </label>
+      </form>
+    }
+  }
+
+  @if (currentStep() === 3) {
+    <form [formGroup]="ownerForm" class="flex flex-col gap-4">
+      <div>
+        <label class="text-sm font-medium text-slate-700">Owner Email</label>
+        <input type="email" formControlName="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm font-medium text-slate-700">First Name</label>
+          <input type="text" formControlName="firstName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-700">Last Name</label>
+          <input type="text" formControlName="lastName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+      </div>
+    </form>
+  }
+
+  @if (currentStep() === 4) {
+    <div class="flex flex-col gap-4 text-sm">
+      <div>
+        <h2 class="font-semibold text-slate-900">Company Details</h2>
+        <p>{{ companyForm.controls.companyName.value }} ({{ companyForm.controls.slug.value }})</p>
+        <p>{{ companyForm.controls.legalEntityName.value }} · {{ companyForm.controls.country.value }}</p>
+      </div>
+      <div>
+        <h2 class="font-semibold text-slate-900">Subscription</h2>
+        <p>{{ selectedPlan()?.name }} · {{ subscriptionForm.controls.billingCycle.value }}</p>
+      </div>
+      <div>
+        <h2 class="font-semibold text-slate-900">Owner Invite</h2>
+        <p>{{ ownerForm.controls.firstName.value }} {{ ownerForm.controls.lastName.value }} · {{ ownerForm.controls.email.value }}</p>
+      </div>
+      @if (submitError(); as message) {
+        <app-error-banner [message]="message" />
+      }
+    </div>
+  }
+
+  <div class="flex justify-between border-t border-slate-100 pt-4">
+    @if (currentStep() > 1) {
+      <app-button label="Back" variant="secondary" (clicked)="prevStep()" />
+    } @else {
+      <span></span>
+    }
+    @if (currentStep() < 4) {
+      <app-button label="Next" (clicked)="nextStep()" />
+    } @else {
+      <app-button label="Create Tenant" variant="indigo" [loading]="submitting()" (clicked)="submit()" />
+    }
+  </div>
+</div>

@@ -4,9 +4,16 @@
   </div>
 } @else {
   <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
-    <div>
-      <h1 class="text-xl font-semibold text-slate-900">Tenants</h1>
-      <p class="mt-1 text-sm text-slate-500">Manage tenant accounts and their status</p>
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900">Tenants</h1>
+        <p class="mt-1 text-sm text-slate-500">Manage tenant accounts and their status</p>
+      </div>
+      @if (canManage()) {
+        <a routerLink="/tenants/new">
+          <app-button label="Create Tenant" variant="indigo" />
+        </a>
+      }
     </div>
 
     <div class="flex flex-col gap-3 sm:flex-row">

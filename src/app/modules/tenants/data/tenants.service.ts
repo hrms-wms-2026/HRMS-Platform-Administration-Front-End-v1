@@ -3,7 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 import { environment } from '../../../../environments/environment';
-import { TenantDetail, TenantListResponse } from './tenant.model';
+import {
+  CreateTenantRequest,
+  CreateTenantResult,
+  ProvisioningSummary,
+  TenantDetail,
+  TenantListResponse,
+  TenantValidationResult,
+} from './tenant.model';
 
 interface TenantDetailResponse {
   id: string;
@@ -82,6 +89,72 @@ export class TenantsService {
     return this.http.patch<void>(
       `${this.baseUrl}${API_ENDPOINTS.tenants.status(id)}`,
       { action, reason },
+      { withCredentials: true },
+    );
+  }
+
+  validate(params: {
+    slug?: string;
+    companyName?: string;
+    emailDomain?: string;
+    registrationNumber?: string;
+    country?: string;
+  }): Observable<TenantValidationResult> {
+    let httpParams = new HttpParams();
+    if (params.slug) httpParams = httpParams.set('slug', params.slug);
+    if (params.companyName) httpParams = httpParams.set('company_name', params.companyName);
+    if (params.emailDomain) httpParams = httpParams.set('email_domain', params.emailDomain);
+    if (params.registrationNumber) {
+      httpParams = httpParams.set('registration_number', params.registrationNumber);
+    }
+    if (params.country) httpParams = httpParams.set('country', params.country);
+
+    return this.http.get<TenantValidationResult>(`${this.baseUrl}${API_ENDPOINTS.tenants.validate}`, {
+      params: httpParams,
+      withCredentials: true,
+    });
+  }
+
+  create(request: CreateTenantRequest): Observable<CreateTenantResult> {
+    const body = {
+      company_name: request.companyName,
+      slug: request.slug,
+      industry_profile: request.industryProfile,
+      company_size_range: request.companySizeRange,
+      legal_entity_name: request.legalEntityName,
+      registration_number: request.registrationNumber,
+      country: request.country,
+      timezone: request.timezone,
+      currency: request.currency,
+      subscription: {
+        plan_id: request.planId,
+        billing_cycle: request.billingCycle,
+        commercial_model: 'standard',
+      },
+      owner_invite: {
+        email: request.ownerInvite.email,
+        first_name: request.ownerInvite.firstName,
+        last_name: request.ownerInvite.lastName,
+      },
+    };
+
+    return this.http.post<CreateTenantResult>(`${this.baseUrl}${API_ENDPOINTS.tenants.list}`, body, {
+      withCredentials: true,
+      headers: { 'Idempotency-Key': crypto.randomUUID() },
+    });
+  }
+
+  getProvisioningSummary(id: string): Observable<ProvisioningSummary> {
+    return this.http.get<ProvisioningSummary>(
+      `${this.baseUrl}${API_ENDPOINTS.tenants.provisioningSummary(id)}`,
+      { withCredentials: true },
+    );
+  }
+
+  confirmProvisioning(id: string): Observable<void> {
+    return this.http.patch<void>(
+      `${this.baseUrl}${API_ENDPOINTS.tenants.confirmProvisioning(id)}`,
+      { confirm: true },
       { withCredentials: true },
     );
   }
