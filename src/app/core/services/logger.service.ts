@@ -3,9 +3,7 @@ import { environment } from '../../../environments/environment';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-interface LogContext {
-  [key: string]: unknown;
-}
+type LogContext = Record<string, unknown>;
 
 @Injectable({ providedIn: 'root' })
 export class LoggerService {

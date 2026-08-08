@@ -33,7 +33,7 @@ jobs:
         run: npm run build -- --configuration production
 
       - name: Test - Unit (Jest)
-        run: npx jest --ci --coverage=false
+        run: npx jest --ci
 
   # Known gap: nothing here starts the backend or the frontend for Playwright to drive,
   # so e2e/ only has a placeholder spec for now. Non-blocking (continue-on-error) so it
