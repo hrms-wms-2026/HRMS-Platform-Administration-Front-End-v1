@@ -1,7 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TenantsService } from '../../data/tenants.service';
-import { TenantDetail as TenantDetailModel } from '../../data/tenant.model';
+import { TenantDetail as TenantDetailModel, ProvisioningSummary } from '../../data/tenant.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button, ButtonVariant } from '../../../../shared/ui/button/button';
@@ -51,6 +52,9 @@ export class TenantDetailComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly tenant = signal<TenantDetailModel | null>(null);
+  protected readonly provisioningSummary = signal<ProvisioningSummary | null>(null);
+  protected readonly pendingActivation = signal(false);
+  protected readonly activating = signal(false);
 
   protected readonly availableActions = computed<StatusAction[]>(() => {
     if (!this.canManage()) {
@@ -75,10 +79,50 @@ export class TenantDetailComponent implements OnInit {
       next: (tenant) => {
         this.tenant.set(tenant);
         this.loading.set(false);
+        this.loadProvisioningSummaryIfNeeded(tenant);
       },
       error: () => {
         this.errorMessage.set('Something went wrong. Please try again.');
         this.loading.set(false);
+      },
+    });
+  }
+
+  private loadProvisioningSummaryIfNeeded(tenant: TenantDetailModel): void {
+    if (tenant.status !== 'provisioning') {
+      this.provisioningSummary.set(null);
+      return;
+    }
+    this.tenantsService.getProvisioningSummary(this.tenantId).subscribe({
+      next: (summary) => this.provisioningSummary.set(summary),
+    });
+  }
+
+  protected startActivation(): void {
+    this.pendingActivation.set(true);
+  }
+
+  protected cancelActivation(): void {
+    this.pendingActivation.set(false);
+  }
+
+  protected confirmActivation(): void {
+    this.pendingActivation.set(false);
+    this.activating.set(true);
+
+    this.tenantsService.confirmProvisioning(this.tenantId).subscribe({
+      next: () => {
+        this.activating.set(false);
+        this.notificationService.success('Tenant activated.');
+        this.loadTenant();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.activating.set(false);
+        if (error.status === 422 && error.error) {
+          this.provisioningSummary.set(error.error as ProvisioningSummary);
+        } else {
+          this.notificationService.error('Could not activate the tenant.');
+        }
       },
     });
   }
