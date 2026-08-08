@@ -97,8 +97,8 @@
             type="button"
             (click)="selectPlan(plan.id)"
             class="flex items-center justify-between rounded-lg border p-4 text-left"
-            [class.border-indigo-600]="selectedPlan()?.id === plan.id"
-            [class.border-slate-200]="selectedPlan()?.id !== plan.id"
+            [class.border-indigo-600]="selectedPlanId() === plan.id"
+            [class.border-slate-200]="selectedPlanId() !== plan.id"
           >
             <div>
               <p class="font-semibold text-slate-900">{{ plan.name }}</p>

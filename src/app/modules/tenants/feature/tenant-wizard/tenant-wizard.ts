@@ -71,9 +71,10 @@ export class TenantWizard implements OnInit {
   protected readonly plans = signal<SubscriptionPlanSummary[]>([]);
   protected readonly loadingPlans = signal(false);
   protected readonly plansError = signal<string | null>(null);
+  protected readonly selectedPlanId = signal<string | null>(null);
 
   protected readonly selectedPlan = computed(
-    () => this.plans().find((p) => p.id === this.subscriptionForm.controls.planId.value) ?? null,
+    () => this.plans().find((p) => p.id === this.selectedPlanId()) ?? null,
   );
 
   protected readonly submitting = signal(false);
@@ -123,6 +124,7 @@ export class TenantWizard implements OnInit {
   }
 
   protected selectPlan(planId: string): void {
+    this.selectedPlanId.set(planId);
     this.subscriptionForm.controls.planId.setValue(planId);
   }
 

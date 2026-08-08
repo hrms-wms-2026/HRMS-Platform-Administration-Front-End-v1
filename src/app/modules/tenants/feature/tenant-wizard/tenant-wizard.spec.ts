@@ -175,4 +175,15 @@ describe('TenantWizard', () => {
     expect(plansService.list).toHaveBeenCalled();
     expect(component['plans']()).toEqual([plan]);
   });
+
+  it('reflects the selected plan reactively for the review step', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    expect(component['selectedPlan']()).toBeNull();
+
+    component['selectPlan']('plan-1');
+
+    expect(component['selectedPlan']()).toEqual(plan);
+  });
 });
