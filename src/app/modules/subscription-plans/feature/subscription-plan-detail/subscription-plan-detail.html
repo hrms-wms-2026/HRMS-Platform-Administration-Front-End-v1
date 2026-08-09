@@ -1,0 +1,83 @@
+@if (loading()) {
+  <app-loader label="Loading…" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadPlan()" />
+} @else if (plan(); as p) {
+  @if (editing()) {
+    <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+      <h1 class="text-xl font-semibold text-slate-900">Edit {{ p.name }}</h1>
+      <app-subscription-plan-form
+        mode="edit"
+        [initialValue]="p"
+        [saving]="saving()"
+        (submitted)="saveEdit($event)"
+      />
+      <div class="flex justify-end border-t border-slate-100 pt-4">
+        <app-button label="Cancel" variant="secondary" (clicked)="cancelEdit()" />
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-semibold text-slate-900">{{ p.name }}</h1>
+          <p class="mt-1 text-sm text-slate-500">{{ p.code }}</p>
+        </div>
+        <app-status-badge [label]="p.isActive ? 'Active' : 'Archived'" [tone]="p.isActive ? 'success' : 'neutral'" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500">Tier</p>
+          <p class="text-slate-900">{{ p.tier }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500">Company Size</p>
+          <p class="text-slate-900">{{ p.companySizeRange }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500">Monthly Price</p>
+          <p class="text-slate-900">{{ p.currency }} {{ p.effectiveMonthlyPrice }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500">Annual Price</p>
+          <p class="text-slate-900">{{ p.currency }} {{ p.effectiveAnnualPrice }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500">AI Token Limit / Month</p>
+          <p class="text-slate-900">{{ p.aiTokenLimitPerMonth ?? 'Unlimited' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500">Trial / Grace Period</p>
+          <p class="text-slate-900">{{ p.trialPeriodDays }} days / {{ p.unpaidGracePeriodDays }} days</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Included Modules</p>
+        <p class="mt-1 text-sm text-slate-900">{{ p.includedModules.join(', ') }}</p>
+      </div>
+
+      @if (canManage()) {
+        <div class="flex gap-3 border-t border-slate-100 pt-4">
+          <app-button label="Edit" variant="secondary" (clicked)="startEdit()" />
+          @if (p.isActive) {
+            <app-button label="Archive" variant="danger" (clicked)="startArchive()" />
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (pendingArchive()) {
+    <app-confirmation-dialog
+      [open]="true"
+      title="Archive plan?"
+      message="This will soft-delete the plan. It will no longer be selectable for new tenants."
+      confirmLabel="Archive"
+      confirmVariant="danger"
+      (confirm)="confirmArchive()"
+      (cancel)="cancelArchive()"
+    />
+  }
+}

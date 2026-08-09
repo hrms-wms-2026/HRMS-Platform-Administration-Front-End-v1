@@ -40,6 +40,27 @@ export const routes: Routes = [
           import('./modules/roles/feature/role-detail/role-detail').then((m) => m.RoleDetail),
       },
       {
+        path: 'subscription-plans',
+        loadComponent: () =>
+          import('./modules/subscription-plans/feature/subscription-plans-list/subscription-plans-list').then(
+            (m) => m.SubscriptionPlansList,
+          ),
+      },
+      {
+        path: 'subscription-plans/new',
+        loadComponent: () =>
+          import('./modules/subscription-plans/feature/subscription-plan-create/subscription-plan-create').then(
+            (m) => m.SubscriptionPlanCreate,
+          ),
+      },
+      {
+        path: 'subscription-plans/:id',
+        loadComponent: () =>
+          import('./modules/subscription-plans/feature/subscription-plan-detail/subscription-plan-detail').then(
+            (m) => m.SubscriptionPlanDetail,
+          ),
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./modules/platform-users/feature/platform-users-list/platform-users-list').then(

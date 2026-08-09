@@ -36,6 +36,13 @@ export const API_ENDPOINTS = {
   },
   subscriptionPlans: {
     list: '/subscription-plans',
+    byId: (id: string) => `/subscription-plans/${id}`,
+    create: '/subscription-plans',
+    update: (id: string) => `/subscription-plans/${id}`,
+    archive: (id: string) => `/subscription-plans/${id}`,
+  },
+  moduleCatalog: {
+    list: '/modules/catalog',
   },
   logs: {
     create: '/logs',

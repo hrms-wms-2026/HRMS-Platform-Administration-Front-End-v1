@@ -41,4 +41,56 @@ describe('SubscriptionPlansService', () => {
 
     expect(result).toEqual([plan]);
   });
+
+  it('gets a subscription plan by id', () => {
+    service.getById('plan-1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/subscription-plans/plan-1`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush({});
+  });
+
+  it('creates a subscription plan', () => {
+    const request = {
+      name: 'Starter',
+      code: 'starter_1_10',
+      tier: 'Starter',
+      companySizeRange: '1-10',
+      moduleKeys: ['core-hr'],
+      currency: 'USD',
+      overrideMonthlyPrice: null,
+      overrideAnnualPrice: null,
+      aiTokenLimitPerMonth: null,
+      trialPeriodDays: 30,
+      unpaidGracePeriodDays: 7,
+    };
+    service.create(request).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/subscription-plans`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(request);
+    expect(req.request.withCredentials).toBe(true);
+    req.flush({});
+  });
+
+  it('updates a subscription plan', () => {
+    const request = { name: 'Starter Plus' };
+    service.update('plan-1', request).subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/subscription-plans/plan-1`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual(request);
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(null);
+  });
+
+  it('archives a subscription plan', () => {
+    service.archive('plan-1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/subscription-plans/plan-1`);
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(null);
+  });
 });
