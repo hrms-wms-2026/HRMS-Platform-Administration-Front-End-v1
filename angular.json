@@ -96,6 +96,11 @@
             },
             "development": {
               "buildTarget": "platform-administration:build:development"
+            },
+            "e2e": {
+              "buildTarget": "platform-administration:build:development",
+              "ssl": false,
+              "allowedHosts": true
             }
           },
           "defaultConfiguration": "development"
