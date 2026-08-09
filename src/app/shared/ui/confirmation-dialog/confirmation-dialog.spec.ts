@@ -37,7 +37,7 @@ describe('ConfirmationDialog', () => {
     let confirmed = false;
     let cancelled = false;
     component.confirm.subscribe(() => (confirmed = true));
-    component.cancel.subscribe(() => (cancelled = true));
+    component.cancelled.subscribe(() => (cancelled = true));
 
     const buttons = fixture.debugElement.queryAll(By.css('button'));
     buttons[0].nativeElement.click();
