@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ModuleCatalogService } from '../../../module-catalog/data/module-catalog.service';
 import { ModuleCatalogItem } from '../../../module-catalog/data/module-catalog.model';
@@ -47,14 +48,60 @@ export class SubscriptionPlanForm implements OnInit {
     unpaidGracePeriodDays: [7, [Validators.required, Validators.min(0)]],
   });
 
+  // Reading form.valueChanges only to establish a signal dependency - form.getRawValue()
+  // itself is a plain (non-signal) snapshot read, always accurate at call time, but
+  // reading it alone inside computed() would never trigger recomputation on keystrokes.
+  private readonly formValueTick = toSignal(this.form.valueChanges, { initialValue: null });
+
+  protected readonly hasChanges = computed(() => {
+    this.formValueTick();
+    this.selectedModuleKeys();
+
+    if (this.isCreate()) {
+      return true;
+    }
+    const initial = this.initialValue();
+    if (!initial) {
+      return true;
+    }
+
+    const raw = this.form.getRawValue();
+    const fieldsChanged =
+      raw.name !== initial.name ||
+      raw.tier !== initial.tier ||
+      raw.companySizeRange !== initial.companySizeRange ||
+      raw.currency !== initial.currency ||
+      raw.overrideMonthlyPrice !== initial.overrideMonthlyPrice ||
+      raw.overrideAnnualPrice !== initial.overrideAnnualPrice ||
+      raw.aiTokenLimitPerMonth !== initial.aiTokenLimitPerMonth ||
+      raw.trialPeriodDays !== initial.trialPeriodDays ||
+      raw.unpaidGracePeriodDays !== initial.unpaidGracePeriodDays;
+    if (fieldsChanged) {
+      return true;
+    }
+
+    const currentModules = this.selectedModuleKeys();
+    const initialModules = new Set(initial.includedModules);
+    if (currentModules.size !== initialModules.size) {
+      return true;
+    }
+    for (const key of currentModules) {
+      if (!initialModules.has(key)) {
+        return true;
+      }
+    }
+    return false;
+  });
+
   protected readonly canSubmit = computed(() => {
     // Read every signal unconditionally before combining with && - short-circuiting on
     // form.valid (a plain getter, not a signal) would otherwise skip reading
-    // selectedModuleKeys()/saving() on that pass, so Angular never tracks them as
-    // dependencies and this computed gets stuck stale forever.
+    // selectedModuleKeys()/saving()/hasChanges() on that pass, so Angular never tracks
+    // them as dependencies and this computed gets stuck stale forever.
     const hasSelectedModule = this.selectedModuleKeys().size > 0;
     const notSaving = !this.saving();
-    return this.form.valid && hasSelectedModule && notSaving;
+    const changed = this.hasChanges();
+    return this.form.valid && hasSelectedModule && notSaving && changed;
   });
 
   ngOnInit(): void {

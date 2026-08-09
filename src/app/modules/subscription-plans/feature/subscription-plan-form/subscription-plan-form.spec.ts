@@ -25,6 +25,29 @@ describe('SubscriptionPlanForm', () => {
     },
   ];
 
+  const planDetail = {
+    id: 'plan-1',
+    name: 'Starter',
+    code: 'starter_1_10',
+    tier: 'Starter',
+    companySizeRange: '1-10',
+    pricingUnit: 'per_employee',
+    includedModules: ['core-hr'],
+    calculatedMonthlyPrice: 10,
+    calculatedAnnualPrice: 100,
+    overrideMonthlyPrice: null,
+    overrideAnnualPrice: null,
+    effectiveMonthlyPrice: 10,
+    effectiveAnnualPrice: 100,
+    currency: 'USD',
+    aiTokenLimitPerMonth: null,
+    trialPeriodDays: 30,
+    unpaidGracePeriodDays: 7,
+    isActive: true,
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: null,
+  };
+
   function setup(mode: 'create' | 'edit' = 'create', initialValue: unknown = null) {
     moduleCatalogService = { list: jest.fn().mockReturnValue(of(modules)) };
 
@@ -54,32 +77,39 @@ describe('SubscriptionPlanForm', () => {
   });
 
   it('disables the code field in edit mode', () => {
-    const fixture = setup('edit', {
-      id: 'plan-1',
-      name: 'Starter',
-      code: 'starter_1_10',
-      tier: 'Starter',
-      companySizeRange: '1-10',
-      pricingUnit: 'per_employee',
-      includedModules: ['core-hr'],
-      calculatedMonthlyPrice: 10,
-      calculatedAnnualPrice: 100,
-      overrideMonthlyPrice: null,
-      overrideAnnualPrice: null,
-      effectiveMonthlyPrice: 10,
-      effectiveAnnualPrice: 100,
-      currency: 'USD',
-      aiTokenLimitPerMonth: null,
-      trialPeriodDays: 30,
-      unpaidGracePeriodDays: 7,
-      isActive: true,
-      createdAt: '2026-01-01T00:00:00Z',
-      updatedAt: null,
-    });
+    const fixture = setup('edit', planDetail);
     const component = fixture.componentInstance;
 
     expect(component['form'].controls.code.disabled).toBe(true);
     expect(component['selectedModuleKeys']().has('core-hr')).toBe(true);
+  });
+
+  it('does not allow submit in edit mode until something actually changes', () => {
+    const fixture = setup('edit', planDetail);
+    const component = fixture.componentInstance;
+
+    expect(component['hasChanges']()).toBe(false);
+    expect(component['canSubmit']()).toBe(false);
+  });
+
+  it('allows submit in edit mode once a field is changed', () => {
+    const fixture = setup('edit', planDetail);
+    const component = fixture.componentInstance;
+
+    component['form'].controls.name.setValue('Starter Plus');
+
+    expect(component['hasChanges']()).toBe(true);
+    expect(component['canSubmit']()).toBe(true);
+  });
+
+  it('allows submit in edit mode once the module selection changes', () => {
+    const fixture = setup('edit', planDetail);
+    const component = fixture.componentInstance;
+
+    component['toggleModule']('leave');
+
+    expect(component['hasChanges']()).toBe(true);
+    expect(component['canSubmit']()).toBe(true);
   });
 
   it('emits the form value with selected module keys on submit', () => {
