@@ -97,7 +97,7 @@
       [confirmLabel]="action.label"
       [confirmVariant]="action.confirmVariant"
       (confirm)="confirmAction()"
-      (cancel)="cancelAction()"
+      (cancelled)="cancelAction()"
     />
   }
 
@@ -109,7 +109,7 @@
       confirmLabel="Confirm & Activate"
       confirmVariant="indigo"
       (confirm)="confirmActivation()"
-      (cancel)="cancelActivation()"
+      (cancelled)="cancelActivation()"
     />
   }
 }
