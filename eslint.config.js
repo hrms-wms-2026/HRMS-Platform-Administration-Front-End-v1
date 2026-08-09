@@ -38,18 +38,14 @@ module.exports = defineConfig([
           message: 'Use @ngrx/signals withState() instead of BehaviorSubject — this codebase\'s state management convention (see PermissionStore for the pattern).',
         }],
       }],
-      // Modal/ConfirmationDialog already ship `close`/`cancel` outputs used across many
-      // consumers (Roles, Tenants, User Profile Drawer, etc.) — renaming needs its own
-      // dedicated, tested pass rather than being folded into unrelated tooling work.
-      '@angular-eslint/no-output-native': 'warn',
     },
   },
   {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {
-      // Modal's backdrop-click-to-close needs a dedicated keyboard-accessible rework
-      // (see the no-output-native note above) — tracked separately, not part of this change.
+      // Modal's backdrop-click-to-close needs a dedicated keyboard-accessible rework —
+      // tracked separately, not part of this change.
       '@angular-eslint/template/click-events-have-key-events': 'warn',
       '@angular-eslint/template/interactive-supports-focus': 'warn',
     },

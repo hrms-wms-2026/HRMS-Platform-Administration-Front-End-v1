@@ -6,10 +6,10 @@ import { Button, ButtonVariant } from '../button/button';
   selector: 'app-confirmation-dialog',
   imports: [Modal, Button],
   template: `
-    <app-modal [open]="open()" [title]="title()" (close)="cancel.emit()">
+    <app-modal [open]="open()" [title]="title()" (closed)="cancelled.emit()">
       <p class="text-sm text-slate-600">{{ message() }}</p>
       <div class="mt-6 flex justify-end gap-3">
-        <app-button label="Cancel" variant="secondary" (clicked)="cancel.emit()" />
+        <app-button label="Cancel" variant="secondary" (clicked)="cancelled.emit()" />
         <app-button [label]="confirmLabel()" [variant]="confirmVariant()" (clicked)="confirm.emit()" />
       </div>
     </app-modal>
@@ -22,5 +22,5 @@ export class ConfirmationDialog {
   readonly confirmLabel = input('Confirm');
   readonly confirmVariant = input<ButtonVariant>('danger');
   readonly confirm = output<void>();
-  readonly cancel = output<void>();
+  readonly cancelled = output<void>();
 }
