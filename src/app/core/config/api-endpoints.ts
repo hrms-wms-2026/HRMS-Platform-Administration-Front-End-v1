@@ -50,4 +50,9 @@ export const API_ENDPOINTS = {
   logs: {
     create: '/logs',
   },
+  systemConfig: {
+    providers: {
+      list: '/system-config/providers',
+    },
+  },
 } as const;
