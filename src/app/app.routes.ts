@@ -72,6 +72,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./modules/auth/feature/mfa-setup/mfa-setup').then((m) => m.MfaSetup),
       },
+      {
+        path: 'audit-logs',
+        loadComponent: () =>
+          import('./modules/audit-logs/feature/audit-logs-list/audit-logs-list').then(
+            (m) => m.AuditLogsList,
+          ),
+      },
     ],
   },
   {

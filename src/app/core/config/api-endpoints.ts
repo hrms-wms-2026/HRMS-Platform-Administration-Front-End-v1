@@ -44,6 +44,9 @@ export const API_ENDPOINTS = {
   moduleCatalog: {
     list: '/modules/catalog',
   },
+  auditLogs: {
+    list: '/platform-access/auth-events',
+  },
   logs: {
     create: '/logs',
   },
