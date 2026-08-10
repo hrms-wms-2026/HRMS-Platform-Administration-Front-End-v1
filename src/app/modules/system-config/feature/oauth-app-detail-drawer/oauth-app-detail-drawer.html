@@ -1,0 +1,96 @@
+<div class="fixed inset-0 z-50 flex justify-end bg-slate-900/50" (click)="close()">
+  <div class="flex h-full w-96 flex-col bg-white shadow-2xl" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+      <h2 class="text-lg font-semibold text-slate-900">{{ app()?.displayName ?? provider() }}</h2>
+      <button
+        type="button"
+        (click)="close()"
+        class="text-xl leading-none text-slate-400 hover:text-slate-600"
+        aria-label="Close"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-6 py-4">
+      @if (loading()) {
+        <app-loader label="Loading…" />
+      } @else if (errorMessage(); as message) {
+        <app-error-banner [message]="message" (retry)="close()" />
+      } @else if (app(); as a) {
+        <div class="flex flex-wrap gap-2">
+          <app-status-badge [label]="a.configured ? 'Configured' : 'Not configured'" [tone]="a.configured ? 'success' : 'neutral'" />
+          @if (a.configured) {
+            <app-status-badge [label]="a.isActive ? 'Active' : 'Inactive'" [tone]="a.isActive ? 'success' : 'neutral'" />
+          }
+        </div>
+
+        <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+          <p><span class="font-medium text-slate-900">Authorization URL:</span> {{ a.authorizationUrl }}</p>
+          <p class="mt-1"><span class="font-medium text-slate-900">Token URL:</span> {{ a.tokenUrl }}</p>
+          <p class="mt-1"><span class="font-medium text-slate-900">Default scopes:</span> {{ a.defaultScopes.join(', ') }}</p>
+          <p class="mt-1"><span class="font-medium text-slate-900">Capabilities:</span> {{ a.capabilities.join(', ') }}</p>
+        </div>
+
+        @if (canManage()) {
+          <form class="mt-6 flex flex-col gap-4" [formGroup]="configureForm" (ngSubmit)="saveConfiguration()" novalidate>
+            <div>
+              <label for="oauth-app-appName" class="text-sm font-medium text-slate-700">App name</label>
+              <input
+                id="oauth-app-appName"
+                type="text"
+                formControlName="appName"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+              />
+            </div>
+
+            <div>
+              <label for="oauth-app-logoUrl" class="text-sm font-medium text-slate-700">Logo URL</label>
+              <input
+                id="oauth-app-logoUrl"
+                type="text"
+                formControlName="logoUrl"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+              />
+            </div>
+
+            <div>
+              <label for="oauth-app-clientId" class="text-sm font-medium text-slate-700">Client ID</label>
+              <input
+                id="oauth-app-clientId"
+                type="text"
+                formControlName="clientId"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+              />
+            </div>
+
+            <div>
+              <label for="oauth-app-clientSecret" class="text-sm font-medium text-slate-700">Client Secret</label>
+              <input
+                id="oauth-app-clientSecret"
+                type="password"
+                formControlName="clientSecret"
+                autocomplete="new-password"
+                placeholder="Leave blank to keep the current secret"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+              />
+            </div>
+
+            <details class="text-sm">
+              <summary class="cursor-pointer font-medium text-slate-700">Advanced: Private key</summary>
+              <textarea
+                id="oauth-app-privateKey"
+                formControlName="privateKey"
+                rows="3"
+                placeholder="Only needed for providers that require a private key"
+                class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+              ></textarea>
+            </details>
+
+            <app-button type="submit" label="Save Configuration" loadingText="Saving…" [loading]="saving()" />
+          </form>
+        }
+      }
+    </div>
+  </div>
+</div>

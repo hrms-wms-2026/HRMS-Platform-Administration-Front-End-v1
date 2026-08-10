@@ -50,4 +50,12 @@
       </div>
     }
   </div>
+
+  @if (selectedProvider(); as provider) {
+    <app-oauth-app-detail-drawer
+      [provider]="provider"
+      (closed)="closeDrawer()"
+      (updated)="onAppUpdated()"
+    />
+  }
 }
