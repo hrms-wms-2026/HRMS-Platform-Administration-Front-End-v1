@@ -113,16 +113,23 @@ Example route entries:
 | `/subscription-plans` | Subscription & Billing / Subscription Plans |
 | `/subscription-plans/new` | Subscription & Billing / **Subscription Plans**(→/subscription-plans) / New Plan |
 | `/subscription-plans/:id` | Subscription & Billing / **Subscription Plans**(→/subscription-plans) / Plan Details |
-| `/system-config/providers` | System Config / Providers |
-| `/system-config/service-keys` | System Config / Service Keys |
-| `/system-config/oauth-apps` | System Config / OAuth Apps |
+| `/system-config/providers` | Platform Configuration / Providers Overview |
+| `/system-config/service-keys` | Platform Configuration / Service Keys |
+| `/system-config/oauth-apps` | Platform Configuration / OAuth Apps |
 | `/audit-logs` | Security & Compliance / Audit Logs |
 | `/settings/mfa` | Two-Factor Authentication (single segment, no section — reached via the profile menu, not the sidebar) |
 | `/access-denied` | *(no breadcrumb rendered — error/utility page)* |
 
-Section labels above use the sidebar's exact current wording
-("System Config", not "Platform Configuration") for consistency
-between the two navigation surfaces.
+Section and page labels above use the sidebar's exact current wording
+for every group except Platform Configuration, where the breadcrumb
+deliberately uses the full, approved user-facing terminology
+("Platform Configuration / Providers Overview") rather than the
+sidebar's own shortened labels ("System Config" / "Providers" — chosen
+there only to fix a text-wrap bug in the sidebar's fixed-width column,
+a constraint the breadcrumb's flexible-width navbar doesn't share).
+Route paths, folder names, and branch names keep using `system-config`
+regardless — this is a display-label difference only, not a routing
+change.
 
 ## Breadcrumb Component
 

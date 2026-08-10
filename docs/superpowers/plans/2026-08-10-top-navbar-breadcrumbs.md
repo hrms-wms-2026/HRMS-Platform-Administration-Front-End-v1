@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Section labels in breadcrumb data must exactly match the sidebar's current wording: "Platform", "Access Control", "Subscription & Billing", "System Config", "Security & Compliance".
+- Section labels in breadcrumb data must exactly match the sidebar's current wording for every group except Platform Configuration: "Platform", "Access Control", "Subscription & Billing", "Security & Compliance". The three `system-config/*` routes use the full approved terminology instead — section "Platform Configuration", and the providers page reads "Providers Overview" (not the sidebar's shortened "Providers") — since the breadcrumb's flexible-width navbar doesn't share the sidebar's fixed-column text-wrap constraint. Route paths and folder names keep using `system-config` regardless; this is a display-label difference only.
 - Detail-page breadcrumbs use a static page label (e.g. "Tenant Details") — never a fetched entity name.
 - `/access-denied` gets no `data.breadcrumb` at all; the component must render nothing (not an empty `<nav>`) when a route has no breadcrumb data.
 - `/settings/mfa` gets a single-segment breadcrumb (`page` only, no `section`, no `parent`).
@@ -350,7 +350,7 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/oauth-apps',
-        data: { breadcrumb: { section: 'System Config', page: 'OAuth Apps' } },
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'OAuth Apps' } },
         loadComponent: () =>
           import('./modules/system-config/feature/oauth-apps-list/oauth-apps-list').then(
             (m) => m.OAuthAppsList,
@@ -358,7 +358,7 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/service-keys',
-        data: { breadcrumb: { section: 'System Config', page: 'Service Keys' } },
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'Service Keys' } },
         loadComponent: () =>
           import('./modules/system-config/feature/service-keys-list/service-keys-list').then(
             (m) => m.ServiceKeysList,
@@ -366,7 +366,7 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/providers',
-        data: { breadcrumb: { section: 'System Config', page: 'Providers' } },
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'Providers Overview' } },
         loadComponent: () =>
           import('./modules/system-config/feature/providers-overview/providers-overview').then(
             (m) => m.ProvidersOverview,
@@ -568,7 +568,7 @@ Expected: `npm test` all suites passing; `npm run lint` shows only the same pre-
 
 - [ ] **Step 10: Live browser smoke test**
 
-Log in, confirm the logo now renders in the top navbar (not the sidebar) and the sidebar's first visible content is the "Platform" section label. Visit a top-level page (e.g. Tenants) and confirm the breadcrumb reads "Platform / Tenants" with no clickable segment. Visit a tenant's detail page and confirm the breadcrumb reads "Platform / Tenants / Tenant Details" with "Tenants" clickable back to `/tenants`. Visit `/settings/mfa` via the profile menu and confirm the breadcrumb reads just "Two-Factor Authentication". Visit each System Config page and confirm "System Config / <page>". Confirm no breadcrumb renders (or crashes) on `/access-denied`.
+Log in, confirm the logo now renders in the top navbar (not the sidebar) and the sidebar's first visible content is the "Platform" section label. Visit a top-level page (e.g. Tenants) and confirm the breadcrumb reads "Platform / Tenants" with no clickable segment. Visit a tenant's detail page and confirm the breadcrumb reads "Platform / Tenants / Tenant Details" with "Tenants" clickable back to `/tenants`. Visit `/settings/mfa` via the profile menu and confirm the breadcrumb reads just "Two-Factor Authentication". Visit each System Config page and confirm "Platform Configuration / <page>" (Providers specifically reads "Platform Configuration / Providers Overview", not "Providers"). Confirm no breadcrumb renders (or crashes) on `/access-denied`.
 
 - [ ] **Step 11: Finish the branch**
 
