@@ -47,6 +47,18 @@ export const API_ENDPOINTS = {
   auditLogs: {
     list: '/platform-access/auth-events',
   },
+  systemConfig: {
+    serviceKeys: {
+      list: '/system-config/service-keys',
+      providers: '/system-config/service-key-providers',
+      create: '/system-config/service-keys',
+      update: (serviceKey: string) => `/system-config/service-keys/${serviceKey}`,
+      rotateKey: (serviceKey: string) => `/system-config/service-keys/${serviceKey}/rotate-key`,
+      verify: (serviceKey: string) => `/system-config/service-keys/${serviceKey}/verify`,
+      activate: (serviceKey: string) => `/system-config/service-keys/${serviceKey}/activate`,
+      deactivate: (serviceKey: string) => `/system-config/service-keys/${serviceKey}/deactivate`,
+    },
+  },
   logs: {
     create: '/logs',
   },
