@@ -86,6 +86,13 @@ export const routes: Routes = [
             (m) => m.AuditLogsList,
           ),
       },
+      {
+        path: 'system-config/oauth-apps',
+        loadComponent: () =>
+          import('./modules/system-config/feature/oauth-apps-list/oauth-apps-list').then(
+            (m) => m.OAuthAppsList,
+          ),
+      },
     ],
   },
   {
