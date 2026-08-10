@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SubscriptionPlanDetail } from './subscription-plan-detail';
@@ -12,6 +12,7 @@ describe('SubscriptionPlanDetail', () => {
   let plansService: { getById: jest.Mock; update: jest.Mock; archive: jest.Mock };
   let moduleCatalogService: { list: jest.Mock };
   let notificationService: { success: jest.Mock; error: jest.Mock };
+  let router: { navigateByUrl: jest.Mock };
 
   const planDetail = {
     id: 'plan-1',
@@ -44,6 +45,7 @@ describe('SubscriptionPlanDetail', () => {
     };
     moduleCatalogService = { list: jest.fn().mockReturnValue(of([])) };
     notificationService = { success: jest.fn(), error: jest.fn() };
+    router = { navigateByUrl: jest.fn() };
 
     TestBed.configureTestingModule({
       imports: [SubscriptionPlanDetail],
@@ -51,6 +53,7 @@ describe('SubscriptionPlanDetail', () => {
         { provide: SubscriptionPlansService, useValue: plansService },
         { provide: ModuleCatalogService, useValue: moduleCatalogService },
         { provide: NotificationService, useValue: notificationService },
+        { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: convertToParamMap({ id: 'plan-1' }) } },
@@ -85,7 +88,7 @@ describe('SubscriptionPlanDetail', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Archive');
   });
 
-  it('archives the plan and reloads on confirm', () => {
+  it('archives the plan and navigates back to the list on confirm', () => {
     const fixture = setup();
     plansService.archive.mockReturnValue(of(undefined));
     const component = fixture.componentInstance;
@@ -95,7 +98,9 @@ describe('SubscriptionPlanDetail', () => {
 
     expect(plansService.archive).toHaveBeenCalledWith('plan-1');
     expect(notificationService.success).toHaveBeenCalledWith('Subscription plan archived.');
-    expect(plansService.getById).toHaveBeenCalledTimes(2);
+    // Archived plans 404 on GetById by backend design, so the component navigates
+    // back to the list instead of reloading this now-archived plan.
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/subscription-plans');
   });
 
   it('shows the backend error detail message when update fails', () => {

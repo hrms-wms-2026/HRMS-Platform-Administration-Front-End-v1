@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SubscriptionPlansService } from '../../data/subscription-plans.service';
 import {
@@ -23,6 +23,7 @@ import { SubscriptionPlanForm } from '../subscription-plan-form/subscription-pla
 })
 export class SubscriptionPlanDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly plansService = inject(SubscriptionPlansService);
   private readonly notificationService = inject(NotificationService);
   protected readonly permissionStore = inject(PermissionStore);
@@ -115,7 +116,10 @@ export class SubscriptionPlanDetail implements OnInit {
       next: () => {
         this.archiving.set(false);
         this.notificationService.success('Subscription plan archived.');
-        this.loadPlan();
+        // Archived plans 404 on GetById by backend design (EfSubscriptionRepository
+        // filters IsActive) - reloading this page would immediately error, so go
+        // back to the list instead.
+        this.router.navigateByUrl('/subscription-plans');
       },
       error: () => {
         this.archiving.set(false);
