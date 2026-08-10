@@ -31,7 +31,7 @@ describe('Sidebar', () => {
     expect(text).toContain('Platform');
     expect(text).toContain('Access Control');
     expect(text).toContain('Subscription & Billing');
-    expect(text).toContain('Platform Configuration');
+    expect(text).toContain('System Config');
     expect(text).toContain('Security & Compliance');
   });
 
