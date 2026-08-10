@@ -12,7 +12,7 @@
       </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-6 py-4">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden px-6 py-4">
       @if (loading()) {
         <app-loader label="Loading…" />
       } @else if (errorMessage(); as message) {
@@ -26,10 +26,10 @@
         </div>
 
         <div class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-          <p><span class="font-medium text-slate-900">Authorization URL:</span> {{ a.authorizationUrl }}</p>
-          <p class="mt-1"><span class="font-medium text-slate-900">Token URL:</span> {{ a.tokenUrl }}</p>
-          <p class="mt-1"><span class="font-medium text-slate-900">Default scopes:</span> {{ a.defaultScopes.join(', ') }}</p>
-          <p class="mt-1"><span class="font-medium text-slate-900">Capabilities:</span> {{ a.capabilities.join(', ') }}</p>
+          <p class="break-all"><span class="font-medium text-slate-900">Authorization URL:</span> {{ a.authorizationUrl }}</p>
+          <p class="mt-1 break-all"><span class="font-medium text-slate-900">Token URL:</span> {{ a.tokenUrl }}</p>
+          <p class="mt-1 break-words"><span class="font-medium text-slate-900">Default scopes:</span> {{ a.defaultScopes.join(', ') }}</p>
+          <p class="mt-1 break-words"><span class="font-medium text-slate-900">Capabilities:</span> {{ a.capabilities.join(', ') }}</p>
         </div>
 
         @if (canManage()) {
