@@ -4,7 +4,7 @@
 
 **Goal:** Add an OAuth Apps management screen — a 4-provider overview (GitHub, Google, Microsoft, Zoom) plus a per-provider detail drawer (view, configure, rotate secret, validate config, activate/deactivate) — wired to the already-merged backend `system-config/oauth-apps` endpoints.
 
-**Architecture:** Pure frontend addition to the existing `system-config` module (started by the Service Keys sub-project). A `OAuthAppsList` landing page renders a fixed 4-card grid (the backend always returns exactly 4 providers). Clicking a card opens `OAuthAppDetailDrawer`, a right-side slide-in panel that owns every credential-touching action, built on the same structural pattern as the existing `UserProfileDrawer` (`input.required<T>()` + `effect()` reload, `closed`/`updated` outputs, `w-96` slide-in with backdrop-click-to-close).
+**Architecture:** Pure frontend addition to the existing `system-config` module (started by the Service Keys sub-project). A `OAuthAppsList` landing page renders a fixed, compact settings list — one row per provider (the backend always returns exactly 4). Clicking a row opens `OAuthAppDetailDrawer`, a right-side slide-in panel that owns every credential-touching action, built on the same structural pattern as the existing `UserProfileDrawer` (`input.required<T>()` + `effect()` reload, `closed`/`updated` outputs, `w-96` slide-in with backdrop-click-to-close).
 
 **Tech Stack:** Angular 21 (signals, `effect()`, reactive forms), Jest + `HttpTestingController`.
 
@@ -283,7 +283,7 @@ git commit -m "feat: add system config oauth apps data layer"
 
 ---
 
-### Task 2: OAuth apps list page (4-card grid) + route
+### Task 2: OAuth apps list page (compact settings list) + route
 
 **Files:**
 - Create: `src/app/modules/system-config/feature/oauth-apps-list/oauth-apps-list.ts`
@@ -379,15 +379,22 @@ export class OAuthAppsList implements OnInit {
     } @else if (errorMessage(); as message) {
       <app-error-banner [message]="message" (retry)="loadApps()" />
     } @else {
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="divide-y divide-slate-100 rounded-xl border border-slate-200">
         @for (app of apps(); track app.provider) {
           <button
             type="button"
             (click)="openDrawer(app.provider)"
-            class="flex flex-col items-start gap-2 rounded-xl border border-slate-200 p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/50"
+            class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left hover:bg-slate-50"
           >
-            <span class="text-sm font-semibold text-slate-900">{{ app.displayName }}</span>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-semibold text-slate-600"
+              >
+                {{ app.displayName.charAt(0) }}
+              </span>
+              <span class="text-sm font-medium text-slate-900">{{ app.displayName }}</span>
+            </div>
+            <div class="flex items-center gap-3">
               <app-status-badge
                 [label]="app.configured ? 'Configured' : 'Not configured'"
                 [tone]="app.configured ? 'success' : 'neutral'"
@@ -398,10 +405,11 @@ export class OAuthAppsList implements OnInit {
                   [tone]="app.isActive ? 'success' : 'neutral'"
                 />
               }
+              <span class="hidden text-xs text-slate-400 sm:inline">
+                Last verified: {{ app.lastVerifiedAt ? (app.lastVerifiedAt | date: 'medium') : '—' }}
+              </span>
+              <span class="text-slate-400" aria-hidden="true">&rsaquo;</span>
             </div>
-            <span class="text-xs text-slate-500">
-              Last verified: {{ app.lastVerifiedAt ? (app.lastVerifiedAt | date: 'medium') : '—' }}
-            </span>
           </button>
         }
       </div>
@@ -493,7 +501,7 @@ describe('OAuthAppsList', () => {
     expect(fixture.nativeElement.textContent).toContain('No permission to view page');
   });
 
-  it('loads and displays all provider cards when authorized', () => {
+  it('loads and displays all provider rows when authorized', () => {
     const fixture = setup();
     expect(oauthAppsService.list).toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('GitHub');
