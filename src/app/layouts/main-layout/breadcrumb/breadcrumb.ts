@@ -21,10 +21,10 @@ export class Breadcrumb {
   }
 
   private readCrumb(): BreadcrumbData | null {
-    let route = this.activatedRoute.root;
-    while (route.firstChild) {
+    let route: ActivatedRoute | null = this.activatedRoute.root;
+    while (route?.firstChild) {
       route = route.firstChild;
     }
-    return (route.snapshot.data['breadcrumb'] as BreadcrumbData | undefined) ?? null;
+    return (route?.snapshot?.data?.['breadcrumb'] as BreadcrumbData | undefined) ?? null;
   }
 }
