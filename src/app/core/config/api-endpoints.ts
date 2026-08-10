@@ -48,6 +48,15 @@ export const API_ENDPOINTS = {
     list: '/platform-access/auth-events',
   },
   systemConfig: {
+    oauthApps: {
+      list: '/system-config/oauth-apps',
+      byId: (provider: string) => `/system-config/oauth-apps/${provider}`,
+      configure: (provider: string) => `/system-config/oauth-apps/${provider}`,
+      rotateSecret: (provider: string) => `/system-config/oauth-apps/${provider}/rotate-secret`,
+      activate: (provider: string) => `/system-config/oauth-apps/${provider}/activate`,
+      deactivate: (provider: string) => `/system-config/oauth-apps/${provider}/deactivate`,
+      validateConfig: (provider: string) => `/system-config/oauth-apps/${provider}/validate-config`,
+    },
     serviceKeys: {
       list: '/system-config/service-keys',
       providers: '/system-config/service-key-providers',

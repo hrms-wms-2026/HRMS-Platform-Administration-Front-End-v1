@@ -87,6 +87,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'system-config/oauth-apps',
+        loadComponent: () =>
+          import('./modules/system-config/feature/oauth-apps-list/oauth-apps-list').then(
+            (m) => m.OAuthAppsList,
+          ),
+      },
+      {
         path: 'system-config/service-keys',
         loadComponent: () =>
           import('./modules/system-config/feature/service-keys-list/service-keys-list').then(
