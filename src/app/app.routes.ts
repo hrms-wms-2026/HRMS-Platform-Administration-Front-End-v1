@@ -94,6 +94,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'system-config/service-keys',
+        loadComponent: () =>
+          import('./modules/system-config/feature/service-keys-list/service-keys-list').then(
+            (m) => m.ServiceKeysList,
+          ),
+      },
+      {
         path: 'system-config/providers',
         loadComponent: () =>
           import('./modules/system-config/feature/providers-overview/providers-overview').then(
