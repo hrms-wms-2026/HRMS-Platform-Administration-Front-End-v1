@@ -24,12 +24,18 @@ describe('Sidebar', () => {
     expect(srcs).toContain('onexso-logo-text.svg');
   });
 
-  it('renders a Platform section label', () => {
+  it('renders all five section labels', () => {
     const fixture = setup();
-    expect(fixture.nativeElement.textContent).toContain('Platform');
+    const text = fixture.nativeElement.textContent;
+
+    expect(text).toContain('Platform');
+    expect(text).toContain('Access Control');
+    expect(text).toContain('Subscription & Billing');
+    expect(text).toContain('Platform Configuration');
+    expect(text).toContain('Security & Compliance');
   });
 
-  it('renders all sidebar items as real navigable links', () => {
+  it('renders all built screens as real navigable links', () => {
     const fixture = setup();
     const links = fixture.debugElement.queryAll(By.css('a'));
     const hrefs = links.map((link) => link.nativeElement.getAttribute('href'));
@@ -39,7 +45,20 @@ describe('Sidebar', () => {
     expect(hrefs).toContain('/users');
     expect(hrefs).toContain('/roles');
     expect(hrefs).toContain('/subscription-plans');
-    expect(hrefs).toContain('/audit-logs');
+    expect(hrefs).toContain('/system-config/providers');
     expect(hrefs).toContain('/system-config/service-keys');
+    expect(hrefs).toContain('/system-config/oauth-apps');
+    expect(hrefs).toContain('/audit-logs');
+  });
+
+  it('renders Payment Gateways as non-navigable', () => {
+    const fixture = setup();
+    const item = fixture.debugElement
+      .queryAll(By.css('[data-sidebar-item]'))
+      .find((el) => el.nativeElement.textContent.includes('Payment Gateways'));
+
+    expect(item).toBeTruthy();
+    expect(item!.nativeElement.querySelector('a')).toBeNull();
+    expect(item!.nativeElement.tagName.toLowerCase()).toBe('span');
   });
 });
