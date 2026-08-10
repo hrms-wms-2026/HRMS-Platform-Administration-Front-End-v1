@@ -86,6 +86,13 @@ export const routes: Routes = [
             (m) => m.AuditLogsList,
           ),
       },
+      {
+        path: 'system-config/providers',
+        loadComponent: () =>
+          import('./modules/system-config/feature/providers-overview/providers-overview').then(
+            (m) => m.ProvidersOverview,
+          ),
+      },
     ],
   },
   {
