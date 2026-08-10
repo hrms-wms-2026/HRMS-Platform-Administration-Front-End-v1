@@ -73,6 +73,13 @@ export const routes: Routes = [
           import('./modules/auth/feature/mfa-setup/mfa-setup').then((m) => m.MfaSetup),
       },
       {
+        path: 'access-denied',
+        loadComponent: () =>
+          import('./modules/shared/feature/access-denied/access-denied').then(
+            (m) => m.AccessDenied,
+          ),
+      },
+      {
         path: 'audit-logs',
         loadComponent: () =>
           import('./modules/audit-logs/feature/audit-logs-list/audit-logs-list').then(
@@ -84,6 +91,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./modules/system-config/feature/service-keys-list/service-keys-list').then(
             (m) => m.ServiceKeysList,
+          ),
+      },
+      {
+        path: 'system-config/providers',
+        loadComponent: () =>
+          import('./modules/system-config/feature/providers-overview/providers-overview').then(
+            (m) => m.ProvidersOverview,
           ),
       },
     ],

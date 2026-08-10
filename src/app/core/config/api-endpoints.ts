@@ -58,6 +58,9 @@ export const API_ENDPOINTS = {
       activate: (serviceKey: string) => `/system-config/service-keys/${serviceKey}/activate`,
       deactivate: (serviceKey: string) => `/system-config/service-keys/${serviceKey}/deactivate`,
     },
+    providers: {
+      list: '/system-config/providers',
+    },
   },
   logs: {
     create: '/logs',
