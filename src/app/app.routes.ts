@@ -11,36 +11,61 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
+        data: { breadcrumb: { section: 'Platform', page: 'Dashboard' } },
         loadComponent: () =>
           import('./modules/dashboard/feature/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
         path: 'tenants',
+        data: { breadcrumb: { section: 'Platform', page: 'Tenants' } },
         loadComponent: () =>
           import('./modules/tenants/feature/tenants-list/tenants-list').then((m) => m.TenantsList),
       },
       {
         path: 'tenants/new',
+        data: {
+          breadcrumb: {
+            section: 'Platform',
+            parent: { label: 'Tenants', route: '/tenants' },
+            page: 'New Tenant',
+          },
+        },
         loadComponent: () =>
           import('./modules/tenants/feature/tenant-wizard/tenant-wizard').then((m) => m.TenantWizard),
       },
       {
         path: 'tenants/:id',
+        data: {
+          breadcrumb: {
+            section: 'Platform',
+            parent: { label: 'Tenants', route: '/tenants' },
+            page: 'Tenant Details',
+          },
+        },
         loadComponent: () =>
           import('./modules/tenants/feature/tenant-detail/tenant-detail').then((m) => m.TenantDetailComponent),
       },
       {
         path: 'roles',
+        data: { breadcrumb: { section: 'Access Control', page: 'Roles' } },
         loadComponent: () =>
           import('./modules/roles/feature/roles-list/roles-list').then((m) => m.RolesList),
       },
       {
         path: 'roles/:id',
+        data: {
+          breadcrumb: {
+            section: 'Access Control',
+            parent: { label: 'Roles', route: '/roles' },
+            page: 'Role Details',
+          },
+        },
         loadComponent: () =>
           import('./modules/roles/feature/role-detail/role-detail').then((m) => m.RoleDetail),
       },
       {
         path: 'subscription-plans',
+        data: { breadcrumb: { section: 'Subscription & Billing', page: 'Subscription Plans' } },
         loadComponent: () =>
           import('./modules/subscription-plans/feature/subscription-plans-list/subscription-plans-list').then(
             (m) => m.SubscriptionPlansList,
@@ -48,6 +73,13 @@ export const routes: Routes = [
       },
       {
         path: 'subscription-plans/new',
+        data: {
+          breadcrumb: {
+            section: 'Subscription & Billing',
+            parent: { label: 'Subscription Plans', route: '/subscription-plans' },
+            page: 'New Plan',
+          },
+        },
         loadComponent: () =>
           import('./modules/subscription-plans/feature/subscription-plan-create/subscription-plan-create').then(
             (m) => m.SubscriptionPlanCreate,
@@ -55,6 +87,13 @@ export const routes: Routes = [
       },
       {
         path: 'subscription-plans/:id',
+        data: {
+          breadcrumb: {
+            section: 'Subscription & Billing',
+            parent: { label: 'Subscription Plans', route: '/subscription-plans' },
+            page: 'Plan Details',
+          },
+        },
         loadComponent: () =>
           import('./modules/subscription-plans/feature/subscription-plan-detail/subscription-plan-detail').then(
             (m) => m.SubscriptionPlanDetail,
@@ -62,6 +101,7 @@ export const routes: Routes = [
       },
       {
         path: 'users',
+        data: { breadcrumb: { section: 'Access Control', page: 'Users' } },
         loadComponent: () =>
           import('./modules/platform-users/feature/platform-users-list/platform-users-list').then(
             (m) => m.PlatformUsersList,
@@ -69,6 +109,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings/mfa',
+        data: { breadcrumb: { page: 'Two-Factor Authentication' } },
         loadComponent: () =>
           import('./modules/auth/feature/mfa-setup/mfa-setup').then((m) => m.MfaSetup),
       },
@@ -81,6 +122,7 @@ export const routes: Routes = [
       },
       {
         path: 'audit-logs',
+        data: { breadcrumb: { section: 'Security & Compliance', page: 'Audit Logs' } },
         loadComponent: () =>
           import('./modules/audit-logs/feature/audit-logs-list/audit-logs-list').then(
             (m) => m.AuditLogsList,
@@ -88,6 +130,7 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/oauth-apps',
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'OAuth Apps' } },
         loadComponent: () =>
           import('./modules/system-config/feature/oauth-apps-list/oauth-apps-list').then(
             (m) => m.OAuthAppsList,
@@ -95,6 +138,7 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/service-keys',
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'Service Keys' } },
         loadComponent: () =>
           import('./modules/system-config/feature/service-keys-list/service-keys-list').then(
             (m) => m.ServiceKeysList,
@@ -102,6 +146,7 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/providers',
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'Providers Overview' } },
         loadComponent: () =>
           import('./modules/system-config/feature/providers-overview/providers-overview').then(
             (m) => m.ProvidersOverview,
