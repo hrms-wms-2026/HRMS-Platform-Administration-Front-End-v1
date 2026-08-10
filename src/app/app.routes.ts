@@ -79,6 +79,13 @@ export const routes: Routes = [
             (m) => m.AuditLogsList,
           ),
       },
+      {
+        path: 'system-config/service-keys',
+        loadComponent: () =>
+          import('./modules/system-config/feature/service-keys-list/service-keys-list').then(
+            (m) => m.ServiceKeysList,
+          ),
+      },
     ],
   },
   {

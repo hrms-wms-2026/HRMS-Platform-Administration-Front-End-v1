@@ -1,0 +1,91 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900">Service Keys</h1>
+        <p class="mt-1 text-sm text-slate-500">Platform-owned API credentials for third-party services</p>
+      </div>
+      @if (canManage()) {
+        <app-button label="Add Service Key" (clicked)="openAddModal()" />
+      }
+    </div>
+
+    @if (loading()) {
+      <app-loader label="Loading…" />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadKeys()" />
+    } @else if (keys().length === 0) {
+      <app-empty-state title="No service keys configured yet" />
+    } @else {
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 text-xs font-medium uppercase text-slate-500">
+            <th class="py-2 pr-4">Service Key</th>
+            <th class="py-2 pr-4">Display Name</th>
+            <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Last Verified</th>
+            @if (canManage()) {
+              <th class="py-2 pr-4">Actions</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (key of keys(); track key.serviceKey) {
+            <tr class="border-b border-slate-100">
+              <td class="py-3 pr-4 font-medium text-slate-900">{{ key.serviceKey }}</td>
+              <td class="py-3 pr-4 text-slate-600">
+                @if (editingKey() === key.serviceKey) {
+                  <input
+                    type="text"
+                    [value]="editingName()"
+                    (input)="editingName.set($any($event.target).value)"
+                    (keydown.enter)="saveEditName(key.serviceKey)"
+                    (blur)="saveEditName(key.serviceKey)"
+                    class="rounded-lg border border-slate-300 px-2 py-1 text-sm"
+                  />
+                } @else {
+                  <button
+                    type="button"
+                    (click)="canManage() && startEditName(key)"
+                    class="text-left hover:underline"
+                  >
+                    {{ key.displayName }}
+                  </button>
+                }
+              </td>
+              <td class="py-3 pr-4">
+                <app-status-badge
+                  [label]="key.isActive ? 'Active' : 'Inactive'"
+                  [tone]="key.isActive ? 'success' : 'neutral'"
+                />
+              </td>
+              <td class="py-3 pr-4 text-slate-600">{{ key.lastVerifiedAt ? (key.lastVerifiedAt | date: 'medium') : '—' }}</td>
+              @if (canManage()) {
+                <td class="py-3 pr-4">
+                  <div class="flex gap-2">
+                    <app-button
+                      label="Verify"
+                      variant="secondary"
+                      [loading]="verifyingKey() === key.serviceKey"
+                      (clicked)="verifyKey(key.serviceKey)"
+                    />
+                    <app-button
+                      [label]="key.isActive ? 'Deactivate' : 'Activate'"
+                      variant="secondary"
+                      (clicked)="toggleActive(key)"
+                    />
+                    <app-button label="Rotate Key" variant="secondary" (clicked)="openRotateModal(key.serviceKey)" />
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}
