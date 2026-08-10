@@ -29,7 +29,7 @@ describe('Sidebar', () => {
     expect(fixture.nativeElement.textContent).toContain('Platform');
   });
 
-  it('renders Dashboard, Tenants, Users, and Roles & Permissions as real navigable links', () => {
+  it('renders all sidebar items as real navigable links', () => {
     const fixture = setup();
     const links = fixture.debugElement.queryAll(By.css('a'));
     const hrefs = links.map((link) => link.nativeElement.getAttribute('href'));
@@ -38,19 +38,8 @@ describe('Sidebar', () => {
     expect(hrefs).toContain('/tenants');
     expect(hrefs).toContain('/users');
     expect(hrefs).toContain('/roles');
-  });
-
-  it('renders Audit Logs and Settings as non-navigable', () => {
-    const fixture = setup();
-    const disabledLabels = ['Audit Logs', 'Settings'];
-
-    for (const label of disabledLabels) {
-      const item = fixture.debugElement
-        .queryAll(By.css('[data-sidebar-item]'))
-        .find((el) => el.nativeElement.textContent.includes(label));
-
-      expect(item).toBeTruthy();
-      expect(item!.nativeElement.querySelector('a')).toBeNull();
-    }
+    expect(hrefs).toContain('/subscription-plans');
+    expect(hrefs).toContain('/audit-logs');
+    expect(hrefs).toContain('/system-config/service-keys');
   });
 });
