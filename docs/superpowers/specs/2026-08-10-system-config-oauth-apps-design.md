@@ -29,14 +29,20 @@ that rather than copy Service Keys' table:
 
 ## Approach (decided after discussion)
 
-A **Provider Hub + Detail Drawer** pattern, not a card grid and not a flat
-table:
+A **Provider Hub + Detail Drawer** pattern — not a dashboard-style card
+grid, and not a flat table either. Revised after review: since this is a
+fixed configuration catalog (exactly 4 rows, always) rather than dashboard
+content, the landing page reads better as a compact settings list than as
+large visual cards — closer to how GitHub/Slack render their own "Connected
+Apps" settings screens than to a metrics dashboard:
 
-- **Landing page** (`oauth-apps-list`): a 4-card overview, one per
-  provider, read-only — logo/name, Configured/Not Configured, Active/
-  Inactive, Last Verified. No credential fields ever appear here.
-- **Detail Drawer** (`oauth-app-detail-drawer`): clicking any card opens a
-  right-side slide-in drawer scoped to that one provider. All
+- **Landing page** (`oauth-apps-list`): a compact, single-column list — one
+  row per provider (name, Configured/Not Configured badge, Active/Inactive
+  badge, Last Verified, a trailing chevron), read-only. No credential
+  fields ever appear here. Clicking anywhere on a row opens the drawer for
+  that provider.
+- **Detail Drawer** (`oauth-app-detail-drawer`): unchanged — clicking any
+  row opens a right-side slide-in drawer scoped to that one provider. All
   credential-touching actions live here: view backend-owned scopes/
   capabilities, edit `AppName`/`LogoUrl`/`ClientId`, submit a new
   `ClientSecret` (write-only), Rotate Secret, Validate Config, Activate/
@@ -125,12 +131,12 @@ second data/feature area, not a new module.)
 ### `OAuthAppsList`
 
 - Permission gate on `platform.system_config.read`.
-- Loads all 4 cards on init (`list()` always returns exactly 4, backend
+- Loads all 4 rows on init (`list()` always returns exactly 4, backend
   guarantees the shape — no empty-state needed).
-- Each card: provider display name, `Configured`/`Not Configured` badge
+- Each row: provider display name, `Configured`/`Not Configured` badge
   (`neutral`/`success` tone), `Active`/`Inactive` badge (only shown when
-  configured), Last Verified date or `—`.
-- Clicking a card sets a `selectedProvider` signal, opening the drawer.
+  configured), Last Verified date or `—`, trailing chevron.
+- Clicking anywhere on a row sets a `selectedProvider` signal, opening the drawer.
 
 ### `OAuthAppDetailDrawer`
 
@@ -184,7 +190,7 @@ spec's implementation or testing.
 - `oauth-apps.service.spec.ts`: `HttpTestingController` pattern for all 5
   methods (list, configure, rotateSecret, setActive, validateConfig).
 - `oauth-apps-list.spec.ts`: no-permission gate; loads and renders all 4
-  provider cards with correct Configured/Active state; clicking a card
+  provider rows with correct Configured/Active state; clicking a row
   opens the drawer with the right provider.
 - `oauth-app-detail-drawer.spec.ts`: loads provider detail on `provider`
   input change; renders backend-owned scopes/capabilities as read-only;
