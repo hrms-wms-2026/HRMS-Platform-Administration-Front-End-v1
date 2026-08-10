@@ -39,4 +39,13 @@ describe('AuthService - password recovery', () => {
     expect(req.request.body).toEqual({ token: 'raw-token', newPassword: 'NewPassphrase123' });
     req.flush(null);
   });
+
+  it('acceptInvite posts token and password', () => {
+    service.acceptInvite('raw-token', 'NewPassword1!').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/accept-invite`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ token: 'raw-token', password: 'NewPassword1!' });
+    req.flush(null);
+  });
 });

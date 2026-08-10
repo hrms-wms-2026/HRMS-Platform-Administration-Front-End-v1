@@ -1,0 +1,26 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+  <div class="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+    <h2 class="text-xl font-semibold text-slate-900">Are you sure you want to log out?</h2>
+
+    @if (email()) {
+      <div class="mt-6 flex items-center gap-3 rounded-xl border border-slate-200 p-4 text-left">
+        <span
+          class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700"
+        >
+          {{ initials() }}
+        </span>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-medium text-slate-900">{{ email() }}</p>
+          @if (platformRole()) {
+            <app-status-badge [label]="platformRole()!" tone="neutral" />
+          }
+        </div>
+      </div>
+    }
+
+    <div class="mt-6 flex flex-col gap-3">
+      <app-button label="Log out" variant="primary" [fullWidth]="true" (clicked)="confirm()" />
+      <app-button label="Cancel" variant="secondary" [fullWidth]="true" (clicked)="cancel()" />
+    </div>
+  </div>
+</div>

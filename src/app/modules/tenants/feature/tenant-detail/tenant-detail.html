@@ -1,0 +1,115 @@
+@if (loading()) {
+  <app-loader label="Loading…" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadTenant()" />
+} @else if (tenant(); as t) {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900">{{ t.companyName }}</h1>
+        <p class="mt-1 text-sm text-slate-500">{{ t.slug }}</p>
+      </div>
+      <app-status-badge [label]="t.status" tone="neutral" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Industry</p>
+        <p class="text-slate-900">{{ t.industryProfile }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Company Size</p>
+        <p class="text-slate-900">{{ t.companySizeRange }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Legal Entity Name</p>
+        <p class="text-slate-900">{{ t.legalEntityName || '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Registration Number</p>
+        <p class="text-slate-900">{{ t.registrationNumber || '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Country</p>
+        <p class="text-slate-900">{{ t.country || '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500">Currency</p>
+        <p class="text-slate-900">{{ t.currency || '—' }}</p>
+      </div>
+    </div>
+
+    @if (t.status === 'provisioning' && provisioningSummary(); as summary) {
+      <div class="flex flex-col gap-3 border-t border-slate-100 pt-4">
+        <h2 class="text-sm font-semibold text-slate-900">Provisioning Checklist</h2>
+        @if (summary.blockingErrors.length > 0) {
+          <ul class="list-disc pl-5 text-sm text-red-700">
+            @for (issue of summary.blockingErrors; track issue.code) {
+              <li>{{ issue.message }}</li>
+            }
+          </ul>
+        }
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          @for (
+            section of [
+              { label: 'Tenant Details', status: summary.sections.tenantDetails },
+              { label: 'Subscription', status: summary.sections.subscription },
+              { label: 'Modules', status: summary.sections.modules },
+              { label: 'Roles', status: summary.sections.roles },
+              { label: 'Settings', status: summary.sections.settings },
+              { label: 'Owner Invite', status: summary.sections.ownerInvite },
+            ];
+            track section.label
+          ) {
+            <p [class.text-green-700]="section.status.complete" [class.text-slate-500]="!section.status.complete">
+              {{ section.status.complete ? '✓' : '○' }} {{ section.label }}
+            </p>
+          }
+        </div>
+        <app-button
+          label="Confirm & Activate"
+          variant="indigo"
+          [disabled]="!summary.canActivate"
+          [loading]="activating()"
+          (clicked)="startActivation()"
+        />
+      </div>
+    }
+
+    @if (availableActions().length > 0) {
+      <div class="flex gap-3 border-t border-slate-100 pt-4">
+        @for (action of availableActions(); track action.action) {
+          <app-button
+            [label]="action.label"
+            [variant]="action.confirmVariant"
+            (clicked)="startAction(action)"
+          />
+        }
+      </div>
+    }
+  </div>
+
+  @if (pendingAction(); as action) {
+    <app-confirmation-dialog
+      [open]="true"
+      [title]="action.label + ' tenant?'"
+      message="Are you sure you want to {{ action.label.toLowerCase() }} this tenant?"
+      [confirmLabel]="action.label"
+      [confirmVariant]="action.confirmVariant"
+      (confirm)="confirmAction()"
+      (cancelled)="cancelAction()"
+    />
+  }
+
+  @if (pendingActivation()) {
+    <app-confirmation-dialog
+      [open]="true"
+      title="Activate tenant?"
+      message="This will activate the tenant and make it available to its users. Continue?"
+      confirmLabel="Confirm & Activate"
+      confirmVariant="indigo"
+      (confirm)="confirmActivation()"
+      (cancelled)="cancelActivation()"
+    />
+  }
+}

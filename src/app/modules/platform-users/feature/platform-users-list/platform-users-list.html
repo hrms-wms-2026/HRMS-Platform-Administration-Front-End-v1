@@ -59,11 +59,12 @@
             <th class="py-2 pr-4">Email</th>
             <th class="py-2 pr-4">Role</th>
             <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Actions</th>
           </tr>
         </thead>
         <tbody>
           @for (user of pagedUsers(); track user.id) {
-            <tr class="border-b border-slate-100">
+            <tr class="cursor-pointer border-b border-slate-100 hover:bg-slate-50" (click)="openProfile(user.id)">
               <td class="flex items-center gap-2 py-3 pr-4">
                 <span
                   class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700"
@@ -75,10 +76,25 @@
               <td class="py-3 pr-4 text-slate-600">{{ user.email }}</td>
               <td class="py-3 pr-4 text-slate-600">{{ user.role || '—' }}</td>
               <td class="py-3 pr-4">
-                <app-status-badge
-                  [label]="user.isActive ? 'Active' : 'Inactive'"
-                  [tone]="user.isActive ? 'success' : 'danger'"
-                />
+                @if (user.status === 'pending') {
+                  <app-status-badge label="Pending" tone="warning" />
+                } @else {
+                  <app-status-badge
+                    [label]="user.status === 'active' ? 'Active' : 'Inactive'"
+                    [tone]="user.status === 'active' ? 'success' : 'danger'"
+                  />
+                }
+              </td>
+              <td class="py-3 pr-4">
+                @if (user.status === 'pending') {
+                  <button
+                    type="button"
+                    (click)="revokeInvite(user.id); $event.stopPropagation()"
+                    class="text-sm font-medium text-red-700 hover:text-red-800"
+                  >
+                    Revoke
+                  </button>
+                }
               </td>
             </tr>
           }
@@ -93,4 +109,12 @@
       />
     }
   </div>
+
+  @if (showInviteModal()) {
+    <app-invite-manager-modal (invited)="onInviteSuccess()" (closed)="onInviteModalClosed()" />
+  }
+
+  @if (selectedUserId(); as userId) {
+    <app-user-profile-drawer [userId]="userId" (closed)="closeProfile()" (updated)="onProfileUpdated()" />
+  }
 }

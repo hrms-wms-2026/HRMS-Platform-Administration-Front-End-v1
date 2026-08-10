@@ -1,0 +1,84 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900">Tenants</h1>
+        <p class="mt-1 text-sm text-slate-500">Manage tenant accounts and their status</p>
+      </div>
+      @if (canManage()) {
+        <a routerLink="/tenants/new">
+          <app-button label="Create Tenant" variant="indigo" />
+        </a>
+      }
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <input
+        type="text"
+        placeholder="Search by name or slug"
+        [value]="search()"
+        (input)="onSearchChange($any($event.target).value)"
+        class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+      />
+      <select
+        [value]="statusFilter()"
+        (change)="onStatusFilterChange($any($event.target).value)"
+        class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+      >
+        <option value="">All Statuses</option>
+        <option value="provisioning">Provisioning</option>
+        <option value="trial">Trial</option>
+        <option value="active">Active</option>
+        <option value="suspended">Suspended</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    @if (loading()) {
+      <app-loader label="Loading…" />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadTenants()" />
+    } @else if (tenants().length === 0) {
+      <app-empty-state
+        [title]="search() || statusFilter() ? 'No tenants match your search' : 'No tenants yet'"
+      />
+    } @else {
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 text-xs font-medium uppercase text-slate-500">
+            <th class="py-2 pr-4">Name</th>
+            <th class="py-2 pr-4">Slug</th>
+            <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tenant of tenants(); track tenant.id) {
+            <tr
+              [routerLink]="['/tenants', tenant.id]"
+              class="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
+            >
+              <td class="py-3 pr-4 font-medium text-slate-900">{{ tenant.name }}</td>
+              <td class="py-3 pr-4 text-slate-600">{{ tenant.slug }}</td>
+              <td class="py-3 pr-4">
+                <app-status-badge [label]="tenant.status" [tone]="toneFor(tenant.status)" />
+              </td>
+              <td class="py-3 pr-4 text-slate-600">{{ tenant.createdAt | date: 'mediumDate' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <app-pagination
+        [page]="currentPage()"
+        [pageSize]="pageSize"
+        [total]="total()"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  </div>
+}
