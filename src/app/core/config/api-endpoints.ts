@@ -60,5 +60,8 @@ export const API_ENDPOINTS = {
       deactivate: (provider: string) => `/system-config/oauth-apps/${provider}/deactivate`,
       validateConfig: (provider: string) => `/system-config/oauth-apps/${provider}/validate-config`,
     },
+    providers: {
+      list: '/system-config/providers',
+    },
   },
 } as const;
