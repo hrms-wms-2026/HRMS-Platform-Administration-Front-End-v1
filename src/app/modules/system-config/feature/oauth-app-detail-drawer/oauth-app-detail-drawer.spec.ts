@@ -7,7 +7,13 @@ import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 describe('OAuthAppDetailDrawer', () => {
-  let oauthAppsService: { getById: jest.Mock; configure: jest.Mock };
+  let oauthAppsService: {
+    getById: jest.Mock;
+    configure: jest.Mock;
+    rotateSecret: jest.Mock;
+    validateConfig: jest.Mock;
+    setActive: jest.Mock;
+  };
   let notificationService: { success: jest.Mock; error: jest.Mock };
 
   const githubApp = {
@@ -34,6 +40,9 @@ describe('OAuthAppDetailDrawer', () => {
     oauthAppsService = {
       getById: jest.fn().mockReturnValue(of(githubApp)),
       configure: jest.fn(),
+      rotateSecret: jest.fn(),
+      validateConfig: jest.fn(),
+      setActive: jest.fn(),
     };
     notificationService = { success: jest.fn(), error: jest.fn() };
 
@@ -117,5 +126,40 @@ describe('OAuthAppDetailDrawer', () => {
     component['close']();
 
     expect(closed).toBe(true);
+  });
+
+  it('rotates the secret and reloads', () => {
+    const fixture = setup();
+    oauthAppsService.rotateSecret = jest.fn().mockReturnValue(of(githubApp));
+    const component = fixture.componentInstance;
+    component['rotateForm'].patchValue({ clientSecret: 'brand-new-secret' });
+
+    component['rotateSecret']();
+
+    expect(oauthAppsService.rotateSecret).toHaveBeenCalledWith('github', 'brand-new-secret', undefined);
+    expect(oauthAppsService.getById).toHaveBeenCalledTimes(2);
+  });
+
+  it('shows a local-check-labeled message on validate', () => {
+    const fixture = setup();
+    oauthAppsService.validateConfig = jest.fn().mockReturnValue(
+      of({ provider: 'github', status: 'valid', verificationType: 'local', message: 'Client ID and secret are present.', verifiedAt: '2026-01-01T00:00:00Z' }),
+    );
+    const component = fixture.componentInstance;
+
+    component['validateConfiguration']();
+
+    expect(notificationService.success).toHaveBeenCalledWith('Local check: Client ID and secret are present.');
+  });
+
+  it('toggles active state', () => {
+    const fixture = setup();
+    oauthAppsService.setActive = jest.fn().mockReturnValue(of({ ...githubApp, isActive: true }));
+    const component = fixture.componentInstance;
+    component['app'].set({ ...githubApp, configured: true, isActive: false });
+
+    component['toggleActive']();
+
+    expect(oauthAppsService.setActive).toHaveBeenCalledWith('github', true);
   });
 });

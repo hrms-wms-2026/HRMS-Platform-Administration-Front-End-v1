@@ -89,6 +89,41 @@
 
             <app-button type="submit" label="Save Configuration" loadingText="Saving…" [loading]="saving()" />
           </form>
+
+          <div class="mt-6 border-t border-slate-100 pt-4">
+            <h3 class="text-sm font-medium text-slate-700">Rotate secret</h3>
+            <form class="mt-2 flex flex-col gap-3" [formGroup]="rotateForm" (ngSubmit)="rotateSecret()" novalidate>
+              <input
+                type="password"
+                formControlName="clientSecret"
+                autocomplete="new-password"
+                placeholder="New client secret"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+              />
+              <app-button
+                type="submit"
+                label="Rotate Secret"
+                variant="secondary"
+                loadingText="Rotating…"
+                [loading]="rotating()"
+                [disabled]="!rotateForm.controls.clientSecret.value"
+              />
+            </form>
+          </div>
+
+          <div class="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-4">
+            <app-button
+              label="Validate Configuration"
+              variant="secondary"
+              [loading]="validating()"
+              (clicked)="validateConfiguration()"
+            />
+            <app-button
+              [label]="a.isActive ? 'Deactivate' : 'Activate'"
+              variant="secondary"
+              (clicked)="toggleActive()"
+            />
+          </div>
         }
       }
     </div>

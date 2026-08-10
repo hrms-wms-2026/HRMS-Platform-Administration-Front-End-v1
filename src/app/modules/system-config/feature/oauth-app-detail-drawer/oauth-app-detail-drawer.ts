@@ -42,6 +42,14 @@ export class OAuthAppDetailDrawer {
     privateKey: [''],
   });
 
+  protected readonly rotating = signal(false);
+  protected readonly validating = signal(false);
+
+  protected readonly rotateForm = this.formBuilder.nonNullable.group({
+    clientSecret: [''],
+    privateKey: [''],
+  });
+
   constructor() {
     effect(() => {
       const provider = this.provider();
@@ -95,6 +103,61 @@ export class OAuthAppDetailDrawer {
           this.notificationService.error(error.error?.detail ?? 'Could not save the configuration.');
         },
       });
+  }
+
+  protected rotateSecret(): void {
+    this.rotating.set(true);
+    const { clientSecret, privateKey } = this.rotateForm.getRawValue();
+
+    this.oauthAppsService.rotateSecret(this.provider(), clientSecret, privateKey || undefined).subscribe({
+      next: () => {
+        this.rotating.set(false);
+        this.rotateForm.reset({ clientSecret: '', privateKey: '' });
+        this.notificationService.success('Secret rotated.');
+        this.loadApp(this.provider());
+        this.updated.emit();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.rotating.set(false);
+        this.notificationService.error(error.error?.detail ?? 'Could not rotate the secret.');
+      },
+    });
+  }
+
+  protected validateConfiguration(): void {
+    this.validating.set(true);
+    this.oauthAppsService.validateConfig(this.provider()).subscribe({
+      next: (result) => {
+        this.validating.set(false);
+        if (result.status === 'valid') {
+          this.notificationService.success(`Local check: ${result.message}`);
+        } else {
+          this.notificationService.error(`Local check: ${result.message}`);
+        }
+        this.loadApp(this.provider());
+      },
+      error: () => {
+        this.validating.set(false);
+        this.notificationService.error('Could not validate the configuration.');
+      },
+    });
+  }
+
+  protected toggleActive(): void {
+    const current = this.app();
+    if (!current) {
+      return;
+    }
+    this.oauthAppsService.setActive(this.provider(), !current.isActive).subscribe({
+      next: () => {
+        this.notificationService.success(current.isActive ? 'App deactivated.' : 'App activated.');
+        this.loadApp(this.provider());
+        this.updated.emit();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.notificationService.error(error.error?.detail ?? 'Could not update the app.');
+      },
+    });
   }
 
   close(): void {
