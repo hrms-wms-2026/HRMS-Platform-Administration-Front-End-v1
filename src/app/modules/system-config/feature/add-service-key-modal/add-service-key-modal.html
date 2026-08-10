@@ -1,0 +1,64 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+    <h2 class="text-lg font-semibold text-slate-900">Add Service Key</h2>
+
+    <form class="mt-6 flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <div
+          class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          role="alert"
+        >
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div>
+        <label for="add-service-key-provider" class="text-sm font-medium text-slate-700">Provider</label>
+        <select
+          id="add-service-key-provider"
+          formControlName="serviceKey"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        >
+          <option value="" disabled>Select a provider</option>
+          @for (provider of providers(); track provider.providerKey) {
+            <option [value]="provider.providerKey" [disabled]="provider.configured">
+              {{ provider.displayName }}{{ provider.configured ? ' (already configured)' : '' }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="add-service-key-displayName" class="text-sm font-medium text-slate-700">Display name</label>
+        <input
+          id="add-service-key-displayName"
+          type="text"
+          formControlName="displayName"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+      </div>
+
+      <div>
+        <label for="add-service-key-apiKey" class="text-sm font-medium text-slate-700">API key</label>
+        <input
+          id="add-service-key-apiKey"
+          type="password"
+          formControlName="apiKey"
+          autocomplete="new-password"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+      </div>
+
+      <div class="mt-2 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancel()"
+          class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+        >
+          Cancel
+        </button>
+        <app-button type="submit" label="Add Service Key" loadingText="Saving…" [loading]="loading()" [disabled]="form.invalid" />
+      </div>
+    </form>
+  </div>
+</div>

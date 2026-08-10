@@ -9,10 +9,11 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { Loader } from '../../../../shared/ui/loader/loader';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
+import { AddServiceKeyModal } from '../add-service-key-modal/add-service-key-modal';
 
 @Component({
   selector: 'app-service-keys-list',
-  imports: [Button, StatusBadge, Loader, ErrorBanner, EmptyState, DatePipe],
+  imports: [Button, StatusBadge, Loader, ErrorBanner, EmptyState, DatePipe, AddServiceKeyModal],
   templateUrl: './service-keys-list.html',
 })
 export class ServiceKeysList implements OnInit {

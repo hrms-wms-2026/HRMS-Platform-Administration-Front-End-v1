@@ -88,4 +88,8 @@
       </table>
     }
   </div>
+
+  @if (showAddModal()) {
+    <app-add-service-key-modal (created)="onServiceKeyCreated()" (closed)="onAddModalClosed()" />
+  }
 }
