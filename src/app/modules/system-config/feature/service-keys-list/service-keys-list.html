@@ -92,4 +92,11 @@
   @if (showAddModal()) {
     <app-add-service-key-modal (created)="onServiceKeyCreated()" (closed)="onAddModalClosed()" />
   }
+  @if (rotatingKey(); as serviceKey) {
+    <app-rotate-service-key-modal
+      [serviceKey]="serviceKey"
+      (rotated)="onKeyRotated()"
+      (closed)="onRotateModalClosed()"
+    />
+  }
 }
