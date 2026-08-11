@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { ServiceKeysService } from '../../data/service-keys.service';
 import { ServiceKey } from '../../data/service-key.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
@@ -14,7 +14,17 @@ import { RotateServiceKeyModal } from '../rotate-service-key-modal/rotate-servic
 
 @Component({
   selector: 'app-service-keys-list',
-  imports: [Button, StatusBadge, Loader, ErrorBanner, EmptyState, DatePipe, AddServiceKeyModal, RotateServiceKeyModal],
+  imports: [
+    Button,
+    StatusBadge,
+    Loader,
+    ErrorBanner,
+    EmptyState,
+    DatePipe,
+    AddServiceKeyModal,
+    RotateServiceKeyModal,
+    NgTemplateOutlet,
+  ],
   templateUrl: './service-keys-list.html',
 })
 export class ServiceKeysList implements OnInit {
