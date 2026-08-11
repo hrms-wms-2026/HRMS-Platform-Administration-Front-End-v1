@@ -37,4 +37,23 @@ describe('Navbar', () => {
 
     expect(fixture.nativeElement.querySelector('app-breadcrumb')).toBeTruthy();
   });
+
+  it('renders a disabled search input with placeholder text', () => {
+    const fixture = TestBed.createComponent(Navbar);
+    fixture.detectChanges();
+
+    const input = fixture.debugElement.query(By.css('input[type="text"]'));
+    expect(input).toBeTruthy();
+    expect(input.nativeElement.disabled).toBe(true);
+    expect(input.nativeElement.getAttribute('placeholder')).toBe('Search tenants, users, settings...');
+  });
+
+  it('renders a disabled notification button', () => {
+    const fixture = TestBed.createComponent(Navbar);
+    fixture.detectChanges();
+
+    const button = fixture.debugElement.query(By.css('button[aria-label="Notifications"]'));
+    expect(button).toBeTruthy();
+    expect(button.nativeElement.disabled).toBe(true);
+  });
 });
