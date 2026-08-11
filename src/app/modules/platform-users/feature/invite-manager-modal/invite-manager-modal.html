@@ -1,6 +1,6 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-    <h2 class="text-lg font-semibold text-slate-900">Invite Platform Manager</h2>
+  <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-2xl">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Invite Platform Manager</h2>
 
     <form class="mt-6 flex flex-col gap-4" [formGroup]="inviteForm" (ngSubmit)="submit()" novalidate>
       @if (errorMessage()) {
@@ -13,30 +13,30 @@
       }
 
       <div>
-        <label for="invite-fullName" class="text-sm font-medium text-slate-700">Full name</label>
+        <label for="invite-fullName" class="text-sm font-medium text-slate-700 dark:text-slate-300">Full name</label>
         <input
           id="invite-fullName"
           type="text"
           formControlName="fullName"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
         />
       </div>
 
       <div>
-        <label for="invite-email" class="text-sm font-medium text-slate-700">Email address</label>
+        <label for="invite-email" class="text-sm font-medium text-slate-700 dark:text-slate-300">Email address</label>
         <input
           id="invite-email"
           type="email"
           formControlName="email"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
         />
       </div>
 
       <fieldset>
-        <legend class="text-sm font-medium text-slate-700">Assign roles</legend>
+        <legend class="text-sm font-medium text-slate-700 dark:text-slate-300">Assign roles</legend>
         <div class="mt-2 flex flex-col gap-2">
           @for (role of roles(); track role.id) {
-            <label class="flex select-none items-center gap-2 text-sm text-slate-700">
+            <label class="flex select-none items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
               <input
                 type="checkbox"
                 [checked]="selectedRoleIds().includes(role.id)"
@@ -53,7 +53,7 @@
         <button
           type="button"
           (click)="cancel()"
-          class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+          class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900"
         >
           Cancel
         </button>

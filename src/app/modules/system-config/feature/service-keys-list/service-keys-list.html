@@ -1,13 +1,13 @@
 @if (!canView()) {
-  <div class="rounded-2xl bg-white p-8 shadow-sm">
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
     <p class="text-sm font-medium text-red-700">No permission to view page</p>
   </div>
 } @else {
-  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-semibold text-slate-900">Service Keys</h1>
-        <p class="mt-1 text-sm text-slate-500">Platform-owned API credentials for third-party services</p>
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Service Keys</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Platform-owned API credentials for third-party services</p>
       </div>
       @if (canManage()) {
         <app-button label="Add Service Key" (clicked)="openAddModal()" />
@@ -23,7 +23,7 @@
     } @else {
       <table class="w-full text-left text-sm">
         <thead>
-          <tr class="border-b border-slate-200 text-xs font-medium uppercase text-slate-500">
+          <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
             <th class="py-2 pr-4">Service Key</th>
             <th class="py-2 pr-4">Display Name</th>
             <th class="py-2 pr-4">Status</th>
@@ -35,9 +35,9 @@
         </thead>
         <tbody>
           @for (key of keys(); track key.serviceKey) {
-            <tr class="border-b border-slate-100">
-              <td class="py-3 pr-4 font-medium text-slate-900">{{ key.serviceKey }}</td>
-              <td class="py-3 pr-4 text-slate-600">
+            <tr class="border-b border-slate-100 dark:border-slate-800">
+              <td class="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">{{ key.serviceKey }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">
                 @if (editingKey() === key.serviceKey) {
                   <input
                     type="text"
@@ -63,7 +63,7 @@
                   [tone]="key.isActive ? 'success' : 'neutral'"
                 />
               </td>
-              <td class="py-3 pr-4 text-slate-600">{{ key.lastVerifiedAt ? (key.lastVerifiedAt | date: 'medium') : '—' }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ key.lastVerifiedAt ? (key.lastVerifiedAt | date: 'medium') : '—' }}</td>
               @if (canManage()) {
                 <td class="py-3 pr-4">
                   <div class="flex gap-2">

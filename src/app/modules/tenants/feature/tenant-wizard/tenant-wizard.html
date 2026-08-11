@@ -1,13 +1,13 @@
-<div class="mx-auto flex max-w-3xl flex-col gap-6 rounded-2xl bg-white p-6 shadow-sm">
+<div class="mx-auto flex max-w-3xl flex-col gap-6 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
   <div>
-    <h1 class="text-xl font-semibold text-slate-900">Create Tenant</h1>
-    <p class="mt-1 text-sm text-slate-500">Step {{ currentStep() }} of 4</p>
+    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Create Tenant</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Step {{ currentStep() }} of 4</p>
   </div>
 
   @if (currentStep() === 1) {
     <form [formGroup]="companyForm" class="flex flex-col gap-4">
       <div>
-        <label class="text-sm font-medium text-slate-700">Company Name</label>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Company Name</label>
         <input
           type="text"
           [value]="companyForm.controls.companyName.value"
@@ -16,7 +16,7 @@
         />
       </div>
       <div>
-        <label class="text-sm font-medium text-slate-700">Slug</label>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Slug</label>
         <input
           type="text"
           [value]="companyForm.controls.slug.value"
@@ -29,7 +29,7 @@
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="text-sm font-medium text-slate-700">Industry</label>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Industry</label>
           <select formControlName="industryProfile" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             @for (option of industryOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
@@ -37,7 +37,7 @@
           </select>
         </div>
         <div>
-          <label class="text-sm font-medium text-slate-700">Company Size</label>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Company Size</label>
           <select formControlName="companySizeRange" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             @for (option of companySizeOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
@@ -46,16 +46,16 @@
         </div>
       </div>
       <div>
-        <label class="text-sm font-medium text-slate-700">Legal Entity Name</label>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Legal Entity Name</label>
         <input type="text" formControlName="legalEntityName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
       </div>
       <div>
-        <label class="text-sm font-medium text-slate-700">Registration Number (optional)</label>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Registration Number (optional)</label>
         <input type="text" formControlName="registrationNumber" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
       </div>
       <div class="grid grid-cols-3 gap-4">
         <div>
-          <label class="text-sm font-medium text-slate-700">Country</label>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
           <select formControlName="country" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             <option value="">Select…</option>
             @for (option of countryOptions; track option.value) {
@@ -64,7 +64,7 @@
           </select>
         </div>
         <div>
-          <label class="text-sm font-medium text-slate-700">Timezone</label>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Timezone</label>
           <select formControlName="timezone" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             <option value="">Select…</option>
             @for (option of timezoneOptions; track option.value) {
@@ -73,7 +73,7 @@
           </select>
         </div>
         <div>
-          <label class="text-sm font-medium text-slate-700">Currency</label>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Currency</label>
           <select formControlName="currency" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             <option value="">Select…</option>
             @for (option of currencyOptions; track option.value) {
@@ -101,10 +101,10 @@
             [class.border-slate-200]="selectedPlanId() !== plan.id"
           >
             <div>
-              <p class="font-semibold text-slate-900">{{ plan.name }}</p>
-              <p class="text-sm text-slate-500">{{ plan.tier }} · {{ plan.companySizeRange }}</p>
+              <p class="font-semibold text-slate-900 dark:text-slate-100">{{ plan.name }}</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">{{ plan.tier }} · {{ plan.companySizeRange }}</p>
             </div>
-            <p class="text-sm text-slate-900">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</p>
+            <p class="text-sm text-slate-900 dark:text-slate-100">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</p>
           </button>
         }
       </div>
@@ -124,16 +124,16 @@
   @if (currentStep() === 3) {
     <form [formGroup]="ownerForm" class="flex flex-col gap-4">
       <div>
-        <label class="text-sm font-medium text-slate-700">Owner Email</label>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Owner Email</label>
         <input type="email" formControlName="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="text-sm font-medium text-slate-700">First Name</label>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">First Name</label>
           <input type="text" formControlName="firstName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
         </div>
         <div>
-          <label class="text-sm font-medium text-slate-700">Last Name</label>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Last Name</label>
           <input type="text" formControlName="lastName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
         </div>
       </div>
@@ -143,16 +143,16 @@
   @if (currentStep() === 4) {
     <div class="flex flex-col gap-4 text-sm">
       <div>
-        <h2 class="font-semibold text-slate-900">Company Details</h2>
+        <h2 class="font-semibold text-slate-900 dark:text-slate-100">Company Details</h2>
         <p>{{ companyForm.controls.companyName.value }} ({{ companyForm.controls.slug.value }})</p>
         <p>{{ companyForm.controls.legalEntityName.value }} · {{ companyForm.controls.country.value }}</p>
       </div>
       <div>
-        <h2 class="font-semibold text-slate-900">Subscription</h2>
+        <h2 class="font-semibold text-slate-900 dark:text-slate-100">Subscription</h2>
         <p>{{ selectedPlan()?.name }} · {{ subscriptionForm.controls.billingCycle.value }}</p>
       </div>
       <div>
-        <h2 class="font-semibold text-slate-900">Owner Invite</h2>
+        <h2 class="font-semibold text-slate-900 dark:text-slate-100">Owner Invite</h2>
         <p>{{ ownerForm.controls.firstName.value }} {{ ownerForm.controls.lastName.value }} · {{ ownerForm.controls.email.value }}</p>
       </div>
       @if (submitError(); as message) {
@@ -161,7 +161,7 @@
     </div>
   }
 
-  <div class="flex justify-between border-t border-slate-100 pt-4">
+  <div class="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
     @if (currentStep() > 1) {
       <app-button label="Back" variant="secondary" (clicked)="prevStep()" />
     } @else {

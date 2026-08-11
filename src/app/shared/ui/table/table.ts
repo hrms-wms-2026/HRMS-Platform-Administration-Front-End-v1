@@ -8,20 +8,20 @@ export interface TableColumn<T> {
 @Component({
   selector: 'app-table',
   template: `
-    <div class="overflow-x-auto rounded-lg border border-slate-200">
+    <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
       <table class="w-full text-left text-sm">
-        <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+        <thead class="bg-slate-50 dark:bg-slate-800 text-xs uppercase text-slate-500 dark:text-slate-400">
           <tr>
             @for (column of columns(); track column.key) {
               <th class="px-4 py-3 font-medium">{{ column.label }}</th>
             }
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
           @for (row of rows(); track $index) {
-            <tr class="hover:bg-slate-50">
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800">
               @for (column of columns(); track column.key) {
-                <td class="px-4 py-3 text-slate-700">{{ row[column.key] }}</td>
+                <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ row[column.key] }}</td>
               }
             </tr>
           }

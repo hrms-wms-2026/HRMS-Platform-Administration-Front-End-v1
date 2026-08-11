@@ -3,45 +3,45 @@
 } @else if (errorMessage(); as message) {
   <app-error-banner [message]="message" (retry)="loadTenant()" />
 } @else if (tenant(); as t) {
-  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-semibold text-slate-900">{{ t.companyName }}</h1>
-        <p class="mt-1 text-sm text-slate-500">{{ t.slug }}</p>
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ t.companyName }}</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t.slug }}</p>
       </div>
       <app-status-badge [label]="t.status" tone="neutral" />
     </div>
 
     <div class="grid grid-cols-2 gap-4 text-sm">
       <div>
-        <p class="text-xs font-medium uppercase text-slate-500">Industry</p>
-        <p class="text-slate-900">{{ t.industryProfile }}</p>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Industry</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ t.industryProfile }}</p>
       </div>
       <div>
-        <p class="text-xs font-medium uppercase text-slate-500">Company Size</p>
-        <p class="text-slate-900">{{ t.companySizeRange }}</p>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Company Size</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ t.companySizeRange }}</p>
       </div>
       <div>
-        <p class="text-xs font-medium uppercase text-slate-500">Legal Entity Name</p>
-        <p class="text-slate-900">{{ t.legalEntityName || '—' }}</p>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Legal Entity Name</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ t.legalEntityName || '—' }}</p>
       </div>
       <div>
-        <p class="text-xs font-medium uppercase text-slate-500">Registration Number</p>
-        <p class="text-slate-900">{{ t.registrationNumber || '—' }}</p>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Registration Number</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ t.registrationNumber || '—' }}</p>
       </div>
       <div>
-        <p class="text-xs font-medium uppercase text-slate-500">Country</p>
-        <p class="text-slate-900">{{ t.country || '—' }}</p>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Country</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ t.country || '—' }}</p>
       </div>
       <div>
-        <p class="text-xs font-medium uppercase text-slate-500">Currency</p>
-        <p class="text-slate-900">{{ t.currency || '—' }}</p>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Currency</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ t.currency || '—' }}</p>
       </div>
     </div>
 
     @if (t.status === 'provisioning' && provisioningSummary(); as summary) {
-      <div class="flex flex-col gap-3 border-t border-slate-100 pt-4">
-        <h2 class="text-sm font-semibold text-slate-900">Provisioning Checklist</h2>
+      <div class="flex flex-col gap-3 border-t border-slate-100 dark:border-slate-800 pt-4">
+        <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Provisioning Checklist</h2>
         @if (summary.blockingErrors.length > 0) {
           <ul class="list-disc pl-5 text-sm text-red-700">
             @for (issue of summary.blockingErrors; track issue.code) {
@@ -77,7 +77,7 @@
     }
 
     @if (availableActions().length > 0) {
-      <div class="flex gap-3 border-t border-slate-100 pt-4">
+      <div class="flex gap-3 border-t border-slate-100 dark:border-slate-800 pt-4">
         @for (action of availableActions(); track action.action) {
           <app-button
             [label]="action.label"

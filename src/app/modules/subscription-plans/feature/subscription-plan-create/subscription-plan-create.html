@@ -1,7 +1,7 @@
-<div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+<div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
   <div>
-    <h1 class="text-xl font-semibold text-slate-900">Create Subscription Plan</h1>
-    <p class="mt-1 text-sm text-slate-500">Define pricing, modules, and billing terms for a new plan</p>
+    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Create Subscription Plan</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Define pricing, modules, and billing terms for a new plan</p>
   </div>
   <app-subscription-plan-form mode="create" [saving]="saving()" (submitted)="submit($event)" />
 </div>

@@ -1,6 +1,6 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
-    <h2 class="text-lg font-semibold text-slate-900">Add Service Key</h2>
+  <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-2xl">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Add Service Key</h2>
 
     <form class="mt-6 flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
       @if (errorMessage()) {
@@ -13,11 +13,11 @@
       }
 
       <div>
-        <label for="add-service-key-provider" class="text-sm font-medium text-slate-700">Provider</label>
+        <label for="add-service-key-provider" class="text-sm font-medium text-slate-700 dark:text-slate-300">Provider</label>
         <select
           id="add-service-key-provider"
           formControlName="serviceKey"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
         >
           <option value="" disabled>Select a provider</option>
           @for (provider of providers(); track provider.providerKey) {
@@ -29,23 +29,23 @@
       </div>
 
       <div>
-        <label for="add-service-key-displayName" class="text-sm font-medium text-slate-700">Display name</label>
+        <label for="add-service-key-displayName" class="text-sm font-medium text-slate-700 dark:text-slate-300">Display name</label>
         <input
           id="add-service-key-displayName"
           type="text"
           formControlName="displayName"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
         />
       </div>
 
       <div>
-        <label for="add-service-key-apiKey" class="text-sm font-medium text-slate-700">API key</label>
+        <label for="add-service-key-apiKey" class="text-sm font-medium text-slate-700 dark:text-slate-300">API key</label>
         <input
           id="add-service-key-apiKey"
           type="password"
           formControlName="apiKey"
           autocomplete="new-password"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
         />
       </div>
 
@@ -53,7 +53,7 @@
         <button
           type="button"
           (click)="cancel()"
-          class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
+          class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900"
         >
           Cancel
         </button>

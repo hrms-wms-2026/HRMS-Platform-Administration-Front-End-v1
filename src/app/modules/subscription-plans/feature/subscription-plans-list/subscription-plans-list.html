@@ -1,13 +1,13 @@
 @if (!canView()) {
-  <div class="rounded-2xl bg-white p-8 shadow-sm">
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
     <p class="text-sm font-medium text-red-700">No permission to view page</p>
   </div>
 } @else {
-  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-semibold text-slate-900">Subscription Plans</h1>
-        <p class="mt-1 text-sm text-slate-500">Manage pricing tiers, module bundles, and billing terms</p>
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Subscription Plans</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage pricing tiers, module bundles, and billing terms</p>
       </div>
       @if (canManage()) {
         <a routerLink="/subscription-plans/new">
@@ -25,7 +25,7 @@
     } @else {
       <table class="w-full text-left text-sm">
         <thead>
-          <tr class="border-b border-slate-200 text-xs font-medium uppercase text-slate-500">
+          <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
             <th class="py-2 pr-4">Name</th>
             <th class="py-2 pr-4">Code</th>
             <th class="py-2 pr-4">Tier</th>
@@ -38,13 +38,13 @@
           @for (plan of plans(); track plan.id) {
             <tr
               [routerLink]="['/subscription-plans', plan.id]"
-              class="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
+              class="cursor-pointer border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
-              <td class="py-3 pr-4 font-medium text-slate-900">{{ plan.name }}</td>
-              <td class="py-3 pr-4 text-slate-600">{{ plan.code }}</td>
-              <td class="py-3 pr-4 text-slate-600">{{ plan.tier }}</td>
-              <td class="py-3 pr-4 text-slate-600">{{ plan.companySizeRange }}</td>
-              <td class="py-3 pr-4 text-slate-600">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</td>
+              <td class="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">{{ plan.name }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.code }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.tier }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.companySizeRange }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</td>
               <td class="py-3 pr-4">
                 <app-status-badge
                   [label]="plan.isActive ? 'Active' : 'Archived'"
