@@ -12,8 +12,13 @@
           type="text"
           [value]="companyForm.controls.companyName.value"
           (input)="onCompanyNameChanged($any($event.target).value)"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+          [class.border-slate-300]="!(companyForm.controls.companyName.invalid && companyForm.controls.companyName.touched)"
+          [class.border-red-500]="companyForm.controls.companyName.invalid && companyForm.controls.companyName.touched"
         />
+        @if (companyForm.controls.companyName.invalid && companyForm.controls.companyName.touched) {
+          <p class="mt-1 text-xs text-red-700">Company name is required.</p>
+        }
       </div>
       <div>
         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Slug</label>
@@ -21,8 +26,15 @@
           type="text"
           [value]="companyForm.controls.slug.value"
           (input)="onSlugChanged($any($event.target).value)"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+          [class.border-slate-300]="!(companyForm.controls.slug.invalid && companyForm.controls.slug.touched)"
+          [class.border-red-500]="companyForm.controls.slug.invalid && companyForm.controls.slug.touched"
         />
+        @if (companyForm.controls.slug.invalid && companyForm.controls.slug.touched) {
+          <p class="mt-1 text-xs text-red-700">
+            Slug must be 3–63 characters: lowercase letters, numbers, and hyphens only (must start and end with a letter or number).
+          </p>
+        }
         @if (slugConflict(); as conflict) {
           <p class="mt-1 text-xs text-red-700">{{ conflict }}</p>
         }
@@ -47,7 +59,16 @@
       </div>
       <div>
         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Legal Entity Name</label>
-        <input type="text" formControlName="legalEntityName" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        <input
+          type="text"
+          formControlName="legalEntityName"
+          class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+          [class.border-slate-300]="!(companyForm.controls.legalEntityName.invalid && companyForm.controls.legalEntityName.touched)"
+          [class.border-red-500]="companyForm.controls.legalEntityName.invalid && companyForm.controls.legalEntityName.touched"
+        />
+        @if (companyForm.controls.legalEntityName.invalid && companyForm.controls.legalEntityName.touched) {
+          <p class="mt-1 text-xs text-red-700">Legal entity name is required.</p>
+        }
       </div>
       <div>
         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Registration Number (optional)</label>
@@ -56,30 +77,54 @@
       <div class="grid grid-cols-3 gap-4">
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
-          <select formControlName="country" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <select
+            formControlName="country"
+            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+            [class.border-slate-300]="!(companyForm.controls.country.invalid && companyForm.controls.country.touched)"
+            [class.border-red-500]="companyForm.controls.country.invalid && companyForm.controls.country.touched"
+          >
             <option value="">Select…</option>
             @for (option of countryOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
           </select>
+          @if (companyForm.controls.country.invalid && companyForm.controls.country.touched) {
+            <p class="mt-1 text-xs text-red-700">Country is required.</p>
+          }
         </div>
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Timezone</label>
-          <select formControlName="timezone" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <select
+            formControlName="timezone"
+            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+            [class.border-slate-300]="!(companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched)"
+            [class.border-red-500]="companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched"
+          >
             <option value="">Select…</option>
             @for (option of timezoneOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
           </select>
+          @if (companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched) {
+            <p class="mt-1 text-xs text-red-700">Timezone is required.</p>
+          }
         </div>
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Currency</label>
-          <select formControlName="currency" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <select
+            formControlName="currency"
+            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+            [class.border-slate-300]="!(companyForm.controls.currency.invalid && companyForm.controls.currency.touched)"
+            [class.border-red-500]="companyForm.controls.currency.invalid && companyForm.controls.currency.touched"
+          >
             <option value="">Select…</option>
             @for (option of currencyOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
           </select>
+          @if (companyForm.controls.currency.invalid && companyForm.controls.currency.touched) {
+            <p class="mt-1 text-xs text-red-700">Currency is required.</p>
+          }
         </div>
       </div>
     </form>

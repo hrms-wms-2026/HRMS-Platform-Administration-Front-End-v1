@@ -73,6 +73,33 @@ describe('TenantWizard', () => {
     expect(component['companyForm'].touched).toBe(true);
   });
 
+  it('shows inline validation errors on the required fields blocking step 1', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['nextStep']();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Company name is required.');
+    expect(text).toContain('Legal entity name is required.');
+    expect(text).toContain('Country is required.');
+    expect(text).toContain('Timezone is required.');
+    expect(text).toContain('Currency is required.');
+  });
+
+  it('shows a slug format error when the auto-generated slug is too short', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['onCompanyNameChanged']('sd');
+    component['nextStep']();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Slug must be 3');
+  });
+
   it('advances through all four steps once each step is valid', () => {
     const fixture = createComponent();
     const component = fixture.componentInstance;
