@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { OAuthAppsService } from '../../data/oauth-apps.service';
 import { OAuthApp } from '../../data/oauth-app.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
@@ -10,7 +10,7 @@ import { OAuthAppDetailDrawer } from '../oauth-app-detail-drawer/oauth-app-detai
 
 @Component({
   selector: 'app-oauth-apps-list',
-  imports: [Loader, ErrorBanner, StatusBadge, DatePipe, OAuthAppDetailDrawer],
+  imports: [Loader, ErrorBanner, StatusBadge, DatePipe, OAuthAppDetailDrawer, NgTemplateOutlet],
   templateUrl: './oauth-apps-list.html',
 })
 export class OAuthAppsList implements OnInit {
