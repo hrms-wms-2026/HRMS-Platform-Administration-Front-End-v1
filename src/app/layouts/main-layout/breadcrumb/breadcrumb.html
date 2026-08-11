@@ -1,13 +1,13 @@
 @if (crumb(); as c) {
-  <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-sm text-slate-500">
+  <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
     @if (c.section) {
       <span>{{ c.section }}</span>
       <span aria-hidden="true">/</span>
     }
     @if (c.parent) {
-      <a [routerLink]="c.parent.route" class="hover:text-slate-700 hover:underline">{{ c.parent.label }}</a>
+      <a [routerLink]="c.parent.route" class="hover:text-slate-700 hover:underline dark:hover:text-slate-200">{{ c.parent.label }}</a>
       <span aria-hidden="true">/</span>
     }
-    <span class="font-medium text-slate-900">{{ c.page }}</span>
+    <span class="font-medium text-slate-900 dark:text-slate-100">{{ c.page }}</span>
   </nav>
 }

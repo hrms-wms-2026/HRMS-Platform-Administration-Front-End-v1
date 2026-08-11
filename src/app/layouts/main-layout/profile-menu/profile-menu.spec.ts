@@ -120,4 +120,25 @@ describe('ProfileMenu', () => {
     expect(component['showLogoutConfirm']()).toBe(false);
     expect(authService.logout).not.toHaveBeenCalled();
   });
+
+  it('has a Dark Mode toggle that flips the theme service', () => {
+    const fixture = createComponent();
+    fixture.componentInstance['open'].set(true);
+    fixture.detectChanges();
+
+    const toggle: HTMLButtonElement = fixture.nativeElement.querySelector('[data-theme-toggle]');
+    expect(toggle).toBeTruthy();
+
+    const themeService = fixture.componentInstance['themeService'];
+    expect(themeService.theme()).toBe('light');
+
+    toggle.click();
+
+    expect(themeService.theme()).toBe('dark');
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+    document.documentElement.classList.remove('dark');
+  });
 });
