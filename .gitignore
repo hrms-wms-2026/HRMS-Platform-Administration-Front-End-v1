@@ -47,6 +47,9 @@ __screenshots__/
 # Superpowers brainstorming companion mockups
 .superpowers/
 
+# Claude Code local session config
+.claude/
+
 # System files
 .DS_Store
 Thumbs.db
