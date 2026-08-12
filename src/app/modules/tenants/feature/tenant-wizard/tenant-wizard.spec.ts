@@ -73,6 +73,88 @@ describe('TenantWizard', () => {
     expect(component['companyForm'].touched).toBe(true);
   });
 
+  it('shows inline validation errors on the required fields blocking step 1', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['nextStep']();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Company name is required.');
+    expect(text).toContain('Legal entity name is required.');
+    expect(text).toContain('Country is required.');
+    expect(text).toContain('Timezone is required.');
+    expect(text).toContain('Currency is required.');
+  });
+
+  it('shows a slug format error when the auto-generated slug is too short', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['onCompanyNameChanged']('sd');
+    component['nextStep']();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Slug must be 3');
+  });
+
+  it('shows a validation error on step 2 when no plan is selected', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['companyForm'].setValue({
+      companyName: 'Acme Inc',
+      slug: 'acme-inc',
+      industryProfile: 'office_it',
+      companySizeRange: '51-200',
+      legalEntityName: 'Acme Legal LLC',
+      registrationNumber: '',
+      country: 'USA',
+      timezone: 'America/New_York',
+      currency: 'USD',
+    });
+    component['nextStep']();
+    fixture.detectChanges();
+
+    component['nextStep']();
+    fixture.detectChanges();
+
+    expect(component['currentStep']()).toBe(2);
+    expect(fixture.nativeElement.textContent).toContain('Please select a plan.');
+  });
+
+  it('shows validation errors on step 3 when the owner fields are empty', () => {
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['companyForm'].setValue({
+      companyName: 'Acme Inc',
+      slug: 'acme-inc',
+      industryProfile: 'office_it',
+      companySizeRange: '51-200',
+      legalEntityName: 'Acme Legal LLC',
+      registrationNumber: '',
+      country: 'USA',
+      timezone: 'America/New_York',
+      currency: 'USD',
+    });
+    component['nextStep']();
+    component['selectPlan']('plan-1');
+    component['nextStep']();
+    fixture.detectChanges();
+
+    component['nextStep']();
+    fixture.detectChanges();
+
+    expect(component['currentStep']()).toBe(3);
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Owner email is required.');
+    expect(text).toContain('First name is required.');
+    expect(text).toContain('Last name is required.');
+  });
+
   it('advances through all four steps once each step is valid', () => {
     const fixture = createComponent();
     const component = fixture.componentInstance;

@@ -1,13 +1,13 @@
 @if (!canView()) {
-  <div class="rounded-2xl bg-white p-8 shadow-sm">
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
     <p class="text-sm font-medium text-red-700">No permission to view page</p>
   </div>
 } @else {
-  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-semibold text-slate-900">Tenants</h1>
-        <p class="mt-1 text-sm text-slate-500">Manage tenant accounts and their status</p>
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Tenants</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage tenant accounts and their status</p>
       </div>
       @if (canManage()) {
         <a routerLink="/tenants/new">
@@ -22,12 +22,12 @@
         placeholder="Search by name or slug"
         [value]="search()"
         (input)="onSearchChange($any($event.target).value)"
-        class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+        class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
       />
       <select
         [value]="statusFilter()"
         (change)="onStatusFilterChange($any($event.target).value)"
-        class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+        class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
       >
         <option value="">All Statuses</option>
         <option value="provisioning">Provisioning</option>
@@ -49,7 +49,7 @@
     } @else {
       <table class="w-full text-left text-sm">
         <thead>
-          <tr class="border-b border-slate-200 text-xs font-medium uppercase text-slate-500">
+          <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
             <th class="py-2 pr-4">Name</th>
             <th class="py-2 pr-4">Slug</th>
             <th class="py-2 pr-4">Status</th>
@@ -60,14 +60,14 @@
           @for (tenant of tenants(); track tenant.id) {
             <tr
               [routerLink]="['/tenants', tenant.id]"
-              class="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
+              class="cursor-pointer border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
-              <td class="py-3 pr-4 font-medium text-slate-900">{{ tenant.name }}</td>
-              <td class="py-3 pr-4 text-slate-600">{{ tenant.slug }}</td>
+              <td class="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">{{ tenant.name }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ tenant.slug }}</td>
               <td class="py-3 pr-4">
                 <app-status-badge [label]="tenant.status" [tone]="toneFor(tenant.status)" />
               </td>
-              <td class="py-3 pr-4 text-slate-600">{{ tenant.createdAt | date: 'mediumDate' }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ tenant.createdAt | date: 'mediumDate' }}</td>
             </tr>
           }
         </tbody>

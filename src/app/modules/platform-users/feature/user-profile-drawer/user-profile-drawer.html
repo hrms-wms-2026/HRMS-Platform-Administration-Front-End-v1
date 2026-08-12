@@ -1,11 +1,11 @@
 <div class="fixed inset-0 z-50 flex justify-end bg-slate-900/50" (click)="close()">
-  <div class="flex h-full w-96 flex-col bg-white shadow-2xl" (click)="$event.stopPropagation()">
-    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-      <h2 class="text-lg font-semibold text-slate-900">User Profile</h2>
+  <div class="flex h-full w-96 flex-col bg-white dark:bg-slate-900 shadow-2xl" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">User Profile</h2>
       <button
         type="button"
         (click)="close()"
-        class="text-xl leading-none text-slate-400 hover:text-slate-600"
+        class="text-xl leading-none text-slate-400 dark:text-slate-500 hover:text-slate-600"
         aria-label="Close"
       >
         &times;
@@ -25,8 +25,8 @@
             {{ initials(u.fullName) }}
           </span>
           <div class="min-w-0">
-            <p class="truncate font-medium text-slate-900">{{ u.fullName }}</p>
-            <p class="truncate text-sm text-slate-500">{{ u.email }}</p>
+            <p class="truncate font-medium text-slate-900 dark:text-slate-100">{{ u.fullName }}</p>
+            <p class="truncate text-sm text-slate-500 dark:text-slate-400">{{ u.email }}</p>
           </div>
         </div>
 
@@ -36,20 +36,20 @@
 
         <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p class="text-xs font-medium uppercase text-slate-500">Created</p>
-            <p class="text-slate-900">{{ u.createdAt | date: 'mediumDate' }}</p>
+            <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Created</p>
+            <p class="text-slate-900 dark:text-slate-100">{{ u.createdAt | date: 'mediumDate' }}</p>
           </div>
           <div>
-            <p class="text-xs font-medium uppercase text-slate-500">Last Login</p>
-            <p class="text-slate-900">{{ u.lastLoginAt ? (u.lastLoginAt | date: 'mediumDate') : 'Never' }}</p>
+            <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Last Login</p>
+            <p class="text-slate-900 dark:text-slate-100">{{ u.lastLoginAt ? (u.lastLoginAt | date: 'mediumDate') : 'Never' }}</p>
           </div>
         </div>
 
-        <div class="mt-6 border-t border-slate-100 pt-4">
-          <p class="text-xs font-medium uppercase text-slate-500">Roles</p>
+        <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Roles</p>
           <div class="mt-2 flex flex-col gap-2">
             @for (role of allRoles(); track role.id) {
-              <label class="flex select-none items-center gap-2 text-sm text-slate-700">
+              <label class="flex select-none items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                 <input
                   type="checkbox"
                   [checked]="checkedRoleIds().has(role.id)"

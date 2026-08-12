@@ -1,12 +1,12 @@
 @if (!canView()) {
-  <div class="rounded-2xl bg-white p-8 shadow-sm">
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
     <p class="text-sm font-medium text-red-700">No permission to view page</p>
   </div>
 } @else {
-  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div>
-      <h1 class="text-xl font-semibold text-slate-900">Providers Overview</h1>
-      <p class="mt-1 text-sm text-slate-500">Configuration status across every System Config provider</p>
+      <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Providers Overview</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Configuration status across every System Config provider</p>
     </div>
 
     @if (loading()) {
@@ -16,11 +16,11 @@
     } @else {
       @for (group of groupedFamilies(); track group.label) {
         <div class="flex flex-col gap-2">
-          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ group.label }}</h2>
-          <div class="divide-y divide-slate-100 rounded-xl border border-slate-200">
+          <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ group.label }}</h2>
+          <div class="divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
             @for (card of group.cards; track card.providerKey) {
               <div class="flex items-center justify-between gap-4 px-4 py-3">
-                <span class="text-sm font-medium text-slate-900">{{ card.displayName }}</span>
+                <span class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ card.displayName }}</span>
                 <div class="flex items-center gap-3">
                   <app-status-badge
                     [label]="card.configured ? 'Configured' : 'Not configured'"
@@ -32,7 +32,7 @@
                       [tone]="card.configurationActive ? 'success' : 'neutral'"
                     />
                   }
-                  <span class="text-xs text-slate-400">
+                  <span class="text-xs text-slate-400 dark:text-slate-500">
                     Last verified: {{ card.lastVerifiedAt ? (card.lastVerifiedAt | date: 'medium') : '—' }}
                   </span>
                 </div>

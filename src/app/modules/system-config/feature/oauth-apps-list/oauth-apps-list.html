@@ -1,12 +1,12 @@
 @if (!canView()) {
-  <div class="rounded-2xl bg-white p-8 shadow-sm">
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
     <p class="text-sm font-medium text-red-700">No permission to view page</p>
   </div>
 } @else {
-  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div>
-      <h1 class="text-xl font-semibold text-slate-900">OAuth Apps</h1>
-      <p class="mt-1 text-sm text-slate-500">Platform-registered OAuth applications for admin SSO and integrations</p>
+      <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">OAuth Apps</h1>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Platform-registered OAuth applications for admin SSO and integrations</p>
     </div>
 
     @if (loading()) {
@@ -14,20 +14,21 @@
     } @else if (errorMessage(); as message) {
       <app-error-banner [message]="message" (retry)="loadApps()" />
     } @else {
-      <div class="divide-y divide-slate-100 rounded-xl border border-slate-200">
+      <div class="divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
         @for (app of apps(); track app.provider) {
           <button
             type="button"
             (click)="openDrawer(app.provider)"
-            class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left hover:bg-slate-50"
+            class="flex w-full items-center justify-between gap-4 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             <div class="flex items-center gap-3">
-              <span
-                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-semibold text-slate-600"
+              <div
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border p-1.5"
+                [class]="app.configured ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 opacity-70'"
               >
-                {{ app.displayName.charAt(0) }}
-              </span>
-              <span class="text-sm font-medium text-slate-900">{{ app.displayName }}</span>
+                <ng-container [ngTemplateOutlet]="providerLogo" [ngTemplateOutletContext]="{ key: app.provider }"></ng-container>
+              </div>
+              <span class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ app.displayName }}</span>
             </div>
             <div class="flex items-center gap-3">
               <app-status-badge
@@ -40,10 +41,10 @@
                   [tone]="app.isActive ? 'success' : 'neutral'"
                 />
               }
-              <span class="hidden text-xs text-slate-400 sm:inline">
+              <span class="hidden text-xs text-slate-400 dark:text-slate-500 sm:inline">
                 Last verified: {{ app.lastVerifiedAt ? (app.lastVerifiedAt | date: 'medium') : '—' }}
               </span>
-              <span class="text-slate-400" aria-hidden="true">&rsaquo;</span>
+              <span class="text-slate-400 dark:text-slate-500" aria-hidden="true">&rsaquo;</span>
             </div>
           </button>
         }
@@ -59,3 +60,42 @@
     />
   }
 }
+
+<ng-template #providerLogo let-key="key">
+  @switch (key) {
+    @case ('github') {
+      <svg class="h-full w-full text-slate-900 dark:text-white" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.479C19.138 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+      </svg>
+    }
+    @case ('google') {
+      <svg class="h-full w-full" viewBox="0 0 24 24" fill="none">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" />
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" />
+      </svg>
+    }
+    @case ('microsoft') {
+      <svg class="h-full w-full" viewBox="0 0 23 23">
+        <rect x="0" y="0" width="11" height="11" fill="#F25022"/>
+        <rect x="12" y="0" width="11" height="11" fill="#7FBA00"/>
+        <rect x="0" y="12" width="11" height="11" fill="#00A4EF"/>
+        <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
+      </svg>
+    }
+    @case ('zoom') {
+      <svg class="h-full w-full text-[#2D8CFF]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M1.385 7.69c0-1.89 1.536-3.426 3.426-3.426h10.384c1.89 0 3.426 1.536 3.426 3.426v8.62c0 1.89-1.536 3.426-3.426 3.426H4.81c-1.89 0-3.426-1.536-3.426-3.426V7.69zm18.257 2.215l3.208-2.31c.71-.512 1.705.027 1.705.918v7.039c0 .891-.995 1.43-1.705.918l-3.208-2.31a1.238 1.238 0 0 1-.502-1.012v-2.23c0-.41.192-.796.502-1.013z"/>
+      </svg>
+    }
+    @default {
+      <svg class="h-full w-full text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+        <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+        <line x1="6" y1="6" x2="6.01" y2="6" />
+        <line x1="6" y1="18" x2="6.01" y2="18" />
+      </svg>
+    }
+  }
+</ng-template>

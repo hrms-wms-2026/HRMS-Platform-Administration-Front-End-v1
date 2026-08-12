@@ -4,6 +4,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { SessionService } from '../../../core/auth/session.service';
 import { StatusBadge } from '../../../shared/ui/status-badge/status-badge';
 import { LogoutConfirmModal } from '../logout-confirm-modal/logout-confirm-modal';
+import { ThemeService } from '../../../core/theme/theme.service';
 
 @Component({
   selector: 'app-profile-menu',
@@ -15,6 +16,7 @@ export class ProfileMenu {
   private readonly router = inject(Router);
   private readonly sessionService = inject(SessionService);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  protected readonly themeService = inject(ThemeService);
 
   protected readonly currentUser = this.sessionService.currentUser;
   protected readonly initials = computed(() => {
