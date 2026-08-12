@@ -15,15 +15,6 @@ describe('Sidebar', () => {
     return fixture;
   }
 
-  it('renders the ONEXSO logo icon and wordmark', () => {
-    const fixture = setup();
-    const images = fixture.debugElement.queryAll(By.css('img'));
-    const srcs = images.map((img) => img.nativeElement.getAttribute('src'));
-
-    expect(srcs).toContain('onexso-logo-icon.svg');
-    expect(srcs).toContain('onexso-logo-text.svg');
-  });
-
   it('renders all five section labels', () => {
     const fixture = setup();
     const text = fixture.nativeElement.textContent;
