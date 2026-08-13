@@ -70,7 +70,7 @@ export class ApplyToTenantModal implements OnInit {
     this.searchSubject.next(value);
   }
 
-  private loadTenants(searchValue: string = ''): void {
+  private loadTenants(searchValue = ''): void {
     this.loadingTenants.set(true);
     this.errorMessage.set(null);
 

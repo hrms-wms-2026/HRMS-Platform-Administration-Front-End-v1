@@ -66,7 +66,7 @@ export interface ApplyConfigurationTemplateResult {
   warnings: string[];
 }
 
-export const TEMPLATE_TYPES: ReadonlyArray<{ value: string; label: string }> = [
+export const TEMPLATE_TYPES: readonly { value: string; label: string }[] = [
   { value: 'configuration', label: 'Configuration' },
   { value: 'position_template', label: 'Position Template' },
   { value: 'time_off_policy', label: 'Time-Off Policy' },

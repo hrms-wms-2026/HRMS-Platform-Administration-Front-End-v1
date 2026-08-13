@@ -7,8 +7,9 @@
   @if (currentStep() === 1) {
     <form [formGroup]="companyForm" class="flex flex-col gap-4">
       <div>
-        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Company Name</label>
+        <label for="tenantCompanyName" class="text-sm font-medium text-slate-700 dark:text-slate-300">Company Name</label>
         <input
+          id="tenantCompanyName"
           type="text"
           [value]="companyForm.controls.companyName.value"
           (input)="onCompanyNameChanged($any($event.target).value)"
@@ -21,8 +22,9 @@
         }
       </div>
       <div>
-        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Slug</label>
+        <label for="tenantSlug" class="text-sm font-medium text-slate-700 dark:text-slate-300">Slug</label>
         <input
+          id="tenantSlug"
           type="text"
           [value]="companyForm.controls.slug.value"
           (input)="onSlugChanged($any($event.target).value)"
@@ -41,16 +43,16 @@
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Industry</label>
-          <select formControlName="industryProfile" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <label for="tenantIndustry" class="text-sm font-medium text-slate-700 dark:text-slate-300">Industry</label>
+          <select id="tenantIndustry" formControlName="industryProfile" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             @for (option of industryOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
           </select>
         </div>
         <div>
-          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Company Size</label>
-          <select formControlName="companySizeRange" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <label for="tenantCompanySize" class="text-sm font-medium text-slate-700 dark:text-slate-300">Company Size</label>
+          <select id="tenantCompanySize" formControlName="companySizeRange" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
             @for (option of companySizeOptions; track option.value) {
               <option [value]="option.value">{{ option.label }}</option>
             }
@@ -58,8 +60,9 @@
         </div>
       </div>
       <div>
-        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Legal Entity Name</label>
+        <label for="tenantLegalEntityName" class="text-sm font-medium text-slate-700 dark:text-slate-300">Legal Entity Name</label>
         <input
+          id="tenantLegalEntityName"
           type="text"
           formControlName="legalEntityName"
           class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
@@ -71,12 +74,12 @@
         }
       </div>
       <div>
-        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Registration Number (optional)</label>
-        <input type="text" formControlName="registrationNumber" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        <label for="tenantRegistrationNumber" class="text-sm font-medium text-slate-700 dark:text-slate-300">Registration Number (optional)</label>
+        <input id="tenantRegistrationNumber" type="text" formControlName="registrationNumber" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
       </div>
       <div class="flex flex-col gap-4 border-t border-slate-100 pt-4 dark:border-slate-800">
         <div>
-          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
+          <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Country</p>
           <app-searchable-select
             formControlName="country"
             class="mt-1 block"
@@ -100,7 +103,7 @@
         } @else if (regionFieldsEnabled()) {
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Timezone</label>
+              <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Timezone</p>
               <app-searchable-select
                 formControlName="timezone"
                 class="mt-1 block"
@@ -114,7 +117,7 @@
               }
             </div>
             <div>
-              <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Currency</label>
+              <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Currency</p>
               <app-searchable-select
                 formControlName="currency"
                 class="mt-1 block"
@@ -182,8 +185,9 @@
   @if (currentStep() === 3) {
     <form [formGroup]="ownerForm" class="flex flex-col gap-4">
       <div>
-        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Owner Email</label>
+        <label for="tenantOwnerEmail" class="text-sm font-medium text-slate-700 dark:text-slate-300">Owner Email</label>
         <input
+          id="tenantOwnerEmail"
           type="email"
           formControlName="email"
           class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
@@ -198,8 +202,9 @@
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">First Name</label>
+          <label for="tenantOwnerFirstName" class="text-sm font-medium text-slate-700 dark:text-slate-300">First Name</label>
           <input
+            id="tenantOwnerFirstName"
             type="text"
             formControlName="firstName"
             class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
@@ -211,8 +216,9 @@
           }
         </div>
         <div>
-          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Last Name</label>
+          <label for="tenantOwnerLastName" class="text-sm font-medium text-slate-700 dark:text-slate-300">Last Name</label>
           <input
+            id="tenantOwnerLastName"
             type="text"
             formControlName="lastName"
             class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"

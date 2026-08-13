@@ -19,7 +19,7 @@ interface CountryDefaultsResponse {
   default_timezone: string;
   timezones: string[];
   default_currency: string;
-  currencies: Array<{ code: string; name: string; symbol: string }>;
+  currencies: { code: string; name: string; symbol: string }[];
 }
 
 export function mapCountryDefaults(response: CountryDefaultsResponse): CountryDefaults {
