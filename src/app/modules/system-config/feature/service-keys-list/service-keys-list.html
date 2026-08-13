@@ -7,7 +7,10 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="page-title">Service Keys</h1>
-        <p class="page-subtitle">Platform-owned API credentials for third-party services</p>
+        <p class="page-subtitle">
+          Platform-owned API credentials for third-party services. Resend and SendGrid use live provider
+          verification; Cloudflare, R2, and AWS Rekognition use local format-only checks.
+        </p>
       </div>
       @if (canManage()) {
         <app-button label="Add Service Key" (clicked)="openAddModal()" />
@@ -15,7 +18,7 @@
     </div>
 
     @if (loading()) {
-      <app-table-skeleton [rows]="6" [columns]="['7rem', '8rem', '5rem', '8rem', '5rem']" [showPagination]="false" />
+      <app-table-skeleton [rows]="6" [columns]="['7rem', '8rem', '5rem', '7rem', '8rem', '5rem']" [showPagination]="false" />
     } @else if (errorMessage(); as message) {
       <app-error-banner [message]="message" (retry)="loadKeys()" />
     } @else if (keys().length === 0) {
@@ -27,6 +30,7 @@
             <th>Service Key</th>
             <th>Display Name</th>
             <th>Status</th>
+            <th>Verification</th>
             <th>Last Verified</th>
             @if (canManage()) {
               <th>Actions</th>
@@ -69,6 +73,12 @@
                 <app-status-badge
                   [label]="key.isActive ? 'Active' : 'Inactive'"
                   [tone]="key.isActive ? 'success' : 'neutral'"
+                />
+              </td>
+              <td class="py-3 pr-4">
+                <app-status-badge
+                  [label]="verificationBadgeLabel(key.serviceKey)"
+                  [tone]="verificationBadgeTone(key.serviceKey)"
                 />
               </td>
               <td class="table-meta">{{ key.lastVerifiedAt ? (key.lastVerifiedAt | date: 'medium') : '—' }}</td>

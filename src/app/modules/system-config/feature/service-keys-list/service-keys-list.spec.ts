@@ -24,9 +24,12 @@ describe('ServiceKeysList', () => {
     updatedAt: '2026-01-01T00:00:00Z',
   };
 
-  function setup(permissions: string[] = ['platform.system_config.read', 'platform.system_config.manage']) {
+  function setup(
+    permissions: string[] = ['platform.system_config.read', 'platform.system_config.manage'],
+    keys = [sampleKey],
+  ) {
     serviceKeysService = {
-      list: jest.fn().mockReturnValue(of([sampleKey])),
+      list: jest.fn().mockReturnValue(of(keys)),
       verify: jest.fn(),
       setActive: jest.fn(),
       updateDisplayName: jest.fn(),
@@ -68,6 +71,21 @@ describe('ServiceKeysList', () => {
     expect(serviceKeysService.list).toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('resend');
     expect(fixture.nativeElement.textContent).toContain('Active');
+    expect(fixture.nativeElement.textContent).toContain('Live provider');
+    expect(fixture.nativeElement.textContent).toContain('live provider verification');
+  });
+
+  it('shows format-only verification badge for non-email providers', () => {
+    const fixture = setup(['platform.system_config.read', 'platform.system_config.manage'], [
+      {
+        ...sampleKey,
+        serviceKey: 'cloudflare',
+        displayName: 'Cloudflare',
+      },
+    ]);
+
+    expect(fixture.nativeElement.textContent).toContain('Format only');
+    expect(fixture.nativeElement.textContent).toContain('local format-only checks');
   });
 
   it('hides row actions without manage permission', () => {
@@ -76,24 +94,59 @@ describe('ServiceKeysList', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Add Service Key');
   });
 
-  it('shows a success toast when verify succeeds', () => {
+  it('shows a live-provider success toast when Resend verify succeeds', () => {
     const fixture = setup();
-    serviceKeysService.verify.mockReturnValue(of({ success: true, checkedAt: '2026-01-01T00:00:00Z', message: 'Key is valid.' }));
+    serviceKeysService.verify.mockReturnValue(
+      of({
+        success: true,
+        checkedAt: '2026-01-01T00:00:00Z',
+        message: 'Resend API key verified successfully.',
+      }),
+    );
     const component = fixture.componentInstance;
 
     component['verifyKey']('resend');
 
-    expect(notificationService.success).toHaveBeenCalledWith('Key is valid.');
+    expect(notificationService.success).toHaveBeenCalledWith(
+      'Live provider check: Resend API key verified successfully.',
+    );
   });
 
-  it('shows an error toast when verify fails', () => {
+  it('shows a live-provider error toast when SendGrid verify fails', () => {
     const fixture = setup();
-    serviceKeysService.verify.mockReturnValue(of({ success: false, checkedAt: '2026-01-01T00:00:00Z', message: 'Key rejected by provider.' }));
+    serviceKeysService.verify.mockReturnValue(
+      of({
+        success: false,
+        checkedAt: '2026-01-01T00:00:00Z',
+        message: 'SendGrid API rejected the key (401 Unauthorized).',
+      }),
+    );
     const component = fixture.componentInstance;
 
-    component['verifyKey']('resend');
+    component['verifyKey']('sendgrid');
 
-    expect(notificationService.error).toHaveBeenCalledWith('Key rejected by provider.');
+    expect(notificationService.error).toHaveBeenCalledWith(
+      'Live provider check: SendGrid API rejected the key (401 Unauthorized).',
+    );
+  });
+
+  it('shows a local-format success toast when Cloudflare verify succeeds', () => {
+    const fixture = setup();
+    serviceKeysService.verify.mockReturnValue(
+      of({
+        success: true,
+        checkedAt: '2026-01-01T00:00:00Z',
+        message:
+          'Local format-only verification passed. Live provider check is not wired for this service.',
+      }),
+    );
+    const component = fixture.componentInstance;
+
+    component['verifyKey']('cloudflare');
+
+    expect(notificationService.success).toHaveBeenCalledWith(
+      'Local format check: Local format-only verification passed. Live provider check is not wired for this service.',
+    );
   });
 
   it('toggles active state', () => {
