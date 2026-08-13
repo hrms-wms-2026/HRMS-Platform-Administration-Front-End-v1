@@ -38,6 +38,7 @@ describe('PaymentGatewaysList', () => {
   let paymentGatewaysService: {
     list: jest.Mock;
     update: jest.Mock;
+    listProviders: jest.Mock;
   };
   let notificationService: { success: jest.Mock; error: jest.Mock };
 
@@ -45,6 +46,7 @@ describe('PaymentGatewaysList', () => {
     paymentGatewaysService = {
       list: jest.fn().mockReturnValue(of([sampleGateway])),
       update: jest.fn().mockReturnValue(of({ ...sampleGateway, isActive: false })),
+      listProviders: jest.fn().mockReturnValue(of([])),
     };
     notificationService = { success: jest.fn(), error: jest.fn() };
 
@@ -101,5 +103,79 @@ describe('PaymentGatewaysList', () => {
 
     expect(paymentGatewaysService.update).toHaveBeenCalledWith('gw-1', { isActive: false });
     expect(notificationService.success).toHaveBeenCalledWith('Gateway deactivated.');
+  });
+
+  it('shows no-permission message without read access', () => {
+    TestBed.resetTestingModule();
+    paymentGatewaysService = {
+      list: jest.fn().mockReturnValue(of([sampleGateway])),
+      update: jest.fn(),
+      listProviders: jest.fn().mockReturnValue(of([])),
+    };
+    notificationService = { success: jest.fn(), error: jest.fn() };
+
+    TestBed.configureTestingModule({
+      imports: [PaymentGatewaysList],
+      providers: [
+        provideRouter([]),
+        { provide: PaymentGatewaysService, useValue: paymentGatewaysService },
+        {
+          provide: PermissionStore,
+          useValue: { hasPermission: () => false },
+        },
+        { provide: NotificationService, useValue: notificationService },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(PaymentGatewaysList);
+    fixture.detectChanges();
+
+    expect(paymentGatewaysService.list).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('No permission to view page');
+  });
+
+  it('opens add and rotate modals from table actions', () => {
+    const fixture = TestBed.createComponent(PaymentGatewaysList);
+    fixture.detectChanges();
+
+    const addButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find((button: Element) =>
+      button.textContent?.includes('Add Gateway'),
+    ) as HTMLButtonElement | undefined;
+    addButton?.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Add Payment Gateway');
+
+    const rotateButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find((button: Element) =>
+      button.textContent?.includes('Rotate'),
+    ) as HTMLButtonElement | undefined;
+    rotateButton?.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Rotate Credentials');
+  });
+
+  it('activates an inactive gateway and formats empty country routes', () => {
+    paymentGatewaysService.list.mockReturnValue(
+      of([
+        {
+          ...sampleGateway,
+          isActive: false,
+          countryRoutes: [{ ...sampleGateway.countryRoutes[0], isActive: false }],
+        },
+      ]),
+    );
+    const fixture = TestBed.createComponent(PaymentGatewaysList);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    expect(component['formatCountries']({ ...sampleGateway, countryRoutes: [] })).toBe('—');
+
+    const activateButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find((button: Element) =>
+      button.textContent?.includes('Activate'),
+    ) as HTMLButtonElement | undefined;
+    activateButton?.click();
+    fixture.detectChanges();
+
+    expect(paymentGatewaysService.update).toHaveBeenCalledWith('gw-1', { isActive: true });
+    expect(notificationService.success).toHaveBeenCalledWith('Gateway activated.');
   });
 });
