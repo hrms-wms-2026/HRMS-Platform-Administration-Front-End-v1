@@ -16,6 +16,8 @@ import { TenantEditForm } from '../tenant-edit-form/tenant-edit-form';
 import { TenantInviteAdminModal } from '../tenant-invite-admin-modal/tenant-invite-admin-modal';
 import { TenantApplyRoleTemplateModal } from '../tenant-apply-role-template-modal/tenant-apply-role-template-modal';
 import { TenantRolesPanel } from '../tenant-roles-panel/tenant-roles-panel';
+import { TenantSubscriptionPanel } from '../tenant-subscription-panel/tenant-subscription-panel';
+import { TenantInvoicesPanel } from '../tenant-invoices-panel/tenant-invoices-panel';
 
 interface StatusAction {
   action: string;
@@ -52,6 +54,8 @@ const ACTIONS_BY_STATUS: Record<string, StatusAction[]> = {
     TenantInviteAdminModal,
     TenantApplyRoleTemplateModal,
     TenantRolesPanel,
+    TenantSubscriptionPanel,
+    TenantInvoicesPanel,
   ],
   templateUrl: './tenant-detail.html',
 })

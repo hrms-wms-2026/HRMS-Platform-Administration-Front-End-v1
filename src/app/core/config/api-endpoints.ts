@@ -49,6 +49,9 @@ export const API_ENDPOINTS = {
       catalog: (tenantId: string) => `/tenants/${tenantId}/permissions/catalog`,
     },
   },
+  tenantSubscriptions: {
+    get: (tenantId: string) => `/tenants/${tenantId}/subscription`,
+  },
   roles: {
     list: '/platform-access/roles',
     byId: (id: string) => `/platform-access/roles/${id}`,
