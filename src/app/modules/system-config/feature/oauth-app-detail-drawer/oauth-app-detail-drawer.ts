@@ -138,7 +138,7 @@ export class OAuthAppDetailDrawer {
       },
       error: () => {
         this.validating.set(false);
-        this.notificationService.error('Could not validate the configuration.');
+        this.notificationService.error('Could not run the local config check.');
       },
     });
   }
