@@ -3,12 +3,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TenantsService } from '../../data/tenants.service';
+import { CountryDefaultsService } from '../../data/country-defaults.service';
 import { CreateTenantRequest } from '../../data/tenant.model';
 import { SubscriptionPlansService } from '../../../subscription-plans/data/subscription-plans.service';
 import { SubscriptionPlanSummary } from '../../../subscription-plans/data/subscription-plan.model';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button } from '../../../../shared/ui/button/button';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { SearchableSelect } from '../../../../shared/ui/searchable-select/searchable-select';
+import { StackedCardsSkeleton } from '../../../../shared/ui/stacked-cards-skeleton/stacked-cards-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import {
   COMPANY_SIZE_OPTIONS,
@@ -16,19 +18,26 @@ import {
   CURRENCY_CODE_OPTIONS,
   INDUSTRY_OPTIONS,
   TIMEZONE_OPTIONS,
+  POPULAR_COUNTRY_OPTIONS,
+  POPULAR_CURRENCY_OPTIONS,
+  SelectOption,
+  alpha3ToAlpha2,
+  currencyOptionsFromCodes,
   slugify,
+  timezoneOptionsFromValues,
 } from '../../utils/tenant-options';
 
 const SLUG_VALIDATION_DEBOUNCE_MS = 400;
 
 @Component({
   selector: 'app-tenant-wizard',
-  imports: [ReactiveFormsModule, Button, Loader, ErrorBanner],
+  imports: [ReactiveFormsModule, Button, SearchableSelect, StackedCardsSkeleton, ErrorBanner],
   templateUrl: './tenant-wizard.html',
 })
 export class TenantWizard implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly tenantsService = inject(TenantsService);
+  private readonly countryDefaultsService = inject(CountryDefaultsService);
   private readonly plansService = inject(SubscriptionPlansService);
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
@@ -36,8 +45,14 @@ export class TenantWizard implements OnInit {
   protected readonly industryOptions = INDUSTRY_OPTIONS;
   protected readonly companySizeOptions = COMPANY_SIZE_OPTIONS;
   protected readonly countryOptions = COUNTRY_CODE_OPTIONS;
-  protected readonly currencyOptions = CURRENCY_CODE_OPTIONS;
-  protected readonly timezoneOptions = TIMEZONE_OPTIONS;
+  protected readonly popularCountryOptions = POPULAR_COUNTRY_OPTIONS;
+  protected readonly popularCurrencyOptions = POPULAR_CURRENCY_OPTIONS;
+  protected readonly timezoneOptions = signal<readonly SelectOption[]>([]);
+  protected readonly currencyOptions = signal<readonly SelectOption[]>([]);
+  protected readonly loadingCountryDefaults = signal(false);
+  protected readonly countryDefaultsHint = signal<string | null>(null);
+
+  protected readonly regionFieldsEnabled = computed(() => this.timezoneOptions().length > 0);
 
   protected readonly currentStep = signal(1);
 
@@ -81,6 +96,10 @@ export class TenantWizard implements OnInit {
   protected readonly submitError = signal<string | null>(null);
 
   ngOnInit(): void {
+    this.companyForm.controls.country.valueChanges.subscribe((countryCode) => {
+      this.onCountryChanged(countryCode);
+    });
+
     this.loadingPlans.set(true);
     this.plansService.list().subscribe({
       next: (plans) => {
@@ -92,6 +111,54 @@ export class TenantWizard implements OnInit {
         this.loadingPlans.set(false);
       },
     });
+  }
+
+  protected onCountryChanged(countryCodeAlpha3: string): void {
+    this.companyForm.controls.timezone.setValue('');
+    this.companyForm.controls.currency.setValue('');
+    this.timezoneOptions.set([]);
+    this.currencyOptions.set([]);
+    this.countryDefaultsHint.set(null);
+
+    if (!countryCodeAlpha3) {
+      return;
+    }
+
+    const alpha2 = alpha3ToAlpha2(countryCodeAlpha3);
+    if (!alpha2) {
+      this.applyFallbackRegionOptions();
+      return;
+    }
+
+    this.loadingCountryDefaults.set(true);
+    this.countryDefaultsService.getDefaults(alpha2).subscribe({
+      next: (defaults) => {
+        this.timezoneOptions.set(timezoneOptionsFromValues(defaults.timezones));
+        this.currencyOptions.set(
+          currencyOptionsFromCodes(defaults.currencies.map((currency) => currency.code)),
+        );
+        this.companyForm.patchValue({
+          timezone: defaults.defaultTimezone,
+          currency: defaults.defaultCurrency,
+        });
+        this.countryDefaultsHint.set(
+          `Suggested timezone and currency for ${defaults.countryName}. You can change them if needed.`,
+        );
+        this.loadingCountryDefaults.set(false);
+      },
+      error: () => {
+        this.applyFallbackRegionOptions();
+        this.countryDefaultsHint.set(
+          'No preset defaults for this country. Search and pick timezone and currency manually.',
+        );
+        this.loadingCountryDefaults.set(false);
+      },
+    });
+  }
+
+  private applyFallbackRegionOptions(): void {
+    this.timezoneOptions.set(TIMEZONE_OPTIONS);
+    this.currencyOptions.set(CURRENCY_CODE_OPTIONS);
   }
 
   protected onCompanyNameChanged(value: string): void {

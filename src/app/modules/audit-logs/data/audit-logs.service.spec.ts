@@ -29,6 +29,8 @@ describe('AuditLogsService', () => {
     const event = {
       id: 'event-1',
       userId: 'user-1',
+      userEmail: 'admin@example.com',
+      userFullName: 'Platform Admin',
       eventType: 'login_succeeded',
       sourceIp: '127.0.0.1',
       userAgent: 'Mozilla/5.0',

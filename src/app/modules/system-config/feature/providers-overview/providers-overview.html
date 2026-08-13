@@ -5,12 +5,12 @@
 } @else {
   <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div>
-      <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Providers Overview</h1>
-      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Configuration status across every System Config provider</p>
+      <h1 class="page-title">Providers Overview</h1>
+      <p class="page-subtitle">Configuration status across every System Config provider</p>
     </div>
 
     @if (loading()) {
-      <app-loader label="Loading…" />
+      <app-list-rows-skeleton [showGroupHeaders]="true" [groups]="2" [rows]="3" />
     } @else if (errorMessage(); as message) {
       <app-error-banner [message]="message" (retry)="loadProviders()" />
     } @else {

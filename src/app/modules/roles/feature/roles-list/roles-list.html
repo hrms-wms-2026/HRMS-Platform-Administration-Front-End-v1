@@ -5,40 +5,40 @@
 } @else {
   <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div>
-      <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Roles & Permissions</h1>
-      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage platform roles and what each one can access</p>
+      <h1 class="page-title">Roles & Permissions</h1>
+      <p class="page-subtitle">Manage platform roles and what each one can access</p>
     </div>
 
     @if (loading()) {
-      <app-loader label="Loading…" />
+      <app-table-skeleton [rows]="8" [columns]="['7rem', '100%', '5rem', '7rem']" [showPagination]="false" />
     } @else if (errorMessage(); as message) {
       <app-error-banner [message]="message" (retry)="loadRoles()" />
     } @else if (roles().length === 0) {
       <app-empty-state title="No roles yet" />
     } @else {
-      <table class="w-full text-left text-sm">
+      <table class="data-table">
         <thead>
-          <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-            <th class="py-2 pr-4">Name</th>
-            <th class="py-2 pr-4">Description</th>
-            <th class="py-2 pr-4">Type</th>
-            <th class="py-2 pr-4">Created</th>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Created</th>
           </tr>
         </thead>
         <tbody>
           @for (role of roles(); track role.id) {
             <tr
               [routerLink]="['/roles', role.id]"
-              class="cursor-pointer border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+              class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
             >
-              <td class="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">{{ role.name }}</td>
-              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ role.description || '—' }}</td>
+              <td class="table-primary">{{ role.name }}</td>
+              <td class="table-secondary">{{ role.description || '—' }}</td>
               <td class="py-3 pr-4">
                 @if (role.isSystemRole) {
                   <app-status-badge label="System" tone="neutral" />
                 }
               </td>
-              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ role.createdAt | date: 'mediumDate' }}</td>
+              <td class="table-secondary">{{ role.createdAt | date: 'mediumDate' }}</td>
             </tr>
           }
         </tbody>

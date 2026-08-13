@@ -1,0 +1,86 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    @if (isCreate()) {
+      <div>
+        <label for="documentType" class="audit-filter-label">Document Type</label>
+        <select id="documentType" formControlName="documentType" class="audit-filter-input">
+          @for (option of documentTypeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label for="version" class="audit-filter-label">Version</label>
+        <input id="version" type="text" formControlName="version" class="audit-filter-input" placeholder="e.g. 1.1" />
+        @if (form.controls.version.invalid && form.controls.version.touched) {
+          <p class="mt-1 text-xs text-red-700">Version is required.</p>
+        }
+      </div>
+    } @else if (initialValue(); as doc) {
+      <div>
+        <p class="audit-filter-label">Document Type</p>
+        <p class="text-sm text-slate-900 dark:text-slate-100">{{ doc.documentType }}</p>
+      </div>
+      <div>
+        <p class="audit-filter-label">Version</p>
+        <p class="text-sm text-slate-900 dark:text-slate-100">v{{ doc.version }}</p>
+      </div>
+    }
+
+    <div class="lg:col-span-2">
+      <label for="title" class="audit-filter-label">Title</label>
+      <input id="title" type="text" formControlName="title" class="audit-filter-input" />
+      @if (form.controls.title.invalid && form.controls.title.touched) {
+        <p class="mt-1 text-xs text-red-700">Title is required.</p>
+      }
+    </div>
+
+    <div class="flex items-end">
+      <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+        <input
+          type="checkbox"
+          formControlName="isRequired"
+          class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+        />
+        Required for login / dashboard access
+      </label>
+    </div>
+
+    <div>
+      <label for="blockScope" class="audit-filter-label">Block Scope</label>
+      <select id="blockScope" formControlName="blockScope" class="audit-filter-input">
+        <option value="dashboard">Dashboard</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label for="contentHtml" class="audit-filter-label">Content (HTML)</label>
+    <p class="mb-2 text-xs text-slate-500">
+      Allowed tags: headings, paragraphs, lists, links, tables, emphasis. Scripts and iframes are rejected.
+    </p>
+    <textarea
+      id="contentHtml"
+      formControlName="contentHtml"
+      rows="14"
+      class="audit-filter-input !h-auto min-h-[280px] py-2 font-mono text-xs"
+      placeholder="<h1>Document title</h1><p>Your legal text here...</p>"
+    ></textarea>
+    @if (form.controls.contentHtml.invalid && form.controls.contentHtml.touched) {
+      <p class="mt-1 text-xs text-red-700">Content is required.</p>
+    }
+  </div>
+
+  @if (!readOnly()) {
+    <div class="flex justify-end border-t border-slate-100 pt-4 dark:border-slate-800">
+      <app-button
+        type="submit"
+        [label]="isCreate() ? 'Create Draft' : 'Save Changes'"
+        variant="indigo"
+        [loading]="saving()"
+        [disabled]="!canSubmit()"
+      />
+    </div>
+  }
+</form>

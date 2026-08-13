@@ -11,6 +11,9 @@ describe('UserProfileDrawer', () => {
     getUserById: jest.Mock;
     listRoles: jest.Mock;
     updateUserRoles: jest.Mock;
+    listSessions: jest.Mock;
+    revokeSession: jest.Mock;
+    revokeAllSessions: jest.Mock;
   };
   let notificationService: { success: jest.Mock; error: jest.Mock };
 
@@ -29,11 +32,27 @@ describe('UserProfileDrawer', () => {
     { id: 'role-2', name: 'Billing Manager' },
   ];
 
+  const sessions = [
+    {
+      id: 'session-1',
+      userId: 'user-1',
+      deviceInfo: 'Chrome on Windows',
+      ipAddress: '127.0.0.1',
+      expiresAt: '2099-01-01T00:00:00Z',
+      createdAt: '2026-08-01T00:00:00Z',
+      revokedAt: null,
+      isRevoked: false,
+    },
+  ];
+
   function setup(userId: string, permissions: string[] = ['platform.accounts.read', 'platform.roles.manage']) {
     usersService = {
       getUserById: jest.fn().mockReturnValue(of(userDetail)),
       listRoles: jest.fn().mockReturnValue(of(allRoles)),
       updateUserRoles: jest.fn(),
+      listSessions: jest.fn().mockReturnValue(of(sessions)),
+      revokeSession: jest.fn().mockReturnValue(of(undefined)),
+      revokeAllSessions: jest.fn().mockReturnValue(of(undefined)),
     };
     notificationService = { success: jest.fn(), error: jest.fn() };
 
@@ -141,5 +160,36 @@ describe('UserProfileDrawer', () => {
     component['close']();
 
     expect(closed).toBe(true);
+  });
+
+  it('loads sessions when platform.security.read is granted', () => {
+    const fixture = setup('user-1', ['platform.accounts.read', 'platform.roles.manage', 'platform.security.read']);
+    fixture.detectChanges();
+
+    expect(usersService.listSessions).toHaveBeenCalledWith('user-1');
+    expect(fixture.nativeElement.textContent).toContain('Chrome on Windows');
+    expect(fixture.nativeElement.textContent).toContain('Sessions');
+  });
+
+  it('does not load sessions without platform.security.read', () => {
+    setup('user-1', ['platform.accounts.read', 'platform.roles.manage']);
+
+    expect(usersService.listSessions).not.toHaveBeenCalled();
+  });
+
+  it('revokes a session and reloads the session list', () => {
+    const fixture = setup('user-1', [
+      'platform.accounts.read',
+      'platform.roles.manage',
+      'platform.security.read',
+      'platform.security.manage',
+    ]);
+    const component = fixture.componentInstance;
+
+    component['revokeSession']('session-1');
+
+    expect(usersService.revokeSession).toHaveBeenCalledWith('user-1', 'session-1');
+    expect(notificationService.success).toHaveBeenCalledWith('Session revoked.');
+    expect(usersService.listSessions).toHaveBeenCalledTimes(2);
   });
 });

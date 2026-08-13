@@ -11,7 +11,7 @@ export class StatusBadge {
   readonly tone = input<StatusTone>('neutral');
 
   protected readonly classes = computed(() => {
-    const base = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium';
+    const base = 'status-badge-text inline-flex items-center rounded-full px-2.5 py-0.5';
     const tones: Record<StatusTone, string> = {
       success: 'bg-green-100 text-green-700',
       warning: 'bg-amber-100 text-amber-700',

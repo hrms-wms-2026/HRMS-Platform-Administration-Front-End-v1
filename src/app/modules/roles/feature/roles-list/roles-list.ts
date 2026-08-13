@@ -5,13 +5,13 @@ import { PlatformRolesService } from '../../data/platform-roles.service';
 import { PlatformRole } from '../../data/platform-role.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { TableSkeleton } from '../../../../shared/ui/table-skeleton/table-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 
 @Component({
   selector: 'app-roles-list',
-  imports: [RouterLink, StatusBadge, Loader, ErrorBanner, EmptyState, DatePipe],
+  imports: [RouterLink, StatusBadge, TableSkeleton, ErrorBanner, EmptyState, DatePipe],
   templateUrl: './roles-list.html',
 })
 export class RolesList implements OnInit {

@@ -6,14 +6,14 @@ import { ModuleCatalogItem } from '../../../module-catalog/data/module-catalog.m
 import { CreateSubscriptionPlanRequest, SubscriptionPlanDetail } from '../../data/subscription-plan.model';
 import { COMPANY_SIZE_OPTIONS, CURRENCY_CODE_OPTIONS } from '../../../tenants/utils/tenant-options';
 import { Button } from '../../../../shared/ui/button/button';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { CheckboxGridSkeleton } from '../../../../shared/ui/checkbox-grid-skeleton/checkbox-grid-skeleton';
 
 const CODE_PATTERN = /^[a-z0-9_]+$/;
 const COMPANY_SIZE_PATTERN = /^\d+(-\d+|\+)$/;
 
 @Component({
   selector: 'app-subscription-plan-form',
-  imports: [ReactiveFormsModule, Button, Loader],
+  imports: [ReactiveFormsModule, Button, CheckboxGridSkeleton],
   templateUrl: './subscription-plan-form.html',
 })
 export class SubscriptionPlanForm implements OnInit {

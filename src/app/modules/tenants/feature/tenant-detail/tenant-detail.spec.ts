@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TenantDetailComponent } from './tenant-detail';
 import { TenantsService } from '../../data/tenants.service';
+import { TenantAdminService } from '../../data/tenant-admin.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -44,12 +45,17 @@ describe('TenantDetail', () => {
       getProvisioningSummary: jest.fn().mockReturnValue(of(provisioningSummary)),
       confirmProvisioning: jest.fn(),
     };
+    const tenantAdminService = {
+      updateTenant: jest.fn().mockReturnValue(of(undefined)),
+      listRoles: jest.fn().mockReturnValue(of([])),
+    };
     notificationService = { success: jest.fn(), error: jest.fn() };
 
     TestBed.configureTestingModule({
       imports: [TenantDetailComponent],
       providers: [
         { provide: TenantsService, useValue: tenantsService },
+        { provide: TenantAdminService, useValue: tenantAdminService },
         { provide: NotificationService, useValue: notificationService },
         {
           provide: ActivatedRoute,

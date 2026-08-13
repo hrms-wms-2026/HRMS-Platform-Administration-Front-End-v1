@@ -5,12 +5,12 @@
 } @else {
   <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div>
-      <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">OAuth Apps</h1>
-      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Platform-registered OAuth applications for admin SSO and integrations</p>
+      <h1 class="page-title">OAuth Apps</h1>
+      <p class="page-subtitle">Platform-registered OAuth applications for admin SSO and integrations</p>
     </div>
 
     @if (loading()) {
-      <app-loader label="Loading…" />
+      <app-list-rows-skeleton variant="with-icon" [rows]="4" />
     } @else if (errorMessage(); as message) {
       <app-error-banner [message]="message" (retry)="loadApps()" />
     } @else {

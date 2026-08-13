@@ -39,17 +39,9 @@ describe('Sidebar', () => {
     expect(hrefs).toContain('/system-config/providers');
     expect(hrefs).toContain('/system-config/service-keys');
     expect(hrefs).toContain('/system-config/oauth-apps');
+    expect(hrefs).toContain('/system-config/payment-gateways');
+    expect(hrefs).toContain('/system-config/tenant-integrations');
     expect(hrefs).toContain('/audit-logs');
-  });
-
-  it('renders Payment Gateways as non-navigable', () => {
-    const fixture = setup();
-    const item = fixture.debugElement
-      .queryAll(By.css('[data-sidebar-item]'))
-      .find((el) => el.nativeElement.textContent.includes('Payment Gateways'));
-
-    expect(item).toBeTruthy();
-    expect(item!.nativeElement.querySelector('a')).toBeNull();
-    expect(item!.nativeElement.tagName.toLowerCase()).toBe('span');
+    expect(hrefs).toContain('/legal-documents');
   });
 });

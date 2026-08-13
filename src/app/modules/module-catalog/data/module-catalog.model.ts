@@ -6,3 +6,8 @@ export interface ModuleCatalogItem {
   pricingUnit: string;
   isActive: boolean;
 }
+
+export interface ModulePermissionItem {
+  permissionCode: string;
+  isDefaultPermission: boolean;
+}

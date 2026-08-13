@@ -1,0 +1,25 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-slate-900/50" (click)="cancel()"></div>
+  <div class="relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Disconnect Integration</h2>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      Disconnect <span class="font-medium text-slate-900 dark:text-slate-100">{{ credential().integrationKey }}</span>
+      for this tenant? Stored tokens will be cleared and the integration will be marked disconnected.
+    </p>
+
+    @if (errorMessage(); as message) {
+      <p class="mt-3 text-sm text-red-600">{{ message }}</p>
+    }
+
+    <div class="mt-6 flex justify-end gap-2">
+      <app-button label="Cancel" variant="secondary" (clicked)="cancel()" />
+      <app-button
+        label="Disconnect"
+        variant="danger"
+        loadingText="Disconnecting…"
+        [loading]="loading()"
+        (clicked)="confirm()"
+      />
+    </div>
+  </div>
+</div>

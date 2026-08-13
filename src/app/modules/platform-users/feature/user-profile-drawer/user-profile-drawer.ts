@@ -4,11 +4,17 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { PlatformUsersService } from '../../data/platform-users.service';
 import { PlatformUserDetail } from '../../data/platform-user.model';
 import { PlatformRoleSummary } from '../../data/platform-role-summary.model';
+import {
+  PlatformUserSession,
+  platformUserSessionStatus,
+  platformUserSessionStatusLabel,
+  platformUserSessionStatusTone,
+} from '../../data/platform-user-session.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button } from '../../../../shared/ui/button/button';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { DrawerContentSkeleton } from '../../../../shared/ui/drawer-content-skeleton/drawer-content-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 
 const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> = {
@@ -25,7 +31,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 @Component({
   selector: 'app-user-profile-drawer',
-  imports: [Button, StatusBadge, Loader, ErrorBanner, DatePipe],
+  imports: [Button, StatusBadge, DrawerContentSkeleton, ErrorBanner, DatePipe],
   templateUrl: './user-profile-drawer.html',
 })
 export class UserProfileDrawer {
@@ -38,13 +44,28 @@ export class UserProfileDrawer {
   readonly updated = output<void>();
 
   protected readonly canManageRoles = computed(() => this.permissionStore.hasPermission('platform.roles.manage'));
+  protected readonly canViewSessions = computed(() => this.permissionStore.hasPermission('platform.security.read'));
+  protected readonly canManageSessions = computed(() => this.permissionStore.hasPermission('platform.security.manage'));
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  protected readonly sessionsLoading = signal(false);
+  protected readonly revokingSessionId = signal<string | null>(null);
+  protected readonly revokingAll = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly sessionsErrorMessage = signal<string | null>(null);
   protected readonly user = signal<PlatformUserDetail | null>(null);
+  protected readonly sessions = signal<PlatformUserSession[]>([]);
   protected readonly allRoles = signal<PlatformRoleSummary[]>([]);
   protected readonly checkedRoleIds = signal<Set<string>>(new Set());
+
+  protected readonly sessionStatus = platformUserSessionStatus;
+  protected readonly sessionStatusLabel = platformUserSessionStatusLabel;
+  protected readonly sessionStatusTone = platformUserSessionStatusTone;
+
+  protected readonly activeSessionCount = computed(
+    () => this.sessions().filter((session) => platformUserSessionStatus(session) === 'active').length,
+  );
 
   protected readonly hasChanges = computed(() => {
     const original = new Set((this.user()?.roles ?? []).map((r) => r.id));
@@ -111,6 +132,40 @@ export class UserProfileDrawer {
     });
   }
 
+  protected revokeSession(sessionId: string): void {
+    this.revokingSessionId.set(sessionId);
+    this.sessionsErrorMessage.set(null);
+
+    this.usersService.revokeSession(this.userId(), sessionId).subscribe({
+      next: () => {
+        this.revokingSessionId.set(null);
+        this.notificationService.success('Session revoked.');
+        this.loadSessions();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.revokingSessionId.set(null);
+        this.sessionsErrorMessage.set(error.error?.detail ?? 'Could not revoke session.');
+      },
+    });
+  }
+
+  protected revokeAllSessions(): void {
+    this.revokingAll.set(true);
+    this.sessionsErrorMessage.set(null);
+
+    this.usersService.revokeAllSessions(this.userId()).subscribe({
+      next: () => {
+        this.revokingAll.set(false);
+        this.notificationService.success('All sessions revoked.');
+        this.loadSessions();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.revokingAll.set(false);
+        this.sessionsErrorMessage.set(error.error?.detail ?? 'Could not revoke sessions.');
+      },
+    });
+  }
+
   protected close(): void {
     this.closed.emit();
   }
@@ -118,16 +173,37 @@ export class UserProfileDrawer {
   private loadUser(id: string): void {
     this.loading.set(true);
     this.errorMessage.set(null);
+    this.sessions.set([]);
+    this.sessionsErrorMessage.set(null);
 
     this.usersService.getUserById(id).subscribe({
       next: (user) => {
         this.user.set(user);
         this.checkedRoleIds.set(new Set(user.roles.map((r) => r.id)));
         this.loadRoles();
+        if (this.canViewSessions()) {
+          this.loadSessions();
+        }
       },
       error: () => {
         this.errorMessage.set('Something went wrong. Please try again.');
         this.loading.set(false);
+      },
+    });
+  }
+
+  private loadSessions(): void {
+    this.sessionsLoading.set(true);
+    this.sessionsErrorMessage.set(null);
+
+    this.usersService.listSessions(this.userId()).subscribe({
+      next: (sessions) => {
+        this.sessions.set(sessions);
+        this.sessionsLoading.set(false);
+      },
+      error: () => {
+        this.sessionsErrorMessage.set('Could not load sessions.');
+        this.sessionsLoading.set(false);
       },
     });
   }

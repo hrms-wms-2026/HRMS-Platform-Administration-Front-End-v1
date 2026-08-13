@@ -4,14 +4,14 @@ import { SubscriptionPlansService } from '../../data/subscription-plans.service'
 import { SubscriptionPlanSummary } from '../../data/subscription-plan.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { TableSkeleton } from '../../../../shared/ui/table-skeleton/table-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Button } from '../../../../shared/ui/button/button';
 
 @Component({
   selector: 'app-subscription-plans-list',
-  imports: [RouterLink, StatusBadge, Loader, ErrorBanner, EmptyState, Button],
+  imports: [RouterLink, StatusBadge, TableSkeleton, ErrorBanner, EmptyState, Button],
   templateUrl: './subscription-plans-list.html',
 })
 export class SubscriptionPlansList implements OnInit {

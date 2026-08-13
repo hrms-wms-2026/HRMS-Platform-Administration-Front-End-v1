@@ -1,43 +1,64 @@
 @if (loading()) {
-  <app-loader label="Loading…" />
+  <app-page-detail-skeleton [fieldCount]="6" [showActionBar]="true" />
 } @else if (errorMessage(); as message) {
   <app-error-banner [message]="message" (retry)="loadTenant()" />
 } @else if (tenant(); as t) {
   <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ t.companyName }}</h1>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t.slug }}</p>
+        <h1 class="page-title">{{ t.companyName }}</h1>
+        <p class="page-subtitle">{{ t.slug }}</p>
       </div>
-      <app-status-badge [label]="t.status" tone="neutral" />
+      <div class="flex flex-wrap items-center gap-2">
+        <app-status-badge [label]="t.status" tone="neutral" />
+        @if (canEditDraft() && !editing()) {
+          <app-button label="Edit Draft" variant="secondary" (clicked)="startEdit()" />
+        }
+      </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 text-sm">
-      <div>
-        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Industry</p>
-        <p class="text-slate-900 dark:text-slate-100">{{ t.industryProfile }}</p>
+    @if (editing()) {
+      <app-tenant-edit-form
+        [tenant]="t"
+        [saving]="savingTenant()"
+        (submitted)="saveTenant($event)"
+        (cancelled)="cancelEdit()"
+      />
+    } @else {
+      <div class="grid grid-cols-2 gap-4 text-sm lg:grid-cols-3">
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Industry</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ t.industryProfile }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Company Size</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ t.companySizeRange }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Legal Entity Name</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ t.legalEntityName || '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Registration Number</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ t.registrationNumber || '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Country</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ t.country || '—' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Currency</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ t.currency || '—' }}</p>
+        </div>
       </div>
-      <div>
-        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Company Size</p>
-        <p class="text-slate-900 dark:text-slate-100">{{ t.companySizeRange }}</p>
+    }
+
+    @if (canManage()) {
+      <div class="flex flex-wrap gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <app-button label="Invite Admin" variant="secondary" (clicked)="openInviteAdmin()" />
+        <app-button label="Apply Role Template" variant="secondary" (clicked)="openApplyTemplate()" />
       </div>
-      <div>
-        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Legal Entity Name</p>
-        <p class="text-slate-900 dark:text-slate-100">{{ t.legalEntityName || '—' }}</p>
-      </div>
-      <div>
-        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Registration Number</p>
-        <p class="text-slate-900 dark:text-slate-100">{{ t.registrationNumber || '—' }}</p>
-      </div>
-      <div>
-        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Country</p>
-        <p class="text-slate-900 dark:text-slate-100">{{ t.country || '—' }}</p>
-      </div>
-      <div>
-        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Currency</p>
-        <p class="text-slate-900 dark:text-slate-100">{{ t.currency || '—' }}</p>
-      </div>
-    </div>
+    }
 
     @if (t.status === 'provisioning' && provisioningSummary(); as summary) {
       <div class="flex flex-col gap-3 border-t border-slate-100 dark:border-slate-800 pt-4">
@@ -76,6 +97,14 @@
       </div>
     }
 
+    @if (canRead()) {
+      <app-tenant-roles-panel
+        [tenantId]="tenantId"
+        [canManage]="canManage()"
+        (refreshed)="loadTenant()"
+      />
+    }
+
     @if (availableActions().length > 0) {
       <div class="flex gap-3 border-t border-slate-100 dark:border-slate-800 pt-4">
         @for (action of availableActions(); track action.action) {
@@ -112,4 +141,18 @@
       (cancelled)="cancelActivation()"
     />
   }
+
+  <app-tenant-invite-admin-modal
+    [open]="inviteAdminOpen()"
+    [tenantId]="tenantId"
+    (closed)="closeInviteAdmin()"
+    (invited)="onAdminInvited()"
+  />
+
+  <app-tenant-apply-role-template-modal
+    [open]="applyTemplateOpen()"
+    [tenantId]="tenantId"
+    (closed)="closeApplyTemplate()"
+    (applied)="onTemplateApplied()"
+  />
 }

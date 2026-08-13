@@ -1,0 +1,101 @@
+<app-modal [open]="open()" title="Apply Template to Tenant" (closed)="close()">
+  @if (loadingTenants()) {
+    <div class="flex flex-col gap-4">
+      <div>
+        <app-skeleton width="6rem" height="0.75rem" />
+        <div class="mt-1">
+          <app-skeleton width="100%" height="2.5rem" />
+        </div>
+      </div>
+      <app-list-rows-skeleton variant="selectable" [rows]="5" />
+    </div>
+  } @else {
+    <div class="flex flex-col gap-4">
+      <div>
+        <label for="tenantSearch" class="text-sm font-medium text-slate-700 dark:text-slate-300">Search Tenants</label>
+        <input
+          id="tenantSearch"
+          type="text"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          [value]="search()"
+          (input)="onSearchChange($any($event.target).value)"
+          placeholder="Company name, slug, or email…"
+        />
+      </div>
+
+      @if (tenants().length === 0 && !loadingTenants()) {
+        <p class="text-center text-sm text-slate-500 dark:text-slate-400 py-4">
+          No tenants found matching your search.
+        </p>
+      } @else {
+        <div class="max-h-96 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-lg">
+          @for (tenant of tenants(); track tenant.id) {
+            <label
+              class="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer border-b border-slate-100 dark:border-slate-800 last:border-0"
+            >
+              <input
+                type="radio"
+                name="tenant"
+                [value]="tenant.id"
+                [(ngModel)]="selectedTenantId"
+                class="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+              />
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-slate-900 dark:text-slate-100 truncate">{{ tenant.name }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ tenant.slug }}</p>
+              </div>
+              <span
+                class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                [class.bg-green-50]="tenant.status === 'Active'"
+                [class.text-green-700]="tenant.status === 'Active'"
+                [class.dark:bg-green-950]="tenant.status === 'Active'"
+                [class.dark:text-green-300]="tenant.status === 'Active'"
+                [class.bg-amber-50]="tenant.status === 'Pending'"
+                [class.text-amber-700]="tenant.status === 'Pending'"
+                [class.dark:bg-amber-950]="tenant.status === 'Pending'"
+                [class.dark:text-amber-300]="tenant.status === 'Pending'"
+                [class.bg-red-50]="tenant.status === 'Suspended'"
+                [class.text-red-700]="tenant.status === 'Suspended'"
+                [class.dark:bg-red-950]="tenant.status === 'Suspended'"
+                [class.dark:text-red-300]="tenant.status === 'Suspended'"
+                [class.bg-slate-50]="tenant.status === 'Provisioning'"
+                [class.text-slate-700]="tenant.status === 'Provisioning'"
+                [class.dark:bg-slate-800]="tenant.status === 'Provisioning'"
+                [class.dark:text-slate-300]="tenant.status === 'Provisioning'"
+              >
+                {{ tenant.status }}
+              </span>
+            </label>
+          }
+        </div>
+      }
+
+      @if (errorMessage(); as message) {
+        <app-error-banner [message]="message" />
+      }
+
+      <div class="flex items-center gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+            [checked]="forceUpdate()"
+            (change)="forceUpdate.set($any($event.target).checked)"
+          />
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Force update (overwrite existing application)</span>
+        </label>
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+        <app-button label="Cancel" variant="secondary" (clicked)="close()" />
+        <app-button
+          label="Apply Template"
+          variant="indigo"
+          [loading]="loadingApply()"
+          [disabled]="!canApply()"
+          (clicked)="applyToTenant()"
+        />
+      </div>
+    </div>
+  }
+</app-modal>

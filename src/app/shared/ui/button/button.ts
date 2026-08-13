@@ -26,8 +26,9 @@ export class Button {
   readonly clicked = output<void>();
 
   protected readonly classes = computed(() => {
+    const typography = this.variant() === 'indigo' ? 'primary-button' : 'action-button';
     const base =
-      'rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50';
+      `rounded-lg px-4 py-2.5 transition disabled:cursor-not-allowed disabled:opacity-50 ${typography}`;
     const width = this.fullWidth() ? 'w-full' : '';
     const variants: Record<ButtonVariant, string> = {
       primary: 'bg-blue-700 text-white hover:bg-blue-800',

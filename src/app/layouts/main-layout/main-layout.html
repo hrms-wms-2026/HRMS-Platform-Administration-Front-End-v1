@@ -1,12 +1,12 @@
-<div class="application-shell flex h-screen flex-col overflow-hidden dark:bg-slate-950">
+<div class="application-shell scrollbar-hidden flex h-screen flex-col overflow-hidden dark:bg-slate-950">
   <a class="skip-to-main" href="#main-content">Skip to main content</a>
 
   <app-navbar />
 
-  <section class="flex flex-1 overflow-hidden">
+  <section class="flex min-w-0 flex-1 overflow-hidden">
     <app-sidebar />
 
-    <main id="main-content" tabindex="-1" class="flex-1 overflow-y-auto p-6 dark:bg-slate-950">
+    <main id="main-content" tabindex="-1" class="scrollbar-hidden min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-6 dark:bg-slate-950">
       <router-outlet />
     </main>
   </section>

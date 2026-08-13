@@ -1,0 +1,127 @@
+@if (loading()) {
+  <app-page-detail-skeleton [fieldCount]="4" [showContentBlock]="true" [showActionBar]="true" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadDetail()" />
+} @else if (detail(); as d) {
+  @if (editing()) {
+    <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <h1 class="page-title">Edit {{ d.template.name }}</h1>
+      <app-configuration-template-form
+        mode="edit"
+        [initialValue]="d.template"
+        [saving]="saving()"
+        (submitted)="saveEdit($event)"
+      />
+      <div class="flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+        <app-button label="Cancel" variant="secondary" (clicked)="cancelEdit()" />
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="page-title">{{ d.template.name }}</h1>
+          <p class="page-subtitle">{{ d.template.templateKey }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <app-status-badge
+            [label]="d.template.isActive ? 'Active' : 'Inactive'"
+            [tone]="d.template.isActive ? 'success' : 'neutral'"
+          />
+          @if (d.template.isSystem) {
+            <span class="inline-flex items-center rounded bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+              System
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Template Type</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ d.template.templateType }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Version</p>
+          <p class="text-slate-900 dark:text-slate-100">v{{ d.template.version }}</p>
+        </div>
+        <div class="col-span-2">
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Modules</p>
+          @if (d.template.moduleKeys.length > 0) {
+            <div class="mt-1 flex flex-wrap gap-1">
+              @for (moduleKey of d.template.moduleKeys; track moduleKey) {
+                <span class="inline-flex items-center rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                  {{ moduleKey }}
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">—</p>
+          }
+        </div>
+        <div class="col-span-2">
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Industry Profile Tag</p>
+          @if (d.template.industryProfileTag) {
+            <p class="mt-1 text-sm text-slate-900 dark:text-slate-100">{{ d.template.industryProfileTag }}</p>
+          } @else {
+            <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">—</p>
+          }
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Description</p>
+        @if (d.template.description) {
+          <p class="mt-1 text-sm text-slate-900 dark:text-slate-100">{{ d.template.description }}</p>
+        } @else {
+          <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">—</p>
+        }
+      </div>
+
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Payload (JSON)</p>
+        <pre class="mt-1 overflow-x-auto rounded-lg bg-slate-50 p-4 text-xs font-mono text-slate-900 dark:bg-slate-800 dark:text-slate-100">
+{{ d.template.payloadJson | json }}
+        </pre>
+      </div>
+
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Created</p>
+        <p class="mt-1 text-sm text-slate-900 dark:text-slate-100">{{ d.template.createdAt }}</p>
+        @if (d.template.updatedAt) {
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Updated: {{ d.template.updatedAt }}</p>
+        }
+      </div>
+
+      @if (canManage()) {
+        <div class="flex flex-wrap gap-3 border-t border-slate-100 dark:border-slate-800 pt-4">
+          <app-button label="Edit" variant="secondary" (clicked)="startEdit()" />
+          <app-button label="Clone" variant="secondary" (clicked)="cloneTemplate()" />
+          <app-button label="Apply to Tenant" variant="indigo" (clicked)="openApplyModal()" />
+          @if (d.template.isActive) {
+            <app-button label="Deactivate" variant="danger" (clicked)="startDeactivate()" />
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (pendingDeactivate()) {
+    <app-confirmation-dialog
+      [open]="true"
+      title="Deactivate template?"
+      message="This will soft-deactivate the template. It will no longer be available for new applications but existing tenant applications remain intact."
+      confirmLabel="Deactivate"
+      confirmVariant="danger"
+      (confirm)="confirmDeactivate()"
+      (cancel)="cancelDeactivate()"
+    />
+  }
+
+  <app-apply-to-tenant-modal
+    [open]="applyModalOpen()"
+    [templateId]="templateId"
+    (closed)="closeApplyModal()"
+    (applied)="onApplied()"
+  />
+}

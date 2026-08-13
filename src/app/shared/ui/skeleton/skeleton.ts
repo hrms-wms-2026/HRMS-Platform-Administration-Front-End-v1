@@ -4,7 +4,7 @@ import { Component, input } from '@angular/core';
   selector: 'app-skeleton',
   template: `
     <div
-      class="animate-pulse rounded bg-slate-200"
+      class="animate-pulse rounded bg-slate-200 dark:bg-slate-700"
       [style.width]="width()"
       [style.height]="height()"
     ></div>

@@ -1,7 +1,7 @@
 <div class="mx-auto flex max-w-3xl flex-col gap-6 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
   <div>
-    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Create Tenant</h1>
-    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Step {{ currentStep() }} of 4</p>
+    <h1 class="page-title">Create Tenant</h1>
+    <p class="page-subtitle">Step {{ currentStep() }} of 4</p>
   </div>
 
   @if (currentStep() === 1) {
@@ -74,65 +74,75 @@
         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Registration Number (optional)</label>
         <input type="text" formControlName="registrationNumber" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
       </div>
-      <div class="grid grid-cols-3 gap-4">
+      <div class="flex flex-col gap-4 border-t border-slate-100 pt-4 dark:border-slate-800">
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Country</label>
-          <select
+          <app-searchable-select
             formControlName="country"
-            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-            [class.border-slate-300]="!(companyForm.controls.country.invalid && companyForm.controls.country.touched)"
-            [class.border-red-500]="companyForm.controls.country.invalid && companyForm.controls.country.touched"
-          >
-            <option value="">Select…</option>
-            @for (option of countryOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+            class="mt-1 block"
+            placeholder="Type country name or code…"
+            emptyMessage="No country matches your search."
+            [invalid]="companyForm.controls.country.invalid && companyForm.controls.country.touched"
+            [options]="countryOptions"
+            [pinnedOptions]="popularCountryOptions"
+          />
           @if (companyForm.controls.country.invalid && companyForm.controls.country.touched) {
             <p class="mt-1 text-xs text-red-700">Country is required.</p>
           }
         </div>
-        <div>
-          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Timezone</label>
-          <select
-            formControlName="timezone"
-            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-            [class.border-slate-300]="!(companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched)"
-            [class.border-red-500]="companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched"
-          >
-            <option value="">Select…</option>
-            @for (option of timezoneOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
-          @if (companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched) {
-            <p class="mt-1 text-xs text-red-700">Timezone is required.</p>
-          }
-        </div>
-        <div>
-          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Currency</label>
-          <select
-            formControlName="currency"
-            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
-            [class.border-slate-300]="!(companyForm.controls.currency.invalid && companyForm.controls.currency.touched)"
-            [class.border-red-500]="companyForm.controls.currency.invalid && companyForm.controls.currency.touched"
-          >
-            <option value="">Select…</option>
-            @for (option of currencyOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
-          @if (companyForm.controls.currency.invalid && companyForm.controls.currency.touched) {
-            <p class="mt-1 text-xs text-red-700">Currency is required.</p>
-          }
-        </div>
+
+        @if (countryDefaultsHint(); as hint) {
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ hint }}</p>
+        }
+
+        @if (loadingCountryDefaults()) {
+          <p class="text-sm text-slate-500 dark:text-slate-400">Loading regional defaults…</p>
+        } @else if (regionFieldsEnabled()) {
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Timezone</label>
+              <app-searchable-select
+                formControlName="timezone"
+                class="mt-1 block"
+                placeholder="Type timezone…"
+                emptyMessage="No timezone matches your search."
+                [invalid]="companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched"
+                [options]="timezoneOptions()"
+              />
+              @if (companyForm.controls.timezone.invalid && companyForm.controls.timezone.touched) {
+                <p class="mt-1 text-xs text-red-700">Timezone is required.</p>
+              }
+            </div>
+            <div>
+              <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Currency</label>
+              <app-searchable-select
+                formControlName="currency"
+                class="mt-1 block"
+                placeholder="Type USD, dollar, etc."
+                emptyMessage="No currency matches your search."
+                [invalid]="companyForm.controls.currency.invalid && companyForm.controls.currency.touched"
+                [options]="currencyOptions()"
+                [pinnedOptions]="popularCurrencyOptions"
+              />
+              @if (companyForm.controls.currency.invalid && companyForm.controls.currency.touched) {
+                <p class="mt-1 text-xs text-red-700">Currency is required.</p>
+              }
+            </div>
+          </div>
+        } @else if (companyForm.controls.country.value) {
+          <p class="text-sm text-slate-500 dark:text-slate-400">Loading regional defaults…</p>
+        } @else {
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Pick a country first — timezone and currency will be suggested automatically.
+          </p>
+        }
       </div>
     </form>
   }
 
   @if (currentStep() === 2) {
     @if (loadingPlans()) {
-      <app-loader label="Loading plans…" />
+      <app-stacked-cards-skeleton [cards]="3" />
     } @else if (plansError(); as message) {
       <app-error-banner [message]="message" />
     } @else {
