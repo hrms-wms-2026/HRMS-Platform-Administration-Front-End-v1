@@ -61,7 +61,7 @@ describe('EditPaymentGatewayModal', () => {
     expect(fixture.componentInstance['form'].controls.countryCodes.value).toBe('US');
   });
 
-  it('saves updated metadata and country routes', () => {
+  it('saves updated metadata and country routes without isActive', () => {
     const fixture = setup();
     let updated = false;
     fixture.componentInstance.updated.subscribe(() => (updated = true));
@@ -69,7 +69,6 @@ describe('EditPaymentGatewayModal', () => {
     fixture.componentInstance['form'].patchValue({
       displayName: 'Stripe Global',
       countryCodes: 'US, GB',
-      isActive: false,
     });
     fixture.componentInstance['submit']();
 
@@ -77,10 +76,80 @@ describe('EditPaymentGatewayModal', () => {
       'gw-1',
       expect.objectContaining({
         displayName: 'Stripe Global',
-        isActive: false,
         countryCodes: ['US', 'GB'],
       }),
     );
+    expect(paymentGatewaysService.update.mock.calls[0][1]).not.toHaveProperty('isActive');
     expect(updated).toBe(true);
+  });
+
+  it('rejects whitespace or comma-only country codes and does not call update', () => {
+    const fixture = setup();
+
+    fixture.componentInstance['form'].patchValue({
+      countryCodes: '  ,  , ',
+    });
+    fixture.componentInstance['submit']();
+
+    expect(paymentGatewaysService.update).not.toHaveBeenCalled();
+    expect(fixture.componentInstance['errorMessage']()).toBe('At least one country route is required.');
+  });
+
+  it('sends blank optional fields as empty strings so backend can clear them', () => {
+    const fixture = setup();
+
+    fixture.componentInstance['form'].patchValue({
+      logoUrl: '',
+      publicKey: '',
+      merchantId: '',
+      webhookUrl: '',
+      countryCodes: 'US',
+    });
+    fixture.componentInstance['submit']();
+
+    expect(paymentGatewaysService.update).toHaveBeenCalledWith(
+      'gw-1',
+      expect.objectContaining({
+        displayName: 'Stripe US',
+        logoUrl: '',
+        publicKey: '',
+        merchantId: '',
+        webhookUrl: '',
+        countryCodes: ['US'],
+        countryNameSnapshots: [expect.any(String)],
+      }),
+    );
+  });
+
+  it('emits closed on backdrop click', () => {
+    const fixture = setup();
+    let closed = false;
+    fixture.componentInstance.closed.subscribe(() => (closed = true));
+
+    const backdrop = fixture.nativeElement.querySelector('[aria-label="Close dialog"]') as HTMLElement;
+    backdrop.click();
+
+    expect(closed).toBe(true);
+  });
+
+  it('emits closed on Escape', () => {
+    const fixture = setup();
+    let closed = false;
+    fixture.componentInstance.closed.subscribe(() => (closed = true));
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(closed).toBe(true);
+  });
+
+  it('does not close on inner modal click', () => {
+    const fixture = setup();
+    let closed = false;
+    fixture.componentInstance.closed.subscribe(() => (closed = true));
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    dialog.click();
+
+    expect(closed).toBe(false);
   });
 });

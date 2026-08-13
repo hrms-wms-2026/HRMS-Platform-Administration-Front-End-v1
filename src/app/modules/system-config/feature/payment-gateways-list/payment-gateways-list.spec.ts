@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { PaymentGatewaysList } from './payment-gateways-list';
 import { PaymentGatewaysService } from '../../data/payment-gateways.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
@@ -177,5 +177,31 @@ describe('PaymentGatewaysList', () => {
 
     expect(paymentGatewaysService.update).toHaveBeenCalledWith('gw-1', { isActive: true });
     expect(notificationService.success).toHaveBeenCalledWith('Gateway activated.');
+  });
+
+  it('disables edit, rotate, and toggle actions while a row is toggling', () => {
+    paymentGatewaysService.update.mockReturnValue(NEVER);
+    const fixture = TestBed.createComponent(PaymentGatewaysList);
+    fixture.detectChanges();
+
+    const deactivateButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find((button: Element) =>
+      button.textContent?.includes('Deactivate'),
+    ) as HTMLButtonElement | undefined;
+    deactivateButton?.click();
+    fixture.detectChanges();
+
+    const rowButtons = Array.from(fixture.nativeElement.querySelectorAll('tbody button')) as HTMLButtonElement[];
+    expect(rowButtons.every((button) => button.disabled)).toBe(true);
+  });
+
+  it('does not open edit modal for a row currently toggling', () => {
+    const fixture = TestBed.createComponent(PaymentGatewaysList);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+
+    component['togglingGatewayId'].set('gw-1');
+    component['openEditModal'](sampleGateway);
+
+    expect(component['editingGateway']()).toBeNull();
   });
 });

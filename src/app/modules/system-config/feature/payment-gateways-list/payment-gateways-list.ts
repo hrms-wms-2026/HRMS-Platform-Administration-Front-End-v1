@@ -84,10 +84,16 @@ export class PaymentGatewaysList implements OnInit {
   }
 
   protected openRotateModal(gateway: PaymentGatewayConfig): void {
+    if (this.isToggling(gateway.id)) {
+      return;
+    }
     this.rotatingGateway.set(gateway);
   }
 
   protected openEditModal(gateway: PaymentGatewayConfig): void {
+    if (this.isToggling(gateway.id)) {
+      return;
+    }
     this.editingGateway.set(gateway);
   }
 
@@ -102,6 +108,9 @@ export class PaymentGatewaysList implements OnInit {
   }
 
   protected toggleActive(gateway: PaymentGatewayConfig): void {
+    if (this.isToggling(gateway.id)) {
+      return;
+    }
     this.togglingGatewayId.set(gateway.id);
     this.paymentGatewaysService.update(gateway.id, { isActive: !gateway.isActive }).subscribe({
       next: () => {

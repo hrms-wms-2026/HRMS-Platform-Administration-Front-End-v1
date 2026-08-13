@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { Component, HostListener, effect, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as isoCountries from 'i18n-iso-countries';
@@ -36,7 +36,6 @@ export class EditPaymentGatewayModal {
     merchantId: [''],
     webhookUrl: [''],
     countryCodes: ['', Validators.required],
-    isActive: [true],
   });
 
   constructor() {
@@ -54,7 +53,6 @@ export class EditPaymentGatewayModal {
         merchantId: gateway.merchantId ?? '',
         webhookUrl: gateway.webhookUrl ?? '',
         countryCodes: activeCountryCodes,
-        isActive: gateway.isActive,
       });
       this.errorMessage.set(null);
     });
@@ -68,6 +66,10 @@ export class EditPaymentGatewayModal {
 
     const value = this.form.getRawValue();
     const countryCodes = parseCountryCodesInput(value.countryCodes);
+    if (countryCodes.length === 0) {
+      this.errorMessage.set('At least one country route is required.');
+      return;
+    }
     if (countryCodes.some((code) => code.length !== 2)) {
       this.errorMessage.set('Country codes must be 2-letter ISO codes (e.g. US, GB, LK).');
       return;
@@ -79,11 +81,10 @@ export class EditPaymentGatewayModal {
 
     const payload: UpdatePaymentGatewayMetadataPayload = {
       displayName: value.displayName.trim(),
-      logoUrl: value.logoUrl.trim() || undefined,
-      publicKey: value.publicKey.trim() || undefined,
-      merchantId: value.merchantId.trim() || undefined,
-      webhookUrl: value.webhookUrl.trim() || undefined,
-      isActive: value.isActive,
+      logoUrl: value.logoUrl.trim(),
+      publicKey: value.publicKey.trim(),
+      merchantId: value.merchantId.trim(),
+      webhookUrl: value.webhookUrl.trim(),
       countryCodes,
       countryNameSnapshots,
     };
@@ -104,5 +105,18 @@ export class EditPaymentGatewayModal {
 
   cancel(): void {
     this.closed.emit();
+  }
+
+  protected onBackdropClick(): void {
+    if (!this.loading()) {
+      this.cancel();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (!this.loading()) {
+      this.cancel();
+    }
   }
 }

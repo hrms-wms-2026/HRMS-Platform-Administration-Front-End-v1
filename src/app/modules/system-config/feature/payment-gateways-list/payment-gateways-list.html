@@ -69,14 +69,25 @@
                 @if (canManage()) {
                   <td>
                     <div class="flex flex-wrap gap-2">
-                      <app-button label="Edit" variant="secondary" (clicked)="openEditModal(gateway)" />
+                      <app-button
+                        label="Edit"
+                        variant="secondary"
+                        [disabled]="isToggling(gateway.id)"
+                        (clicked)="openEditModal(gateway)"
+                      />
                       <app-button
                         [label]="gateway.isActive ? 'Deactivate' : 'Activate'"
                         variant="secondary"
+                        [disabled]="isToggling(gateway.id)"
                         [loading]="isToggling(gateway.id)"
                         (clicked)="toggleActive(gateway)"
                       />
-                      <app-button label="Rotate" variant="secondary" (clicked)="openRotateModal(gateway)" />
+                      <app-button
+                        label="Rotate"
+                        variant="secondary"
+                        [disabled]="isToggling(gateway.id)"
+                        (clicked)="openRotateModal(gateway)"
+                      />
                     </div>
                   </td>
                 }
