@@ -48,4 +48,44 @@ describe('PaymentGatewaysService', () => {
       expect.objectContaining({ gatewayKey: 'stripe_us_prod', provider: 'stripe' }),
     ]);
   });
+
+  it('updates payment gateway metadata', () => {
+    let result: unknown;
+    service
+      .update('gw-1', {
+        displayName: 'Stripe Global',
+        isActive: false,
+        countryCodes: ['US', 'GB'],
+        countryNameSnapshots: ['United States', 'United Kingdom of Great Britain and Northern Ireland'],
+      })
+      .subscribe((item) => (result = item));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/system-config/payment-gateways/gw-1`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({
+      displayName: 'Stripe Global',
+      isActive: false,
+      countryCodes: ['US', 'GB'],
+      countryNameSnapshots: ['United States', 'United Kingdom of Great Britain and Northern Ireland'],
+    });
+    req.flush({
+      id: 'gw-1',
+      gatewayKey: 'stripe_us_prod',
+      provider: 'stripe',
+      environment: 'production',
+      displayName: 'Stripe Global',
+      logoUrl: null,
+      publicKey: 'pk_test',
+      merchantId: null,
+      webhookUrl: null,
+      isActive: false,
+      hasActiveCredential: true,
+      activeCredentialVersion: 1,
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-02T00:00:00Z',
+      countryRoutes: [],
+    });
+
+    expect(result).toEqual(expect.objectContaining({ displayName: 'Stripe Global', isActive: false }));
+  });
 });

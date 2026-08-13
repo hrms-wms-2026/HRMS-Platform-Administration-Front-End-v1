@@ -134,6 +134,7 @@ export const API_ENDPOINTS = {
       providers: '/system-config/payment-gateway-providers',
       verify: '/system-config/payment-gateways/verify',
       create: '/system-config/payment-gateways',
+      update: (id: string) => `/system-config/payment-gateways/${id}`,
       rotateCredentials: (id: string) => `/system-config/payment-gateways/${id}/credentials/rotate`,
       resolve: '/payment-gateways/resolve',
     },

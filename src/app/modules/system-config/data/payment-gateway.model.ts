@@ -48,6 +48,17 @@ export interface CreatePaymentGatewayPayload {
   countryNameSnapshots: (string | null)[];
 }
 
+export interface UpdatePaymentGatewayMetadataPayload {
+  displayName?: string;
+  logoUrl?: string;
+  publicKey?: string;
+  merchantId?: string;
+  webhookUrl?: string;
+  isActive?: boolean;
+  countryCodes?: string[];
+  countryNameSnapshots?: (string | null)[];
+}
+
 export interface RotatePaymentGatewayCredentialsPayload {
   secretKey: string;
   webhookSecret?: string;

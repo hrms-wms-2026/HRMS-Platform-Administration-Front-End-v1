@@ -68,7 +68,16 @@
                 </td>
                 @if (canManage()) {
                   <td>
-                    <app-button label="Rotate" variant="secondary" (clicked)="openRotateModal(gateway)" />
+                    <div class="flex flex-wrap gap-2">
+                      <app-button label="Edit" variant="secondary" (clicked)="openEditModal(gateway)" />
+                      <app-button
+                        [label]="gateway.isActive ? 'Deactivate' : 'Activate'"
+                        variant="secondary"
+                        [loading]="isToggling(gateway.id)"
+                        (clicked)="toggleActive(gateway)"
+                      />
+                      <app-button label="Rotate" variant="secondary" (clicked)="openRotateModal(gateway)" />
+                    </div>
                   </td>
                 }
               </tr>
@@ -81,6 +90,14 @@
 
   @if (showAddModal()) {
     <app-add-payment-gateway-modal (created)="onGatewayCreated()" (closed)="onAddModalClosed()" />
+  }
+
+  @if (editingGateway(); as gateway) {
+    <app-edit-payment-gateway-modal
+      [gateway]="gateway"
+      (updated)="onGatewayUpdated()"
+      (closed)="onEditModalClosed()"
+    />
   }
 
   @if (rotatingGateway(); as gateway) {

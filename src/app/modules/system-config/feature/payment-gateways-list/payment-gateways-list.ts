@@ -10,6 +10,7 @@ import { TableSkeleton } from '../../../../shared/ui/table-skeleton/table-skelet
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { AddPaymentGatewayModal } from '../add-payment-gateway-modal/add-payment-gateway-modal';
+import { EditPaymentGatewayModal } from '../edit-payment-gateway-modal/edit-payment-gateway-modal';
 import { RotatePaymentGatewayModal } from '../rotate-payment-gateway-modal/rotate-payment-gateway-modal';
 
 @Component({
@@ -21,6 +22,7 @@ import { RotatePaymentGatewayModal } from '../rotate-payment-gateway-modal/rotat
     ErrorBanner,
     EmptyState,
     AddPaymentGatewayModal,
+    EditPaymentGatewayModal,
     RotatePaymentGatewayModal,
     NgTemplateOutlet,
   ],
@@ -40,7 +42,9 @@ export class PaymentGatewaysList implements OnInit {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly gateways = signal<PaymentGatewayConfig[]>([]);
   protected readonly showAddModal = signal(false);
+  protected readonly editingGateway = signal<PaymentGatewayConfig | null>(null);
   protected readonly rotatingGateway = signal<PaymentGatewayConfig | null>(null);
+  protected readonly togglingGatewayId = signal<string | null>(null);
 
   ngOnInit(): void {
     if (!this.canView()) {
@@ -81,6 +85,39 @@ export class PaymentGatewaysList implements OnInit {
 
   protected openRotateModal(gateway: PaymentGatewayConfig): void {
     this.rotatingGateway.set(gateway);
+  }
+
+  protected openEditModal(gateway: PaymentGatewayConfig): void {
+    this.editingGateway.set(gateway);
+  }
+
+  protected onGatewayUpdated(): void {
+    this.editingGateway.set(null);
+    this.notificationService.success('Payment gateway updated.');
+    this.loadGateways();
+  }
+
+  protected onEditModalClosed(): void {
+    this.editingGateway.set(null);
+  }
+
+  protected toggleActive(gateway: PaymentGatewayConfig): void {
+    this.togglingGatewayId.set(gateway.id);
+    this.paymentGatewaysService.update(gateway.id, { isActive: !gateway.isActive }).subscribe({
+      next: () => {
+        this.togglingGatewayId.set(null);
+        this.notificationService.success(gateway.isActive ? 'Gateway deactivated.' : 'Gateway activated.');
+        this.loadGateways();
+      },
+      error: (error: { error?: { detail?: string } }) => {
+        this.togglingGatewayId.set(null);
+        this.notificationService.error(error.error?.detail ?? 'Could not update gateway status.');
+      },
+    });
+  }
+
+  protected isToggling(gatewayId: string): boolean {
+    return this.togglingGatewayId() === gatewayId;
   }
 
   protected onCredentialsRotated(): void {

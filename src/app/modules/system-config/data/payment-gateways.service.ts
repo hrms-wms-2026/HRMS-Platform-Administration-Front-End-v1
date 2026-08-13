@@ -9,6 +9,7 @@ import {
   PaymentGatewayConfig,
   PaymentGatewayProviderOption,
   RotatePaymentGatewayCredentialsPayload,
+  UpdatePaymentGatewayMetadataPayload,
 } from './payment-gateway.model';
 
 @Injectable({ providedIn: 'root' })
@@ -44,6 +45,14 @@ export class PaymentGatewaysService {
   create(payload: CreatePaymentGatewayPayload): Observable<PaymentGatewayConfig> {
     return this.http.post<PaymentGatewayConfig>(
       `${this.baseUrl}${API_ENDPOINTS.systemConfig.paymentGateways.create}`,
+      payload,
+      { withCredentials: true },
+    );
+  }
+
+  update(id: string, payload: UpdatePaymentGatewayMetadataPayload): Observable<PaymentGatewayConfig> {
+    return this.http.put<PaymentGatewayConfig>(
+      `${this.baseUrl}${API_ENDPOINTS.systemConfig.paymentGateways.update(id)}`,
       payload,
       { withCredentials: true },
     );
