@@ -9,7 +9,6 @@ import { ConfigurationTemplatesService } from '../../data/configuration-template
 import { Modal } from '../../../../shared/ui/modal/modal';
 import { Button } from '../../../../shared/ui/button/button';
 import { ListRowsSkeleton } from '../../../../shared/ui/list-rows-skeleton/list-rows-skeleton';
-import { Skeleton } from '../../../../shared/ui/skeleton/skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 
 interface TenantOption {
@@ -21,7 +20,7 @@ interface TenantOption {
 
 @Component({
   selector: 'app-apply-to-tenant-modal',
-  imports: [CommonModule, Modal, Button, ListRowsSkeleton, Skeleton, ErrorBanner, FormsModule],
+  imports: [CommonModule, Modal, Button, ListRowsSkeleton, ErrorBanner, FormsModule],
   templateUrl: './apply-to-tenant-modal.html',
 })
 export class ApplyToTenantModal implements OnInit {
