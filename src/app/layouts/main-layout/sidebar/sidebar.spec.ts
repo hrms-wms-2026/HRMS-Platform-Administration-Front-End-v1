@@ -36,6 +36,7 @@ describe('Sidebar', () => {
     expect(hrefs).toContain('/users');
     expect(hrefs).toContain('/roles');
     expect(hrefs).toContain('/subscription-plans');
+    expect(hrefs).toContain('/invoices');
     expect(hrefs).toContain('/system-config/providers');
     expect(hrefs).toContain('/system-config/service-keys');
     expect(hrefs).toContain('/system-config/oauth-apps');

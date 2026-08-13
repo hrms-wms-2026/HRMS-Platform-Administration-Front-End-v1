@@ -100,6 +100,24 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'invoices',
+        data: { breadcrumb: { section: 'Subscription & Billing', page: 'Invoices' } },
+        loadComponent: () =>
+          import('./modules/invoices/feature/invoices-list/invoices-list').then((m) => m.InvoicesList),
+      },
+      {
+        path: 'invoices/:id',
+        data: {
+          breadcrumb: {
+            section: 'Subscription & Billing',
+            parent: { label: 'Invoices', route: '/invoices' },
+            page: 'Invoice Details',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/invoices/feature/invoice-detail/invoice-detail').then((m) => m.InvoiceDetail),
+      },
+      {
         path: 'configuration-templates',
         data: { breadcrumb: { section: 'Template Management', page: 'Configuration Templates' } },
         loadComponent: () =>

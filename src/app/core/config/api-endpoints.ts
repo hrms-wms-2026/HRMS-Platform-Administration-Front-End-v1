@@ -62,6 +62,15 @@ export const API_ENDPOINTS = {
     update: (id: string) => `/subscription-plans/${id}`,
     archive: (id: string) => `/subscription-plans/${id}`,
   },
+  invoices: {
+    list: '/invoices',
+    byId: (id: string) => `/invoices/${id}`,
+    listByTenant: (tenantId: string) => `/tenants/${tenantId}/invoices`,
+    create: '/invoices',
+    markPaid: (id: string) => `/invoices/${id}/mark-paid`,
+    void: (id: string) => `/invoices/${id}/void`,
+    resendEmail: (id: string) => `/invoices/${id}/resend-email`,
+  },
   moduleCatalog: {
     list: '/modules/catalog',
     permissions: (moduleKey: string) => `/modules/catalog/${moduleKey}/permissions`,
