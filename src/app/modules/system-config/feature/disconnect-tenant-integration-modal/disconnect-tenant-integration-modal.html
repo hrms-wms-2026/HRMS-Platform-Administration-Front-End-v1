@@ -1,6 +1,14 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-  <div class="fixed inset-0 bg-slate-900/50" (click)="cancel()"></div>
-  <div class="relative w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl">
+  <div
+    class="fixed inset-0 bg-slate-900/50"
+    role="button"
+    tabindex="0"
+    aria-label="Close dialog"
+    (click)="cancel()"
+    (keydown.enter)="cancel()"
+    (keydown.space)="$event.preventDefault(); cancel()"
+  ></div>
+  <div class="relative z-10 w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl">
     <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Disconnect Integration</h2>
     <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
       Disconnect <span class="font-medium text-slate-900 dark:text-slate-100">{{ credential().integrationKey }}</span>
