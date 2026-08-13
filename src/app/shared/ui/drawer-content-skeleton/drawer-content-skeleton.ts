@@ -8,25 +8,25 @@ import { Skeleton } from '../skeleton/skeleton';
     <div role="status" aria-live="polite" aria-label="Loading content">
       @if (showAvatar()) {
         <div class="flex items-center gap-3">
-          <app-skeleton width="3rem" height="3rem" />
+          <app-skeleton width="3rem" height="3rem" shape="circle" />
           <div class="flex-1">
-            <app-skeleton width="60%" height="0.875rem" />
+            <app-skeleton width="60%" height="0.875rem" shape="line" />
             <div class="mt-2">
-              <app-skeleton width="80%" height="0.75rem" />
+              <app-skeleton width="80%" height="0.75rem" shape="line" tone="soft" />
             </div>
           </div>
         </div>
         <div class="mt-3">
-          <app-skeleton width="4.5rem" height="1.25rem" />
+          <app-skeleton width="4.5rem" height="1.25rem" shape="pill" />
         </div>
       }
 
       <div class="mt-4 grid grid-cols-2 gap-3">
         @for (field of fieldIndices(); track field) {
           <div>
-            <app-skeleton width="4rem" height="0.625rem" />
+            <app-skeleton width="4rem" height="0.625rem" shape="line" tone="soft" />
             <div class="mt-2">
-              <app-skeleton width="80%" height="0.875rem" />
+              <app-skeleton width="80%" height="0.875rem" shape="line" />
             </div>
           </div>
         }
@@ -34,15 +34,15 @@ import { Skeleton } from '../skeleton/skeleton';
 
       @if (showForm()) {
         <div class="mt-6 flex flex-col gap-4">
-          <app-skeleton width="5rem" height="1.25rem" />
+          <app-skeleton width="5rem" height="1.25rem" shape="pill" />
           <div class="rounded-lg border border-slate-100 dark:border-slate-800 p-3">
-            <app-skeleton width="100%" height="4rem" />
+            <app-skeleton width="100%" height="4rem" shape="block" />
           </div>
           @for (field of formFieldIndices(); track field) {
             <div>
-              <app-skeleton width="30%" height="0.75rem" />
+              <app-skeleton width="30%" height="0.75rem" shape="line" tone="soft" />
               <div class="mt-2">
-                <app-skeleton width="100%" height="2.5rem" />
+                <app-skeleton width="100%" height="2.5rem" shape="block" />
               </div>
             </div>
           }
@@ -51,12 +51,12 @@ import { Skeleton } from '../skeleton/skeleton';
 
       @if (showCheckboxSection()) {
         <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
-          <app-skeleton width="4rem" height="0.625rem" />
+          <app-skeleton width="4rem" height="0.625rem" shape="line" tone="soft" />
           <div class="mt-3 flex flex-col gap-3">
             @for (item of checkboxIndices(); track item) {
               <div class="flex items-center gap-2">
-                <app-skeleton width="1rem" height="1rem" />
-                <app-skeleton width="50%" height="0.875rem" />
+                <app-skeleton width="1rem" height="1rem" shape="block" />
+                <app-skeleton width="50%" height="0.875rem" shape="line" />
               </div>
             }
           </div>

@@ -9,14 +9,18 @@ import { Skeleton } from '../skeleton/skeleton';
       @if (showGroupHeaders()) {
         @for (group of groupIndices(); track group) {
           <div class="flex flex-col gap-2">
-            <app-skeleton width="6rem" height="0.625rem" />
+            <app-skeleton width="6rem" height="0.625rem" shape="line" tone="soft" />
             <div class="divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
               @for (row of rowIndices(); track row) {
                 <div class="flex items-center justify-between gap-4 px-4 py-3">
-                  <app-skeleton [width]="variant() === 'with-icon' ? '40%' : '30%'" height="0.875rem" />
+                  <app-skeleton
+                    [width]="variant() === 'with-icon' ? '40%' : '30%'"
+                    height="0.875rem"
+                    shape="line"
+                  />
                   <div class="flex items-center gap-3">
-                    <app-skeleton width="5.5rem" height="1.25rem" />
-                    <app-skeleton width="8rem" height="0.75rem" />
+                    <app-skeleton width="5.5rem" height="1.25rem" shape="pill" />
+                    <app-skeleton width="8rem" height="0.75rem" shape="line" tone="soft" />
                   </div>
                 </div>
               }
@@ -28,21 +32,21 @@ import { Skeleton } from '../skeleton/skeleton';
           @for (row of rowIndices(); track row) {
             <div class="flex items-center gap-3 px-4 py-3">
               @if (variant() === 'with-icon') {
-                <app-skeleton width="2rem" height="2rem" />
+                <app-skeleton width="2rem" height="2rem" shape="circle" />
               }
               @if (variant() === 'selectable') {
-                <app-skeleton width="1rem" height="1rem" />
+                <app-skeleton width="1rem" height="1rem" shape="block" />
               }
               <div class="flex-1">
-                <app-skeleton width="45%" height="0.875rem" />
+                <app-skeleton width="45%" height="0.875rem" shape="line" />
                 <div class="mt-1">
-                  <app-skeleton width="30%" height="0.75rem" />
+                  <app-skeleton width="30%" height="0.75rem" shape="line" tone="soft" />
                 </div>
               </div>
               @if (variant() === 'selectable') {
-                <app-skeleton width="4rem" height="1.25rem" />
+                <app-skeleton width="4rem" height="1.25rem" shape="pill" />
               } @else if (variant() === 'with-icon') {
-                <app-skeleton width="5.5rem" height="1.25rem" />
+                <app-skeleton width="5.5rem" height="1.25rem" shape="pill" />
               }
             </div>
           }

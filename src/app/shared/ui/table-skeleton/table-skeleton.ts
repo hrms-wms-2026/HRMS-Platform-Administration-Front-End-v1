@@ -12,7 +12,7 @@ import { Skeleton } from '../skeleton/skeleton';
             <tr class="border-b border-slate-200 dark:border-slate-700">
               @for (width of columns(); track $index) {
                 <th class="py-2 pr-4">
-                  <app-skeleton height="0.75rem" [width]="width" />
+                  <app-skeleton height="0.75rem" [width]="width" shape="line" tone="soft" />
                 </th>
               }
             </tr>
@@ -22,7 +22,12 @@ import { Skeleton } from '../skeleton/skeleton';
               <tr class="border-b border-slate-100 dark:border-slate-800">
                 @for (width of columns(); track $index) {
                   <td class="py-3 pr-4">
-                    <app-skeleton [height]="$index === 0 ? '1.25rem' : '0.875rem'" [width]="width" />
+                    <app-skeleton
+                      [height]="$index === 0 ? '1.25rem' : '0.875rem'"
+                      [width]="width"
+                      [shape]="$index === columns().length - 1 ? 'pill' : 'line'"
+                      [tone]="$index === 0 ? 'default' : 'soft'"
+                    />
                   </td>
                 }
               </tr>
@@ -33,8 +38,8 @@ import { Skeleton } from '../skeleton/skeleton';
 
       @if (showPagination()) {
         <div class="flex items-center justify-end gap-2">
-          <app-skeleton width="5.5rem" height="2.25rem" />
-          <app-skeleton width="5.5rem" height="2.25rem" />
+          <app-skeleton width="5.5rem" height="2.25rem" shape="pill" />
+          <app-skeleton width="5.5rem" height="2.25rem" shape="pill" />
         </div>
       }
     </div>

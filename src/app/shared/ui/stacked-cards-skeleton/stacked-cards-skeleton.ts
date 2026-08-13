@@ -9,10 +9,10 @@ import { Skeleton } from '../skeleton/skeleton';
       @for (card of cardIndices(); track card) {
         <div class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 p-4">
           <div class="flex flex-col gap-2">
-            <app-skeleton width="8rem" height="0.875rem" />
-            <app-skeleton width="12rem" height="0.75rem" />
+            <app-skeleton width="8rem" height="0.875rem" shape="line" />
+            <app-skeleton width="12rem" height="0.75rem" shape="line" tone="soft" />
           </div>
-          <app-skeleton width="5rem" height="0.875rem" />
+          <app-skeleton width="5rem" height="0.875rem" shape="pill" />
         </div>
       }
     </div>

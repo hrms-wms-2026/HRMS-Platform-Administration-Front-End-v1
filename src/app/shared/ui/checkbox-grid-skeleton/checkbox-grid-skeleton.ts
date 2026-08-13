@@ -13,8 +13,8 @@ import { Skeleton } from '../skeleton/skeleton';
     >
       @for (item of itemIndices(); track item) {
         <div class="flex items-center gap-2">
-          <app-skeleton width="1rem" height="1rem" />
-          <app-skeleton width="70%" height="0.875rem" />
+          <app-skeleton width="1rem" height="1rem" shape="block" />
+          <app-skeleton width="70%" height="0.875rem" shape="line" />
         </div>
       }
     </div>
