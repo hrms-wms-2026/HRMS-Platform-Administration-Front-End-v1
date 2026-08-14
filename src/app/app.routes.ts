@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   {
@@ -17,55 +18,73 @@ export const routes: Routes = [
       },
       {
         path: 'tenants',
-        data: { breadcrumb: { section: 'Platform', page: 'Tenants' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform', page: 'Tenants' },
+          permission: 'platform.tenants.read',
+        },
         loadComponent: () =>
           import('./modules/tenants/feature/tenants-list/tenants-list').then((m) => m.TenantsList),
       },
       {
         path: 'tenants/new',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Platform',
             parent: { label: 'Tenants', route: '/tenants' },
             page: 'New Tenant',
           },
+          permission: 'platform.tenants.manage',
         },
         loadComponent: () =>
           import('./modules/tenants/feature/tenant-wizard/tenant-wizard').then((m) => m.TenantWizard),
       },
       {
         path: 'tenants/:id',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Platform',
             parent: { label: 'Tenants', route: '/tenants' },
             page: 'Tenant Details',
           },
+          permission: 'platform.tenants.read',
         },
         loadComponent: () =>
           import('./modules/tenants/feature/tenant-detail/tenant-detail').then((m) => m.TenantDetailComponent),
       },
       {
         path: 'roles',
-        data: { breadcrumb: { section: 'Access Control', page: 'Roles' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Access Control', page: 'Roles' },
+          permission: 'platform.roles.read',
+        },
         loadComponent: () =>
           import('./modules/roles/feature/roles-list/roles-list').then((m) => m.RolesList),
       },
       {
         path: 'roles/:id',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Access Control',
             parent: { label: 'Roles', route: '/roles' },
             page: 'Role Details',
           },
+          permission: 'platform.roles.read',
         },
         loadComponent: () =>
           import('./modules/roles/feature/role-detail/role-detail').then((m) => m.RoleDetail),
       },
       {
         path: 'subscription-plans',
-        data: { breadcrumb: { section: 'Subscription & Billing', page: 'Subscription Plans' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Subscription & Billing', page: 'Subscription Plans' },
+          permission: 'platform.subscriptions.read',
+        },
         loadComponent: () =>
           import('./modules/subscription-plans/feature/subscription-plans-list/subscription-plans-list').then(
             (m) => m.SubscriptionPlansList,
@@ -73,12 +92,14 @@ export const routes: Routes = [
       },
       {
         path: 'subscription-plans/new',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Subscription & Billing',
             parent: { label: 'Subscription Plans', route: '/subscription-plans' },
             page: 'New Plan',
           },
+          permission: 'platform.subscriptions.manage',
         },
         loadComponent: () =>
           import('./modules/subscription-plans/feature/subscription-plan-create/subscription-plan-create').then(
@@ -87,12 +108,14 @@ export const routes: Routes = [
       },
       {
         path: 'subscription-plans/:id',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Subscription & Billing',
             parent: { label: 'Subscription Plans', route: '/subscription-plans' },
             page: 'Plan Details',
           },
+          permission: 'platform.subscriptions.read',
         },
         loadComponent: () =>
           import('./modules/subscription-plans/feature/subscription-plan-detail/subscription-plan-detail').then(
@@ -101,25 +124,35 @@ export const routes: Routes = [
       },
       {
         path: 'invoices',
-        data: { breadcrumb: { section: 'Subscription & Billing', page: 'Invoices' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Subscription & Billing', page: 'Invoices' },
+          permission: 'platform.subscriptions.read',
+        },
         loadComponent: () =>
           import('./modules/invoices/feature/invoices-list/invoices-list').then((m) => m.InvoicesList),
       },
       {
         path: 'invoices/:id',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Subscription & Billing',
             parent: { label: 'Invoices', route: '/invoices' },
             page: 'Invoice Details',
           },
+          permission: 'platform.subscriptions.read',
         },
         loadComponent: () =>
           import('./modules/invoices/feature/invoice-detail/invoice-detail').then((m) => m.InvoiceDetail),
       },
       {
         path: 'configuration-templates',
-        data: { breadcrumb: { section: 'Template Management', page: 'Configuration Templates' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Template Management', page: 'Configuration Templates' },
+          permission: 'platform.templates.read',
+        },
         loadComponent: () =>
           import('./modules/configuration-templates/feature/configuration-templates-list/configuration-templates-list').then(
             (m) => m.ConfigurationTemplatesList,
@@ -127,12 +160,14 @@ export const routes: Routes = [
       },
       {
         path: 'configuration-templates/new',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Template Management',
             parent: { label: 'Configuration Templates', route: '/configuration-templates' },
             page: 'New Template',
           },
+          permission: 'platform.templates.manage',
         },
         loadComponent: () =>
           import('./modules/configuration-templates/feature/configuration-template-create/configuration-template-create').then(
@@ -141,12 +176,14 @@ export const routes: Routes = [
       },
       {
         path: 'configuration-templates/:id',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Template Management',
             parent: { label: 'Configuration Templates', route: '/configuration-templates' },
             page: 'Template Details',
           },
+          permission: 'platform.templates.read',
         },
         loadComponent: () =>
           import('./modules/configuration-templates/feature/configuration-template-detail/configuration-template-detail').then(
@@ -155,7 +192,11 @@ export const routes: Routes = [
       },
       {
         path: 'role-templates',
-        data: { breadcrumb: { section: 'Template Management', page: 'Role Templates' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Template Management', page: 'Role Templates' },
+          permission: 'platform.templates.read',
+        },
         loadComponent: () =>
           import('./modules/role-templates/feature/role-templates-list/role-templates-list').then(
             (m) => m.RoleTemplatesList,
@@ -163,12 +204,14 @@ export const routes: Routes = [
       },
       {
         path: 'role-templates/new',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Template Management',
             parent: { label: 'Role Templates', route: '/role-templates' },
             page: 'New Template',
           },
+          permission: 'platform.templates.manage',
         },
         loadComponent: () =>
           import('./modules/role-templates/feature/role-template-create/role-template-create').then(
@@ -177,12 +220,14 @@ export const routes: Routes = [
       },
       {
         path: 'role-templates/:id',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Template Management',
             parent: { label: 'Role Templates', route: '/role-templates' },
             page: 'Template Details',
           },
+          permission: 'platform.templates.read',
         },
         loadComponent: () =>
           import('./modules/role-templates/feature/role-template-detail/role-template-detail').then(
@@ -191,7 +236,11 @@ export const routes: Routes = [
       },
       {
         path: 'users',
-        data: { breadcrumb: { section: 'Access Control', page: 'Users' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Access Control', page: 'Users' },
+          permission: 'platform.accounts.read',
+        },
         loadComponent: () =>
           import('./modules/platform-users/feature/platform-users-list/platform-users-list').then(
             (m) => m.PlatformUsersList,
@@ -212,7 +261,11 @@ export const routes: Routes = [
       },
       {
         path: 'audit-logs',
-        data: { breadcrumb: { section: 'Security & Compliance', page: 'Audit Logs' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Security & Compliance', page: 'Audit Logs' },
+          permission: 'platform.audit.read',
+        },
         loadComponent: () =>
           import('./modules/audit-logs/feature/audit-logs-list/audit-logs-list').then(
             (m) => m.AuditLogsList,
@@ -220,7 +273,11 @@ export const routes: Routes = [
       },
       {
         path: 'legal-documents',
-        data: { breadcrumb: { section: 'Security & Compliance', page: 'Legal Documents' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Security & Compliance', page: 'Legal Documents' },
+          permission: 'platform.compliance.read',
+        },
         loadComponent: () =>
           import('./modules/legal-compliance/feature/legal-documents-list/legal-documents-list').then(
             (m) => m.LegalDocumentsList,
@@ -228,12 +285,14 @@ export const routes: Routes = [
       },
       {
         path: 'legal-documents/new',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Security & Compliance',
             parent: { label: 'Legal Documents', route: '/legal-documents' },
             page: 'New Document',
           },
+          permission: 'platform.compliance.manage',
         },
         loadComponent: () =>
           import('./modules/legal-compliance/feature/legal-document-create/legal-document-create').then(
@@ -242,12 +301,14 @@ export const routes: Routes = [
       },
       {
         path: 'legal-documents/:id',
+        canActivate: [permissionGuard],
         data: {
           breadcrumb: {
             section: 'Security & Compliance',
             parent: { label: 'Legal Documents', route: '/legal-documents' },
             page: 'Document Details',
           },
+          permission: 'platform.compliance.read',
         },
         loadComponent: () =>
           import('./modules/legal-compliance/feature/legal-document-detail/legal-document-detail').then(
@@ -256,7 +317,11 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/oauth-apps',
-        data: { breadcrumb: { section: 'Platform Configuration', page: 'OAuth Apps' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'OAuth Apps' },
+          permission: 'platform.system_config.read',
+        },
         loadComponent: () =>
           import('./modules/system-config/feature/oauth-apps-list/oauth-apps-list').then(
             (m) => m.OAuthAppsList,
@@ -264,7 +329,11 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/service-keys',
-        data: { breadcrumb: { section: 'Platform Configuration', page: 'Service Keys' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'Service Keys' },
+          permission: 'platform.system_config.read',
+        },
         loadComponent: () =>
           import('./modules/system-config/feature/service-keys-list/service-keys-list').then(
             (m) => m.ServiceKeysList,
@@ -272,7 +341,11 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/providers',
-        data: { breadcrumb: { section: 'Platform Configuration', page: 'Providers Overview' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'Providers Overview' },
+          permission: 'platform.system_config.read',
+        },
         loadComponent: () =>
           import('./modules/system-config/feature/providers-overview/providers-overview').then(
             (m) => m.ProvidersOverview,
@@ -280,7 +353,11 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/integrations',
-        data: { breadcrumb: { section: 'Platform Configuration', page: 'Integration Catalog' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'Integration Catalog' },
+          permission: 'platform.system_config.read',
+        },
         loadComponent: () =>
           import('./modules/system-config/feature/integration-catalog-list/integration-catalog-list').then(
             (m) => m.IntegrationCatalogList,
@@ -288,7 +365,11 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/payment-gateways',
-        data: { breadcrumb: { section: 'Platform Configuration', page: 'Payment Gateways' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'Payment Gateways' },
+          permission: 'platform.system_config.read',
+        },
         loadComponent: () =>
           import('./modules/system-config/feature/payment-gateways-list/payment-gateways-list').then(
             (m) => m.PaymentGatewaysList,
@@ -296,7 +377,11 @@ export const routes: Routes = [
       },
       {
         path: 'system-config/tenant-integrations',
-        data: { breadcrumb: { section: 'Platform Configuration', page: 'Tenant Integrations' } },
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'Tenant Integrations' },
+          permission: 'platform.system_config.read',
+        },
         loadComponent: () =>
           import('./modules/system-config/feature/tenant-integrations-list/tenant-integrations-list').then(
             (m) => m.TenantIntegrationsList,

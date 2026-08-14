@@ -1,234 +1,120 @@
 <aside class="scrollbar-hidden flex h-full min-h-0 w-56 shrink-0 flex-col gap-1 overflow-x-hidden overflow-y-auto border-r border-slate-200 bg-white p-3.5 pb-4 dark:border-slate-700 dark:bg-slate-900">
-  <p class="sidebar-section-title">Platform</p>
+  @for (section of sections(); track section.label) {
+    <p class="sidebar-section-title" [class.mt-3]="!$first">{{ section.label }}</p>
 
-  <a
-    routerLink="/"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    [routerLinkActiveOptions]="{ exact: true }"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <rect x="3" y="3" width="8" height="8" rx="1.5"></rect>
-      <rect x="13" y="3" width="8" height="8" rx="1.5"></rect>
-      <rect x="3" y="13" width="8" height="8" rx="1.5"></rect>
-      <rect x="13" y="13" width="8" height="8" rx="1.5"></rect>
-    </svg>
-    Dashboard
-  </a>
-  <a
-    routerLink="/tenants"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <rect x="4" y="3" width="16" height="18" rx="1"></rect>
-      <rect x="7" y="6" width="3" height="3"></rect>
-      <rect x="14" y="6" width="3" height="3"></rect>
-      <rect x="7" y="11" width="3" height="3"></rect>
-      <rect x="14" y="11" width="3" height="3"></rect>
-      <rect x="10" y="16" width="4" height="5"></rect>
-    </svg>
-    Tenants
-  </a>
-
-  <p class="sidebar-section-title mt-3">Access Control</p>
-
-  <a
-    routerLink="/users"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <circle cx="9" cy="8" r="3"></circle>
-      <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path>
-      <circle cx="17" cy="9" r="2.5"></circle>
-      <path d="M15.5 14a5 5 0 0 1 4.5 5.5"></path>
-    </svg>
-    Users
-  </a>
-  <a
-    routerLink="/roles"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"></path>
-    </svg>
-    Roles
-  </a>
-
-  <p class="sidebar-section-title mt-3">Subscription &amp; Billing</p>
-
-  <a
-    routerLink="/subscription-plans"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-      ></path>
-    </svg>
-    Subscription Plans
-  </a>
-  <a
-    routerLink="/invoices"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-    </svg>
-    Invoices
-  </a>
-
-  <p class="sidebar-section-title mt-3">Template Management</p>
-
-  <a
-    routerLink="/configuration-templates"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-      <path d="M14 2v6h6"></path>
-      <line x1="16" y1="13" x2="8" y2="13"></line>
-      <line x1="16" y1="17" x2="8" y2="17"></line>
-      <line x1="10" y1="9" x2="8" y2="9"></line>
-    </svg>
-    Configuration Templates
-  </a>
-  <a
-    routerLink="/role-templates"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"></path>
-      <path d="M9 12h6"></path>
-      <path d="M12 8v8"></path>
-    </svg>
-    Role Templates
-  </a>
-
-  <p class="sidebar-section-title mt-3">System Config</p>
-
-  <a
-    routerLink="/system-config/providers"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <rect x="4" y="4" width="16" height="4" rx="1"></rect>
-      <rect x="4" y="10" width="16" height="4" rx="1"></rect>
-      <rect x="4" y="16" width="16" height="4" rx="1"></rect>
-    </svg>
-    Providers
-  </a>
-  <a
-    routerLink="/system-config/integrations"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-    </svg>
-    Integration Catalog
-  </a>
-  <a
-    routerLink="/system-config/service-keys"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <line x1="4" y1="6" x2="20" y2="6"></line>
-      <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"></circle>
-      <line x1="4" y1="12" x2="20" y2="12"></line>
-      <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"></circle>
-      <line x1="4" y1="18" x2="20" y2="18"></line>
-      <circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"></circle>
-    </svg>
-    Service Keys
-  </a>
-  <a
-    routerLink="/system-config/oauth-apps"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M9 12h6"></path>
-      <path d="M8 8h1a4 4 0 0 1 0 8H8"></path>
-      <path d="M16 8h-1a4 4 0 0 0 0 8h1"></path>
-    </svg>
-    OAuth Apps
-  </a>
-  <a
-    routerLink="/system-config/payment-gateways"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <rect x="3" y="6" width="18" height="12" rx="2"></rect>
-      <line x1="3" y1="10" x2="21" y2="10"></line>
-    </svg>
-    Payment Gateways
-  </a>
-  <a
-    routerLink="/system-config/tenant-integrations"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-      <circle cx="7" cy="7" r="2"></circle>
-    </svg>
-    Tenant Integrations
-  </a>
-
-  <p class="sidebar-section-title mt-3">Security &amp; Compliance</p>
-
-  <a
-    routerLink="/audit-logs"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <rect x="5" y="3" width="14" height="18" rx="1.5"></rect>
-      <line x1="8" y1="8" x2="16" y2="8"></line>
-      <line x1="8" y1="12" x2="16" y2="12"></line>
-      <line x1="8" y1="16" x2="12" y2="16"></line>
-    </svg>
-    Audit Logs
-  </a>
-  <a
-    routerLink="/legal-documents"
-    routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
-    data-sidebar-item
-    class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 pl-4 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-  >
-    <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path d="M9 12h6"></path>
-      <path d="M9 16h6"></path>
-      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-      <path d="M13 2v7h7"></path>
-    </svg>
-    Legal Documents
-  </a>
+    @for (item of section.items; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="bg-indigo-50 text-indigo-700 font-semibold dark:bg-indigo-950 dark:text-indigo-300"
+        [routerLinkActiveOptions]="{ exact: !!item.exact }"
+        data-sidebar-item
+        [class.pl-4]="section.indent"
+        class="flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 sidebar-item text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+      >
+        <svg class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          @switch (item.icon) {
+            @case ('dashboard') {
+              <rect x="3" y="3" width="8" height="8" rx="1.5"></rect>
+              <rect x="13" y="3" width="8" height="8" rx="1.5"></rect>
+              <rect x="3" y="13" width="8" height="8" rx="1.5"></rect>
+              <rect x="13" y="13" width="8" height="8" rx="1.5"></rect>
+            }
+            @case ('tenants') {
+              <rect x="4" y="3" width="16" height="18" rx="1"></rect>
+              <rect x="7" y="6" width="3" height="3"></rect>
+              <rect x="14" y="6" width="3" height="3"></rect>
+              <rect x="7" y="11" width="3" height="3"></rect>
+              <rect x="14" y="11" width="3" height="3"></rect>
+              <rect x="10" y="16" width="4" height="5"></rect>
+            }
+            @case ('users') {
+              <circle cx="9" cy="8" r="3"></circle>
+              <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path>
+              <circle cx="17" cy="9" r="2.5"></circle>
+              <path d="M15.5 14a5 5 0 0 1 4.5 5.5"></path>
+            }
+            @case ('roles') {
+              <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"></path>
+            }
+            @case ('subscription-plans') {
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+              ></path>
+            }
+            @case ('invoices') {
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+              />
+            }
+            @case ('configuration-templates') {
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <path d="M14 2v6h6"></path>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <line x1="10" y1="9" x2="8" y2="9"></line>
+            }
+            @case ('role-templates') {
+              <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"></path>
+              <path d="M9 12h6"></path>
+              <path d="M12 8v8"></path>
+            }
+            @case ('providers') {
+              <rect x="4" y="4" width="16" height="4" rx="1"></rect>
+              <rect x="4" y="10" width="16" height="4" rx="1"></rect>
+              <rect x="4" y="16" width="16" height="4" rx="1"></rect>
+            }
+            @case ('integration-catalog') {
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+              />
+            }
+            @case ('service-keys') {
+              <line x1="4" y1="6" x2="20" y2="6"></line>
+              <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"></circle>
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+              <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"></circle>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+              <circle cx="11" cy="18" r="2" fill="currentColor" stroke="none"></circle>
+            }
+            @case ('oauth-apps') {
+              <path d="M9 12h6"></path>
+              <path d="M8 8h1a4 4 0 0 1 0 8H8"></path>
+              <path d="M16 8h-1a4 4 0 0 0 0 8h1"></path>
+            }
+            @case ('payment-gateways') {
+              <rect x="3" y="6" width="18" height="12" rx="2"></rect>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            }
+            @case ('tenant-integrations') {
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+              />
+              <circle cx="7" cy="7" r="2"></circle>
+            }
+            @case ('audit-logs') {
+              <rect x="5" y="3" width="14" height="18" rx="1.5"></rect>
+              <line x1="8" y1="8" x2="16" y2="8"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+              <line x1="8" y1="16" x2="12" y2="16"></line>
+            }
+            @case ('legal-documents') {
+              <path d="M9 12h6"></path>
+              <path d="M9 16h6"></path>
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+              <path d="M13 2v7h7"></path>
+            }
+          }
+        </svg>
+        {{ item.label }}
+      </a>
+    }
+  }
 </aside>
