@@ -1,0 +1,20 @@
+<ng-template #content>
+  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ label() }}</p>
+  <p class="mt-2 text-2xl font-semibold" [class]="valueClasses()">{{ value() }}</p>
+  @if (hint()) {
+    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ hint() }}</p>
+  }
+</ng-template>
+
+@if (link()) {
+  <a
+    [routerLink]="link()"
+    class="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-indigo-500"
+  >
+    <ng-container [ngTemplateOutlet]="content" />
+  </a>
+} @else {
+  <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <ng-container [ngTemplateOutlet]="content" />
+  </div>
+}
