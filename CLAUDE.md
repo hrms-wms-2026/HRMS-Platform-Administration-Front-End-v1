@@ -110,13 +110,16 @@ via an `effect()` watching `PermissionStore.hasPermission()`.
   `http://localhost:5139/swagger/v1/swagger.json` (tenant surface). A 404 from a guessed path is
   not proof the feature doesn't exist — check swagger first.
 
-### Known backend gap
-There is currently no session-restore endpoint (`GET /admin/v1/auth/me` or `/context`) on the
-admin API — only `login`, `logout`, `google-callback` exist under `AdminAuth`. Until backend adds
-one, `SessionInitializerService.initialize()` will always fail to restore a session after a page
-refresh, even with a valid cookie. This is expected for now, not a frontend bug — don't "fix" it
-by guessing a path. `SessionInitializerService` wraps this call in a 3s `timeout()` for exactly
-this reason — see [`session-initializer.service.ts`](src/app/core/auth/session-initializer.service.ts).
+### Auth/session state
+- Frontend API base paths use `/admin/v1` (see `environment.apiUrl`).
+- The session-restore endpoint exists at `GET /admin/v1/auth/me` — `SessionInitializerService`
+  calls it on bootstrap to restore a session after a page refresh; it is no longer missing, don't
+  reintroduce a "backend gap" workaround for it.
+- Google SSO frontend journey (`google-callback`) is out of Release 1 scope for now — don't wire
+  it up until it's explicitly scoped.
+- `/me` may not yet return the caller's `permissions` for every account. Until it reliably does,
+  `PermissionStore.canAccess()` fails open (allows) whenever `permissions` is empty, so route
+  guards and the sidebar don't lock users out — see `permission.store.ts`.
 
 ### CSRF cookie/header names (verified against live backend, 2026-07-27)
 The admin API does **not** use the Angular-default `XSRF-TOKEN` cookie / `X-XSRF-TOKEN` header
