@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { Sidebar } from './sidebar';
 import { PermissionStore } from '../../../core/permissions/permission.store';
+import { MobileNavService } from '../mobile-nav.service';
 
 describe('Sidebar', () => {
   function setup(permissions: string[] = []) {
@@ -87,5 +88,57 @@ describe('Sidebar', () => {
     expect(text).toContain('Platform');
     expect(text).not.toContain('Access Control');
     expect(text).not.toContain('System Config');
+  });
+
+  it('renders the sidebar on desktop without an off-canvas backdrop', () => {
+    const fixture = setup();
+
+    expect(fixture.debugElement.query(By.css('aside'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('[role="button"][aria-label="Close navigation menu"]'))).toBeNull();
+  });
+
+  it('shows a backdrop when the mobile nav is open', () => {
+    const fixture = setup();
+    const mobileNav = TestBed.inject(MobileNavService);
+
+    mobileNav.open.set(true);
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css('[role="button"][aria-label="Close navigation menu"]'))).toBeTruthy();
+  });
+
+  it('closes the mobile nav when the backdrop is clicked', () => {
+    const fixture = setup();
+    const mobileNav = TestBed.inject(MobileNavService);
+    mobileNav.open.set(true);
+    fixture.detectChanges();
+
+    const backdrop = fixture.debugElement.query(By.css('[role="button"][aria-label="Close navigation menu"]'));
+    backdrop.nativeElement.click();
+
+    expect(mobileNav.open()).toBe(false);
+  });
+
+  it('closes the mobile nav on Escape', () => {
+    const fixture = setup();
+    const mobileNav = TestBed.inject(MobileNavService);
+    mobileNav.open.set(true);
+    fixture.detectChanges();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(mobileNav.open()).toBe(false);
+  });
+
+  it('closes the mobile nav when a nav link is clicked', () => {
+    const fixture = setup();
+    const mobileNav = TestBed.inject(MobileNavService);
+    mobileNav.open.set(true);
+    fixture.detectChanges();
+
+    const link = fixture.debugElement.query(By.css('a[data-sidebar-item]'));
+    link.nativeElement.click();
+
+    expect(mobileNav.open()).toBe(false);
   });
 });
