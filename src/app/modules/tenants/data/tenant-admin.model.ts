@@ -77,3 +77,33 @@ export interface ApplyTenantRoleTemplateResult {
   rejectedPermissions: string[];
   universalPermissions: string[];
 }
+
+export interface TenantSession {
+  id: string;
+  userId: string;
+  userEmail: string | null;
+  userFullName: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  startedAt: string;
+  lastActivityAt: string;
+  expiresAt: string;
+}
+
+export interface TenantAuditLogEntry {
+  id: string;
+  userId: string | null;
+  userEmail: string | null;
+  action: string;
+  resourceType: string;
+  resourceId: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+}
+
+export interface TenantAuditLogListResponse {
+  items: TenantAuditLogEntry[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}

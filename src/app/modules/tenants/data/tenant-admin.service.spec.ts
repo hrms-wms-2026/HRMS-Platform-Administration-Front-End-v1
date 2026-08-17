@@ -174,4 +174,70 @@ describe('TenantAdminService', () => {
       universalPermissions: ['auth.login'],
     });
   });
+
+  it('lists tenant sessions', () => {
+    let result: unknown;
+    service.listSessions('tenant-1').subscribe((sessions) => (result = sessions));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/tenants/tenant-1/sessions`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+
+    const session = {
+      id: 'session-1',
+      userId: 'user-1',
+      userEmail: 'jane@acme.test',
+      userFullName: 'Jane Doe',
+      ipAddress: '10.0.0.1',
+      userAgent: 'Chrome/Windows',
+      startedAt: '2026-08-17T10:00:00Z',
+      lastActivityAt: '2026-08-17T11:00:00Z',
+      expiresAt: '2026-08-17T18:00:00Z',
+    };
+    req.flush([session]);
+
+    expect(result).toEqual([session]);
+  });
+
+  it('revokes a tenant session', () => {
+    service.revokeSession('tenant-1', 'session-1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/tenants/tenant-1/sessions/session-1/revoke`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(null);
+  });
+
+  it('lists the tenant audit log with pagination params', () => {
+    let result: unknown;
+    service.listAuditLog('tenant-1', 2, 10).subscribe((response) => (result = response));
+
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.apiUrl}/tenants/tenant-1/audit-log`,
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('page')).toBe('2');
+    expect(req.request.params.get('page_size')).toBe('10');
+
+    const response = {
+      items: [
+        {
+          id: 'entry-1',
+          userId: 'user-1',
+          userEmail: 'jane@acme.test',
+          action: 'tenant.suspended',
+          resourceType: 'tenant',
+          resourceId: 'tenant-1',
+          ipAddress: '10.0.0.1',
+          createdAt: '2026-08-17T10:00:00Z',
+        },
+      ],
+      totalCount: 1,
+      page: 2,
+      pageSize: 10,
+    };
+    req.flush(response);
+
+    expect(result).toEqual(response);
+  });
 });

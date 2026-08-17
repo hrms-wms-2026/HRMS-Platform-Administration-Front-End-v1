@@ -112,6 +112,17 @@
       </div>
     }
 
+    @if (canViewSessions() || canViewAuditLog()) {
+      <div class="grid gap-4 border-t border-slate-100 pt-4 dark:border-slate-800 lg:grid-cols-2">
+        @if (canViewSessions()) {
+          <app-tenant-sessions-panel [tenantId]="tenantId" [canManage]="canManageSessions()" />
+        }
+        @if (canViewAuditLog()) {
+          <app-tenant-audit-log-panel [tenantId]="tenantId" />
+        }
+      </div>
+    }
+
     @if (availableActions().length > 0) {
       <div class="flex gap-3 border-t border-slate-100 dark:border-slate-800 pt-4">
         @for (action of availableActions(); track action.action) {
