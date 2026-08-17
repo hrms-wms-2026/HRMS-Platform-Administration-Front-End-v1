@@ -35,7 +35,7 @@ describe('Sidebar', () => {
       .map((link) => link.nativeElement.getAttribute('href'));
   }
 
-  it('renders all five section labels', () => {
+  it('renders all six section labels', () => {
     const fixture = setup();
     const text = fixture.nativeElement.textContent;
 
@@ -44,6 +44,7 @@ describe('Sidebar', () => {
     expect(text).toContain('Subscription & Billing');
     expect(text).toContain('System Config');
     expect(text).toContain('Security & Compliance');
+    expect(text).toContain('Support');
   });
 
   it('renders all built screens as real navigable links', () => {
@@ -64,6 +65,7 @@ describe('Sidebar', () => {
     expect(links).toContain('/system-config/tenant-integrations');
     expect(links).toContain('/audit-logs');
     expect(links).toContain('/legal-documents');
+    expect(links).toContain('/support/tickets');
   });
 
   it('dashboard remains accessible even when no permissions are loaded', () => {

@@ -158,6 +158,15 @@ export const API_ENDPOINTS = {
       disconnect: (id: string) => `/system-config/tenant-integrations/${id}/disconnect`,
     },
   },
+  support: {
+    tickets: {
+      list: '/support/tickets',
+      byId: (ticketId: string) => `/support/tickets/${ticketId}`,
+      create: '/support/tickets',
+      updateStatus: (ticketId: string) => `/support/tickets/${ticketId}/status`,
+      addComment: (ticketId: string) => `/support/tickets/${ticketId}/comments`,
+    },
+  },
   logs: {
     create: '/logs',
   },

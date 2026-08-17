@@ -1,0 +1,79 @@
+<div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Create Support Ticket</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Log an issue reported outside the portal</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+    <div>
+      <label for="tenantId" class="text-sm font-medium text-slate-700 dark:text-slate-300">Tenant</label>
+      <select
+        id="tenantId"
+        formControlName="tenantId"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+      >
+        <option value="">Platform-wide (no tenant)</option>
+        @for (tenant of tenants(); track tenant.id) {
+          <option [value]="tenant.id">{{ tenant.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="subject" class="text-sm font-medium text-slate-700 dark:text-slate-300">Subject</label>
+      <input
+        id="subject"
+        type="text"
+        formControlName="subject"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+      @if (form.controls.subject.invalid && form.controls.subject.touched) {
+        <p class="mt-1 text-xs text-red-700">Subject is required.</p>
+      }
+    </div>
+
+    <div>
+      <label for="description" class="text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
+      <textarea
+        id="description"
+        rows="4"
+        formControlName="description"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      ></textarea>
+      @if (form.controls.description.invalid && form.controls.description.touched) {
+        <p class="mt-1 text-xs text-red-700">Description is required.</p>
+      }
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="priority" class="text-sm font-medium text-slate-700 dark:text-slate-300">Priority</label>
+        <select
+          id="priority"
+          formControlName="priority"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        >
+          @for (option of priorityOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="category" class="text-sm font-medium text-slate-700 dark:text-slate-300">
+          Category (optional)
+        </label>
+        <input
+          id="category"
+          type="text"
+          formControlName="category"
+          placeholder="e.g. bug, billing, access"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+      <app-button type="submit" label="Create Ticket" variant="indigo" [loading]="saving()" />
+    </div>
+  </form>
+</div>
