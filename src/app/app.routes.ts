@@ -387,6 +387,50 @@ export const routes: Routes = [
             (m) => m.TenantIntegrationsList,
           ),
       },
+      {
+        path: 'support/tickets',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Support', page: 'Support Tickets' },
+          permission: 'platform.support.read',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/support-tickets-list/support-tickets-list').then(
+            (m) => m.SupportTicketsList,
+          ),
+      },
+      {
+        path: 'support/tickets/new',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Support',
+            parent: { label: 'Support Tickets', route: '/support/tickets' },
+            page: 'New Ticket',
+          },
+          permission: 'platform.support.manage',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/support-ticket-create/support-ticket-create').then(
+            (m) => m.SupportTicketCreate,
+          ),
+      },
+      {
+        path: 'support/tickets/:id',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Support',
+            parent: { label: 'Support Tickets', route: '/support/tickets' },
+            page: 'Ticket Details',
+          },
+          permission: 'platform.support.read',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/support-ticket-detail/support-ticket-detail').then(
+            (m) => m.SupportTicketDetail,
+          ),
+      },
     ],
   },
   {

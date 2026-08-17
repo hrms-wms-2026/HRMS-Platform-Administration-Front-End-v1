@@ -1,0 +1,86 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Support Tickets</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Review and respond to tenant support requests</p>
+      </div>
+      @if (canManage()) {
+        <a routerLink="/support/tickets/new">
+          <app-button label="Create Ticket" variant="indigo" />
+        </a>
+      }
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <select
+        [value]="statusFilter()"
+        (change)="onStatusFilterChange($any($event.target).value)"
+        class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+      >
+        <option value="">All Statuses</option>
+        @for (option of statusOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      <select
+        [value]="priorityFilter()"
+        (change)="onPriorityFilterChange($any($event.target).value)"
+        class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+      >
+        <option value="">All Priorities</option>
+        @for (option of priorityOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    @if (loading()) {
+      <app-loader label="Loading…" />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadTickets()" />
+    } @else if (tickets().length === 0) {
+      <app-empty-state
+        [title]="statusFilter() || priorityFilter() ? 'No tickets match your filters' : 'No support tickets yet'"
+      />
+    } @else {
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            <th class="py-2 pr-4">Subject</th>
+            <th class="py-2 pr-4">Tenant</th>
+            <th class="py-2 pr-4">Priority</th>
+            <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ticket of tickets(); track ticket.id) {
+            <tr
+              [routerLink]="['/support/tickets', ticket.id]"
+              class="cursor-pointer border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <td class="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">{{ ticket.subject }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">
+                {{ ticket.tenantId ? shortId(ticket.tenantId) : 'Platform-wide' }}
+              </td>
+              <td class="py-3 pr-4">
+                <app-status-badge [label]="ticket.priority" [tone]="priorityTone(ticket.priority)" />
+              </td>
+              <td class="py-3 pr-4">
+                <app-status-badge [label]="ticket.status" [tone]="statusTone(ticket.status)" />
+              </td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ ticket.createdAt | date: 'mediumDate' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <app-pagination [page]="currentPage()" [pageSize]="pageSize" [total]="total()" (pageChange)="goToPage($event)" />
+    }
+  </div>
+}
