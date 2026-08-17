@@ -76,6 +76,8 @@ export const API_ENDPOINTS = {
   },
   moduleCatalog: {
     list: '/modules/catalog',
+    byId: (moduleKey: string) => `/modules/catalog/${moduleKey}`,
+    features: (moduleKey: string) => `/modules/catalog/${moduleKey}/features`,
     permissions: (moduleKey: string) => `/modules/catalog/${moduleKey}/permissions`,
   },
   roleTemplates: {
