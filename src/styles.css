@@ -8,11 +8,31 @@
 }
 
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
   body {
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.5;
     font-weight: 400;
+  }
+
+  /* `color-scheme` alone is only a hint some browsers ignore for native <select> popups —
+     set the popup's own colors explicitly so it's never left rendering light text on the
+     browser's default white dropdown background. */
+  .dark select {
+    color-scheme: dark;
+  }
+
+  .dark select option {
+    background-color: #1e293b;
+    color: #f1f5f9;
   }
 }
 
