@@ -15,8 +15,8 @@ import { TableSkeleton } from '../../../../shared/ui/table-skeleton/table-skelet
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Button } from '../../../../shared/ui/button/button';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
+import { DateRange, DateRangePicker } from '../../../../shared/ui/date-range-picker/date-range-picker';
 
 @Component({
   selector: 'app-invoices-list',
@@ -28,8 +28,8 @@ import { Pagination } from '../../../../shared/ui/pagination/pagination';
     ErrorBanner,
     EmptyState,
     StatusBadge,
-    Button,
     Pagination,
+    DateRangePicker,
   ],
   templateUrl: './invoices-list.html',
 })
@@ -44,6 +44,10 @@ export class InvoicesList implements OnInit {
   protected readonly shortTenantLabel = shortTenantLabel;
 
   protected readonly canView = computed(() => this.permissionStore.hasPermission('platform.subscriptions.read'));
+
+  protected readonly filtersActive = computed(
+    () => !!(this.statusFilter() || this.fromFilter() || this.toFilter()),
+  );
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -92,6 +96,12 @@ export class InvoicesList implements OnInit {
   protected onFilterChange(): void {
     this.page.set(1);
     this.loadInvoices();
+  }
+
+  protected onDateRangeChange(range: DateRange): void {
+    this.fromFilter.set(range.from);
+    this.toFilter.set(range.to);
+    this.onFilterChange();
   }
 
   protected clearFilters(): void {
