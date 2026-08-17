@@ -416,6 +416,34 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'support/announcements',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Support', page: 'Announcements' },
+          permission: 'platform.support.read',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/announcements-list/announcements-list').then(
+            (m) => m.AnnouncementsList,
+          ),
+      },
+      {
+        path: 'support/announcements/new',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Support',
+            parent: { label: 'Announcements', route: '/support/announcements' },
+            page: 'New Announcement',
+          },
+          permission: 'platform.support.manage',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/announcement-create/announcement-create').then(
+            (m) => m.AnnouncementCreate,
+          ),
+      },
+      {
         path: 'support/tickets',
         canActivate: [permissionGuard],
         data: {

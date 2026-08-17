@@ -1,0 +1,65 @@
+<div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+  <div>
+    <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">New Announcement</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Draft a notice — publish it when it's ready to go out</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+    <div>
+      <label for="title" class="text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
+      <input
+        id="title"
+        type="text"
+        formControlName="title"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+      @if (form.controls.title.invalid && form.controls.title.touched) {
+        <p class="mt-1 text-xs text-red-700">Title is required.</p>
+      }
+    </div>
+
+    <div>
+      <label for="body" class="text-sm font-medium text-slate-700 dark:text-slate-300">Body</label>
+      <textarea
+        id="body"
+        rows="4"
+        formControlName="body"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      ></textarea>
+      @if (form.controls.body.invalid && form.controls.body.touched) {
+        <p class="mt-1 text-xs text-red-700">Body is required.</p>
+      }
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="severity" class="text-sm font-medium text-slate-700 dark:text-slate-300">Severity</label>
+        <select
+          id="severity"
+          formControlName="severity"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        >
+          @for (option of severityOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="audience" class="text-sm font-medium text-slate-700 dark:text-slate-300">Audience</label>
+        <select
+          id="audience"
+          formControlName="audience"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        >
+          @for (option of audienceOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+      <app-button type="submit" label="Create Announcement" variant="indigo" [loading]="saving()" />
+    </div>
+  </form>
+</div>

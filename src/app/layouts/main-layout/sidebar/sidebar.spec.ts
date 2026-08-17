@@ -65,6 +65,7 @@ describe('Sidebar', () => {
     expect(links).toContain('/system-config/tenant-integrations');
     expect(links).toContain('/audit-logs');
     expect(links).toContain('/legal-documents');
+    expect(links).toContain('/support/announcements');
     expect(links).toContain('/support/tickets');
   });
 

@@ -131,6 +131,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     indent: true,
     items: [
       {
+        label: 'Announcements',
+        route: '/support/announcements',
+        icon: 'announcements',
+        permission: 'platform.support.read',
+      },
+      {
         label: 'Support Tickets',
         route: '/support/tickets',
         icon: 'support-tickets',

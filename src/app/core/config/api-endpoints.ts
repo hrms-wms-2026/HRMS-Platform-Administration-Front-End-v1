@@ -159,6 +159,12 @@ export const API_ENDPOINTS = {
     },
   },
   support: {
+    announcements: {
+      list: '/support/announcements',
+      create: '/support/announcements',
+      publish: (announcementId: string) => `/support/announcements/${announcementId}/publish`,
+      unpublish: (announcementId: string) => `/support/announcements/${announcementId}/unpublish`,
+    },
     tickets: {
       list: '/support/tickets',
       byId: (ticketId: string) => `/support/tickets/${ticketId}`,
