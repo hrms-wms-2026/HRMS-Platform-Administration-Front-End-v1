@@ -8,10 +8,12 @@ import {
   ApplyTenantRoleTemplateResult,
   CreateTenantRolePayload,
   InviteTenantAdminPayload,
+  TenantAuditLogListResponse,
   TenantInvitationResult,
   TenantPermissionCatalog,
   TenantRoleDetail,
   TenantRoleSummary,
+  TenantSession,
   UpdateTenantPayload,
 } from './tenant-admin.model';
 
@@ -155,6 +157,28 @@ export class TenantAdminService {
         rejectedPermissions: result.rejectedPermissions,
         universalPermissions: result.universalPermissions,
       })));
+  }
+
+  listSessions(tenantId: string): Observable<TenantSession[]> {
+    return this.http.get<TenantSession[]>(
+      `${this.baseUrl}${API_ENDPOINTS.tenants.sessions.list(tenantId)}`,
+      { withCredentials: true },
+    );
+  }
+
+  revokeSession(tenantId: string, sessionId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.tenants.sessions.revoke(tenantId, sessionId)}`,
+      {},
+      { withCredentials: true },
+    );
+  }
+
+  listAuditLog(tenantId: string, page: number, pageSize: number): Observable<TenantAuditLogListResponse> {
+    return this.http.get<TenantAuditLogListResponse>(
+      `${this.baseUrl}${API_ENDPOINTS.tenants.auditLog.list(tenantId)}`,
+      { params: { page, page_size: pageSize }, withCredentials: true },
+    );
   }
 
   private mapRoleSummary(item: TenantRoleSummaryApi): TenantRoleSummary {

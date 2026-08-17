@@ -18,6 +18,8 @@ import { TenantApplyRoleTemplateModal } from '../tenant-apply-role-template-moda
 import { TenantRolesPanel } from '../tenant-roles-panel/tenant-roles-panel';
 import { TenantSubscriptionPanel } from '../tenant-subscription-panel/tenant-subscription-panel';
 import { TenantInvoicesPanel } from '../tenant-invoices-panel/tenant-invoices-panel';
+import { TenantSessionsPanel } from '../tenant-sessions-panel/tenant-sessions-panel';
+import { TenantAuditLogPanel } from '../tenant-audit-log-panel/tenant-audit-log-panel';
 
 interface StatusAction {
   action: string;
@@ -56,6 +58,8 @@ const ACTIONS_BY_STATUS: Record<string, StatusAction[]> = {
     TenantRolesPanel,
     TenantSubscriptionPanel,
     TenantInvoicesPanel,
+    TenantSessionsPanel,
+    TenantAuditLogPanel,
   ],
   templateUrl: './tenant-detail.html',
 })
@@ -70,6 +74,11 @@ export class TenantDetailComponent implements OnInit {
 
   protected readonly canManage = computed(() => this.permissionStore.hasPermission('platform.tenants.manage'));
   protected readonly canRead = computed(() => this.permissionStore.hasPermission('platform.tenants.read'));
+  protected readonly canViewSessions = computed(() => this.permissionStore.hasPermission('platform.security.read'));
+  protected readonly canManageSessions = computed(() =>
+    this.permissionStore.hasPermission('platform.security.manage'),
+  );
+  protected readonly canViewAuditLog = computed(() => this.permissionStore.hasPermission('platform.audit.read'));
 
   protected readonly loading = signal(false);
   protected readonly savingTenant = signal(false);

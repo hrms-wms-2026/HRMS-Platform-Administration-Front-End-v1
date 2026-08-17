@@ -48,6 +48,13 @@ export const API_ENDPOINTS = {
     permissions: {
       catalog: (tenantId: string) => `/tenants/${tenantId}/permissions/catalog`,
     },
+    sessions: {
+      list: (tenantId: string) => `/tenants/${tenantId}/sessions`,
+      revoke: (tenantId: string, sessionId: string) => `/tenants/${tenantId}/sessions/${sessionId}/revoke`,
+    },
+    auditLog: {
+      list: (tenantId: string) => `/tenants/${tenantId}/audit-log`,
+    },
   },
   tenantSubscriptions: {
     get: (tenantId: string) => `/tenants/${tenantId}/subscription`,
