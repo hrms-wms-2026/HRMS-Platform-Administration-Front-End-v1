@@ -76,6 +76,8 @@ export const API_ENDPOINTS = {
   },
   moduleCatalog: {
     list: '/modules/catalog',
+    byId: (moduleKey: string) => `/modules/catalog/${moduleKey}`,
+    features: (moduleKey: string) => `/modules/catalog/${moduleKey}/features`,
     permissions: (moduleKey: string) => `/modules/catalog/${moduleKey}/permissions`,
   },
   roleTemplates: {
@@ -162,6 +164,13 @@ export const API_ENDPOINTS = {
       create: '/support/announcements',
       publish: (announcementId: string) => `/support/announcements/${announcementId}/publish`,
       unpublish: (announcementId: string) => `/support/announcements/${announcementId}/unpublish`,
+    },
+    tickets: {
+      list: '/support/tickets',
+      byId: (ticketId: string) => `/support/tickets/${ticketId}`,
+      create: '/support/tickets',
+      updateStatus: (ticketId: string) => `/support/tickets/${ticketId}/status`,
+      addComment: (ticketId: string) => `/support/tickets/${ticketId}/comments`,
     },
   },
   logs: {

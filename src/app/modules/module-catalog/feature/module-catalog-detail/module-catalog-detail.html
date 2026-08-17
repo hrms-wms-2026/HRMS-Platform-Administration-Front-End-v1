@@ -1,0 +1,113 @@
+@if (loading()) {
+  <app-page-detail-skeleton [fieldCount]="8" [showContentBlock]="true" [showPermissionsSection]="true" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadModule()" />
+} @else if (view(); as v) {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          <a routerLink="/module-catalog" class="text-indigo-600 hover:underline">Module Catalog</a>
+          <span class="mx-2">/</span>
+          {{ v.module.name }}
+        </p>
+        <h1 class="page-title">{{ v.module.name }}</h1>
+        <p class="page-subtitle font-mono text-xs">{{ v.module.moduleKey }}</p>
+      </div>
+      <app-status-badge
+        [label]="v.module.isActive ? 'Active' : 'Inactive'"
+        [tone]="moduleActiveTone(v.module.isActive)"
+      />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm lg:grid-cols-4">
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Pillar</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ v.module.pillar }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Phase</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ v.module.phase }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Pricing Unit</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ v.module.pricingUnit }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Pricing Reference</p>
+        <p class="font-mono text-xs text-slate-700 dark:text-slate-300">{{ v.module.pricingReference }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Storage Reference</p>
+        <p class="font-mono text-xs text-slate-700 dark:text-slate-300">
+          {{ v.module.isStorageConsuming ? v.module.storageReference : 'Not storage-consuming' }}
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">AI Token Reference</p>
+        <p class="font-mono text-xs text-slate-700 dark:text-slate-300">
+          {{ v.module.isAiEnabled ? v.module.aiTokenReference : 'AI not enabled' }}
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Created</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ v.module.createdAt | date: 'medium' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Updated</p>
+        <p class="text-slate-900 dark:text-slate-100">
+          {{ v.module.updatedAt ? (v.module.updatedAt | date: 'medium') : '—' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+      <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Features ({{ v.features.length }})</p>
+      @if (v.features.length === 0) {
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">No features defined for this module.</p>
+      } @else {
+        <div class="mt-3 flex flex-col gap-3">
+          @for (feature of v.features; track feature.featureKey) {
+            <div class="flex items-start justify-between gap-4 rounded-lg border border-slate-100 px-4 py-3 dark:border-slate-800">
+              <div>
+                <p class="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  {{ feature.name }}
+                  @if (feature.isDefaultIncluded) {
+                    <span class="ml-2 text-xs font-normal text-slate-500 dark:text-slate-400">Included by default</span>
+                  }
+                </p>
+                @if (feature.description) {
+                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">{{ feature.description }}</p>
+                }
+              </div>
+              <app-status-badge
+                [label]="feature.isActive ? 'Active' : 'Inactive'"
+                [tone]="moduleActiveTone(feature.isActive)"
+              />
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="border-t border-slate-100 pt-4 dark:border-slate-800">
+      <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+        Permissions ({{ v.permissions.length }})
+      </p>
+      @if (v.permissions.length === 0) {
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">No permissions owned by this module.</p>
+      } @else {
+        <div class="mt-3 flex flex-col gap-2">
+          @for (permission of v.permissions; track permission.permissionCode) {
+            <div class="flex items-center justify-between gap-4 text-sm">
+              <span class="font-mono text-xs text-slate-700 dark:text-slate-300">{{ permission.permissionCode }}</span>
+              @if (permission.isDefaultPermission) {
+                <span class="text-xs text-slate-500 dark:text-slate-400">Default</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

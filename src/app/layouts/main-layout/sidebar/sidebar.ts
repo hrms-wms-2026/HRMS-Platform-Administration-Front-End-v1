@@ -45,6 +45,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         permission: 'platform.subscriptions.read',
       },
       { label: 'Invoices', route: '/invoices', icon: 'invoices', permission: 'platform.subscriptions.read' },
+      {
+        label: 'Module Catalog',
+        route: '/module-catalog',
+        icon: 'module-catalog',
+        permission: 'platform.module_catalog.read',
+      },
     ],
   },
   {
@@ -128,6 +134,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         label: 'Announcements',
         route: '/support/announcements',
         icon: 'announcements',
+        permission: 'platform.support.read',
+      },
+      {
+        label: 'Support Tickets',
+        route: '/support/tickets',
+        icon: 'support-tickets',
         permission: 'platform.support.read',
       },
     ],

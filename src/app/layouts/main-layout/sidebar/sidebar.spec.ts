@@ -57,6 +57,7 @@ describe('Sidebar', () => {
     expect(links).toContain('/roles');
     expect(links).toContain('/subscription-plans');
     expect(links).toContain('/invoices');
+    expect(links).toContain('/module-catalog');
     expect(links).toContain('/system-config/providers');
     expect(links).toContain('/system-config/service-keys');
     expect(links).toContain('/system-config/oauth-apps');
@@ -65,6 +66,7 @@ describe('Sidebar', () => {
     expect(links).toContain('/audit-logs');
     expect(links).toContain('/legal-documents');
     expect(links).toContain('/support/announcements');
+    expect(links).toContain('/support/tickets');
   });
 
   it('dashboard remains accessible even when no permissions are loaded', () => {

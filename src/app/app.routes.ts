@@ -133,6 +133,34 @@ export const routes: Routes = [
           import('./modules/invoices/feature/invoices-list/invoices-list').then((m) => m.InvoicesList),
       },
       {
+        path: 'module-catalog',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Subscription & Billing', page: 'Module Catalog' },
+          permission: 'platform.module_catalog.read',
+        },
+        loadComponent: () =>
+          import('./modules/module-catalog/feature/module-catalog-list/module-catalog-list').then(
+            (m) => m.ModuleCatalogList,
+          ),
+      },
+      {
+        path: 'module-catalog/:moduleKey',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Subscription & Billing',
+            parent: { label: 'Module Catalog', route: '/module-catalog' },
+            page: 'Module Details',
+          },
+          permission: 'platform.module_catalog.read',
+        },
+        loadComponent: () =>
+          import('./modules/module-catalog/feature/module-catalog-detail/module-catalog-detail').then(
+            (m) => m.ModuleCatalogDetail,
+          ),
+      },
+      {
         path: 'invoices/:id',
         canActivate: [permissionGuard],
         data: {
@@ -413,6 +441,50 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./modules/support/feature/announcement-create/announcement-create').then(
             (m) => m.AnnouncementCreate,
+          ),
+      },
+      {
+        path: 'support/tickets',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Support', page: 'Support Tickets' },
+          permission: 'platform.support.read',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/support-tickets-list/support-tickets-list').then(
+            (m) => m.SupportTicketsList,
+          ),
+      },
+      {
+        path: 'support/tickets/new',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Support',
+            parent: { label: 'Support Tickets', route: '/support/tickets' },
+            page: 'New Ticket',
+          },
+          permission: 'platform.support.manage',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/support-ticket-create/support-ticket-create').then(
+            (m) => m.SupportTicketCreate,
+          ),
+      },
+      {
+        path: 'support/tickets/:id',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Support',
+            parent: { label: 'Support Tickets', route: '/support/tickets' },
+            page: 'Ticket Details',
+          },
+          permission: 'platform.support.read',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/support-ticket-detail/support-ticket-detail').then(
+            (m) => m.SupportTicketDetail,
           ),
       },
     ],
