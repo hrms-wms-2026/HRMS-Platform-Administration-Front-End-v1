@@ -1,6 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, HostListener, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { PermissionStore } from '../../../core/permissions/permission.store';
+import { MobileNavService } from '../mobile-nav.service';
 
 export interface SidebarNavItem {
   label: string;
@@ -129,6 +130,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
 })
 export class Sidebar {
   private readonly permissionStore = inject(PermissionStore);
+  protected readonly mobileNav = inject(MobileNavService);
 
   protected readonly sections = computed<SidebarNavSection[]>(() =>
     NAV_SECTIONS.map((section) => ({
@@ -136,4 +138,15 @@ export class Sidebar {
       items: section.items.filter((item) => this.permissionStore.canAccess(item.permission)),
     })).filter((section) => section.items.length > 0),
   );
+
+  protected onNavLinkClick(): void {
+    this.mobileNav.close();
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.mobileNav.open()) {
+      this.mobileNav.close();
+    }
+  }
 }

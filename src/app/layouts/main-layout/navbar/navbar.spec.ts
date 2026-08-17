@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { Navbar } from './navbar';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SessionService } from '../../../core/auth/session.service';
+import { MobileNavService } from '../mobile-nav.service';
 
 describe('Navbar', () => {
   beforeEach(async () => {
@@ -55,5 +56,26 @@ describe('Navbar', () => {
     const button = fixture.debugElement.query(By.css('button[aria-label="Notifications"]'));
     expect(button).toBeTruthy();
     expect(button.nativeElement.disabled).toBe(true);
+  });
+
+  it('renders a hamburger button with an aria-label', () => {
+    const fixture = TestBed.createComponent(Navbar);
+    fixture.detectChanges();
+
+    const button = fixture.debugElement.query(By.css('button[aria-label="Open navigation menu"]'));
+    expect(button).toBeTruthy();
+  });
+
+  it('toggles the mobile nav open state when the hamburger is clicked', () => {
+    const fixture = TestBed.createComponent(Navbar);
+    fixture.detectChanges();
+    const mobileNav = TestBed.inject(MobileNavService);
+
+    expect(mobileNav.open()).toBe(false);
+
+    const button = fixture.debugElement.query(By.css('button[aria-label="Open navigation menu"]'));
+    button.nativeElement.click();
+
+    expect(mobileNav.open()).toBe(true);
   });
 });

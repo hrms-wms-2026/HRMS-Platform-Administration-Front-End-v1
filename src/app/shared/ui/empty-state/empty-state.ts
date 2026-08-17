@@ -1,11 +1,11 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-empty-state',
   template: `
     <div class="flex flex-col items-center justify-center gap-2 py-10 text-center">
       <svg
-        class="h-10 w-10 text-slate-300"
+        class="h-10 w-10 text-slate-300 dark:text-slate-600"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -22,10 +22,21 @@ import { Component, input } from '@angular/core';
       @if (description()) {
         <p class="max-w-xs text-sm text-slate-500 dark:text-slate-400">{{ description() }}</p>
       }
+      @if (actionLabel()) {
+        <button
+          type="button"
+          class="mt-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+          (click)="action.emit()"
+        >
+          {{ actionLabel() }}
+        </button>
+      }
     </div>
   `,
 })
 export class EmptyState {
   readonly title = input('No records found');
   readonly description = input<string>('');
+  readonly actionLabel = input<string>('');
+  readonly action = output<void>();
 }

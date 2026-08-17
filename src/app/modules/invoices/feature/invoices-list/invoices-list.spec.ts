@@ -111,6 +111,38 @@ describe('InvoicesList', () => {
     expect(fixture.nativeElement.textContent).toContain('Something went wrong');
   });
 
+  it('shows the filtered empty state with a clear-filters action when filters match nothing', () => {
+    const fixture = setup();
+    invoicesService.list.mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 25 }));
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as InvoicesList;
+    component['statusFilter'].set('paid');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No invoices found');
+    expect(fixture.nativeElement.textContent).toContain('No invoices match the selected filters');
+    expect(fixture.nativeElement.textContent).not.toContain('No invoices yet');
+  });
+
+  it('updates the date range and reloads when the date-range-picker emits a change', () => {
+    const fixture = setup();
+    invoicesService.list.mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 25 }));
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as InvoicesList;
+    component['onDateRangeChange']({ from: '2026-01-01', to: '2026-01-31' });
+
+    expect(component['fromFilter']()).toBe('2026-01-01');
+    expect(component['toFilter']()).toBe('2026-01-31');
+    expect(invoicesService.list).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        from: new Date('2026-01-01').toISOString(),
+        to: new Date('2026-01-31').toISOString(),
+      }),
+    );
+  });
+
   it('clears filters and reloads invoices', () => {
     const fixture = setup();
     invoicesService.list.mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 25 }));
