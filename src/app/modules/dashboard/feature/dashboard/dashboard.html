@@ -1,22 +1,197 @@
-<div class="flex flex-col gap-6">
-  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
-    @if (currentUser(); as user) {
-      <h1 class="page-title">Welcome back, {{ user.email }}</h1>
-      <p class="page-subtitle">
-        Signed in as <span class="font-medium text-slate-700 dark:text-slate-300">{{ user.platformRole }}</span>
-      </p>
-    } @else {
-      <h1 class="page-title">Welcome back</h1>
-    }
+<div class="flex flex-col gap-8">
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-8 shadow-sm sm:flex-row sm:items-start sm:justify-between dark:bg-slate-900">
+    <div>
+      @if (currentUser(); as user) {
+        <h1 class="page-title">Welcome back, {{ user.email }}</h1>
+      } @else {
+        <h1 class="page-title">Welcome back</h1>
+      }
+      <p class="page-subtitle">Platform health, billing, and tenant operations at a glance</p>
+    </div>
+    <app-button label="Refresh" variant="secondary" (clicked)="refresh()" />
   </div>
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    <a
-      routerLink="/settings/mfa"
-      class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm transition hover:border-blue-300 hover:shadow-md"
-    >
-      <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Security</p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Manage two-factor authentication for your account.</p>
-    </a>
-  </div>
+  @if (canViewTenants()) {
+    <section class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Tenants</h2>
+        <a
+          routerLink="/tenants"
+          class="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+        >
+          View all tenants →
+        </a>
+      </div>
+
+      @if (tenantsLoading()) {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <app-skeleton shape="block" height="5.5rem" />
+          <app-skeleton shape="block" height="5.5rem" />
+          <app-skeleton shape="block" height="5.5rem" />
+        </div>
+      } @else if (tenantsError(); as message) {
+        <app-error-banner [message]="message" (retry)="loadTenants()" />
+      } @else if (tenantsMetrics(); as metrics) {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <app-metric-card label="Total Tenants" [value]="metrics.total" link="/tenants" />
+          <app-metric-card label="Active Tenants" [value]="metrics.active" tone="success" link="/tenants" />
+          <app-metric-card label="Suspended Tenants" [value]="metrics.suspended" tone="warning" link="/tenants" />
+        </div>
+      }
+    </section>
+  }
+
+  @if (canViewBilling()) {
+    <section class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Billing</h2>
+        <a
+          routerLink="/invoices"
+          class="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+        >
+          View all invoices →
+        </a>
+      </div>
+
+      @if (billingLoading()) {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <app-skeleton shape="block" height="5.5rem" />
+          <app-skeleton shape="block" height="5.5rem" />
+          <app-skeleton shape="block" height="5.5rem" />
+        </div>
+      } @else if (billingError(); as message) {
+        <app-error-banner [message]="message" (retry)="loadBilling()" />
+      } @else if (billingMetrics(); as metrics) {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <app-metric-card label="Open Invoices" [value]="metrics.open" tone="indigo" link="/invoices" />
+          <app-metric-card label="Paid Invoices" [value]="metrics.paid" tone="success" link="/invoices" />
+          <app-metric-card
+            label="Overdue Invoices"
+            [value]="metrics.overdue"
+            [tone]="metrics.overdue > 0 ? 'danger' : 'default'"
+            hint="Computed from open invoices past their due date"
+            link="/invoices"
+          />
+        </div>
+      }
+    </section>
+  }
+
+  @if (canViewSystemConfig()) {
+    <section class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">System Configuration Health</h2>
+      </div>
+
+      @if (systemConfigLoading()) {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <app-skeleton shape="block" height="5.5rem" />
+          <app-skeleton shape="block" height="5.5rem" />
+          <app-skeleton shape="block" height="5.5rem" />
+        </div>
+      } @else if (systemConfigError(); as message) {
+        <app-error-banner [message]="message" (retry)="loadSystemConfig()" />
+      } @else if (systemConfigMetrics(); as metrics) {
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <app-metric-card
+            label="Service Keys"
+            [value]="metrics.serviceKeysConfigured"
+            [hint]="metrics.serviceKeysActive + ' active'"
+            link="/system-config/service-keys"
+          />
+          <app-metric-card
+            label="Payment Gateways"
+            [value]="metrics.paymentGatewaysConfigured"
+            [hint]="metrics.paymentGatewaysActive + ' active'"
+            link="/system-config/payment-gateways"
+          />
+          <app-metric-card
+            label="OAuth Apps"
+            [value]="metrics.oauthAppsConfigured"
+            [hint]="metrics.oauthAppsActive + ' active'"
+            link="/system-config/oauth-apps"
+          />
+        </div>
+      }
+    </section>
+  }
+
+  @if (canViewAudit()) {
+    <section class="flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Security Snapshot</h2>
+        <a
+          routerLink="/audit-logs"
+          class="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+        >
+          View audit logs →
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        @if (auditLoading()) {
+          <app-skeleton shape="block" height="5.5rem" />
+        } @else if (auditError(); as message) {
+          <div class="sm:col-span-1">
+            <app-error-banner [message]="message" (retry)="loadAudit()" />
+          </div>
+        } @else if (auditLogs(); as logs) {
+          <app-metric-card label="Recent Auth Events" [value]="logs.length" link="/audit-logs" />
+        }
+
+        <a
+          routerLink="/settings/mfa"
+          class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-indigo-500"
+        >
+          <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Security</p>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Manage two-factor authentication for your account.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="flex flex-col gap-3">
+      <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Recent Activity</h2>
+
+      <div class="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+        @if (auditLoading()) {
+          <div class="flex flex-col gap-3 p-4">
+            <app-skeleton height="2.5rem" />
+            <app-skeleton height="2.5rem" />
+            <app-skeleton height="2.5rem" />
+          </div>
+        } @else if (auditError(); as message) {
+          <div class="p-4">
+            <app-error-banner [message]="message" (retry)="loadAudit()" />
+          </div>
+        } @else if (auditLogs(); as logs) {
+          @if (logs.length === 0) {
+            <app-empty-state
+              title="No recent activity"
+              description="Auth and audit events will show up here once they occur."
+            />
+          } @else {
+            <ul class="divide-y divide-slate-100 dark:divide-slate-800">
+              @for (entry of logs.slice(0, 5); track entry.id) {
+                <li class="flex items-center justify-between gap-4 px-4 py-3">
+                  <div class="min-w-0">
+                    <p class="table-primary truncate">{{ entry.eventType }}</p>
+                    <p class="table-secondary truncate">{{ entry.userEmail ?? entry.userFullName ?? 'Unknown user' }}</p>
+                  </div>
+                  <p class="table-meta whitespace-nowrap">{{ entry.createdAt | date: 'medium' }}</p>
+                </li>
+              }
+            </ul>
+          }
+        }
+      </div>
+    </section>
+  } @else {
+    <section class="flex flex-col gap-3">
+      <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Security Snapshot</h2>
+      <app-empty-state
+        title="Security activity unavailable"
+        description="You don't have permission to view audit and security activity."
+      />
+    </section>
+  }
 </div>
