@@ -100,4 +100,42 @@ describe('PlatformUsersService', () => {
     expect(req.request.withCredentials).toBe(true);
     req.flush(null);
   });
+
+  it('listSessions fetches sessions for a platform user', () => {
+    service.listSessions('user-1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/users/user-1/sessions`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush([
+      {
+        id: 'session-1',
+        userId: 'user-1',
+        deviceInfo: 'Chrome',
+        ipAddress: '127.0.0.1',
+        expiresAt: '2026-12-01T00:00:00Z',
+        createdAt: '2026-08-01T00:00:00Z',
+        revokedAt: null,
+        isRevoked: false,
+      },
+    ]);
+  });
+
+  it('revokeSession posts to the session revoke path', () => {
+    service.revokeSession('user-1', 'session-1').subscribe();
+
+    const req = httpMock.expectOne(
+      `${environment.apiUrl}/platform-access/users/user-1/sessions/session-1/revoke`,
+    );
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+  });
+
+  it('revokeAllSessions posts to the revoke-all path', () => {
+    service.revokeAllSessions('user-1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/users/user-1/sessions/revoke-all`);
+    expect(req.request.method).toBe('POST');
+    req.flush(null);
+  });
 });

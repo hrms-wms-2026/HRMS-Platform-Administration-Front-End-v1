@@ -1,0 +1,89 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+  <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-2xl">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Add Payment Gateway</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 flex flex-col gap-4">
+      @if (errorMessage(); as message) {
+        <p class="text-sm text-red-700">{{ message }}</p>
+      }
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="gatewayKey" class="audit-filter-label">Gateway Key</label>
+          <input id="gatewayKey" type="text" formControlName="gatewayKey" class="audit-filter-input" placeholder="stripe_us_prod" />
+        </div>
+        <div>
+          <label for="provider" class="audit-filter-label">Provider</label>
+          <select id="provider" formControlName="provider" class="audit-filter-input">
+            <option value="">Select provider</option>
+            @for (provider of providers(); track provider.providerKey) {
+              <option [value]="provider.providerKey">{{ provider.displayName }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="environment" class="audit-filter-label">Environment</label>
+          <select id="environment" formControlName="environment" class="audit-filter-input">
+            @for (env of environments; track env.value) {
+              <option [value]="env.value">{{ env.label }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="displayName" class="audit-filter-label">Display Name</label>
+          <input id="displayName" type="text" formControlName="displayName" class="audit-filter-input" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="countryCodes" class="audit-filter-label">Country Routes</label>
+          <input
+            id="countryCodes"
+            type="text"
+            formControlName="countryCodes"
+            class="audit-filter-input"
+            placeholder="US, GB, LK"
+          />
+          <p class="mt-1 text-xs text-slate-500">Comma-separated ISO 3166-1 alpha-2 codes</p>
+        </div>
+        <div>
+          <label for="publicKey" class="audit-filter-label">Public Key (optional)</label>
+          <input id="publicKey" type="text" formControlName="publicKey" class="audit-filter-input" />
+        </div>
+        <div>
+          <label for="merchantId" class="audit-filter-label">Merchant ID (optional)</label>
+          <input id="merchantId" type="text" formControlName="merchantId" class="audit-filter-input" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="webhookUrl" class="audit-filter-label">Webhook URL (optional)</label>
+          <input id="webhookUrl" type="url" formControlName="webhookUrl" class="audit-filter-input" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="logoUrl" class="audit-filter-label">Logo URL (optional)</label>
+          <input id="logoUrl" type="url" formControlName="logoUrl" class="audit-filter-input" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="secretKey" class="audit-filter-label">Secret Key</label>
+          <input id="secretKey" type="password" formControlName="secretKey" class="audit-filter-input" autocomplete="new-password" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="webhookSecret" class="audit-filter-label">Webhook Secret (optional)</label>
+          <input id="webhookSecret" type="password" formControlName="webhookSecret" class="audit-filter-input" autocomplete="new-password" />
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+        <input type="checkbox" formControlName="isActive" class="h-4 w-4 rounded border-slate-300 text-indigo-600" />
+        Active gateway
+      </label>
+
+      @if (verifyMessage(); as message) {
+        <p class="text-xs text-slate-600 dark:text-slate-300">{{ message }}</p>
+      }
+
+      <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <app-button label="Verify Credentials" variant="secondary" type="button" [loading]="verifying()" (clicked)="verifyCredentials()" />
+        <app-button label="Cancel" variant="secondary" type="button" (clicked)="cancel()" />
+        <app-button label="Create Gateway" variant="indigo" type="submit" [loading]="loading()" />
+      </div>
+    </form>
+  </div>
+</div>

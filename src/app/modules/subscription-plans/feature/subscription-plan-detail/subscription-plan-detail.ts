@@ -11,14 +11,14 @@ import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button } from '../../../../shared/ui/button/button';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { PageDetailSkeleton } from '../../../../shared/ui/page-detail-skeleton/page-detail-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
 import { SubscriptionPlanForm } from '../subscription-plan-form/subscription-plan-form';
 
 @Component({
   selector: 'app-subscription-plan-detail',
-  imports: [Button, StatusBadge, Loader, ErrorBanner, ConfirmationDialog, SubscriptionPlanForm],
+  imports: [Button, StatusBadge, PageDetailSkeleton, ErrorBanner, ConfirmationDialog, SubscriptionPlanForm],
   templateUrl: './subscription-plan-detail.html',
 })
 export class SubscriptionPlanDetail implements OnInit {

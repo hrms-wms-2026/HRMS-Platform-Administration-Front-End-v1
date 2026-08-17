@@ -140,7 +140,14 @@ describe('OAuthAppDetailDrawer', () => {
     expect(oauthAppsService.getById).toHaveBeenCalledTimes(2);
   });
 
-  it('shows a local-check-labeled message on validate', () => {
+  it('labels the local config check action in the drawer', () => {
+    const fixture = setup();
+    expect(fixture.nativeElement.textContent).toContain('Local config check');
+    expect(fixture.nativeElement.textContent).toContain('Run Local Check');
+    expect(fixture.nativeElement.textContent).not.toContain('Validate Configuration');
+  });
+
+  it('shows a local-check-labeled message after running the local config check', () => {
     const fixture = setup();
     oauthAppsService.validateConfig = jest.fn().mockReturnValue(
       of({ provider: 'github', status: 'valid', verificationType: 'local', message: 'Client ID and secret are present.', verifiedAt: '2026-01-01T00:00:00Z' }),
@@ -150,6 +157,16 @@ describe('OAuthAppDetailDrawer', () => {
     component['validateConfiguration']();
 
     expect(notificationService.success).toHaveBeenCalledWith('Local check: Client ID and secret are present.');
+  });
+
+  it('shows a local-check error when the local config check fails', () => {
+    const fixture = setup();
+    oauthAppsService.validateConfig = jest.fn().mockReturnValue(throwError(() => new Error('network')));
+    const component = fixture.componentInstance;
+
+    component['validateConfiguration']();
+
+    expect(notificationService.error).toHaveBeenCalledWith('Could not run the local config check.');
   });
 
   it('toggles active state', () => {

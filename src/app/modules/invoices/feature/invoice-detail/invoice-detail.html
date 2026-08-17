@@ -1,0 +1,187 @@
+@if (loading()) {
+  <app-page-detail-skeleton [fieldCount]="6" [showContentBlock]="true" [showActionBar]="true" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadInvoice()" />
+} @else if (invoice(); as inv) {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          <a routerLink="/invoices" class="text-indigo-600 hover:underline">Invoices</a>
+          <span class="mx-2">/</span>
+          {{ inv.invoiceNumber }}
+        </p>
+        <h1 class="page-title">{{ inv.invoiceNumber }}</h1>
+        <p class="page-subtitle">
+          {{ shortTenantLabel(inv) }}
+          · {{ formatInvoicePeriod(inv.periodStart, inv.periodEnd) }}
+        </p>
+      </div>
+      <app-status-badge [label]="inv.status | titlecase" [tone]="invoiceStatusTone(inv.status)" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm lg:grid-cols-4">
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Tenant</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ shortTenantLabel(inv) }}</p>
+        <p class="font-mono text-xs text-slate-500 dark:text-slate-400">{{ inv.tenantId }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Billing Period</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ formatInvoicePeriod(inv.periodStart, inv.periodEnd) }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Due Date</p>
+        <p class="text-slate-900 dark:text-slate-100">
+          @if (inv.dueAt) {
+            {{ inv.dueAt | date: 'medium' }}
+          } @else {
+            —
+          }
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Paid Date</p>
+        <p class="text-slate-900 dark:text-slate-100">
+          @if (inv.paidAt) {
+            {{ inv.paidAt | date: 'medium' }}
+          } @else {
+            —
+          }
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Voided Date</p>
+        <p class="text-slate-900 dark:text-slate-100">
+          @if (inv.voidedAt) {
+            {{ inv.voidedAt | date: 'medium' }}
+          } @else {
+            —
+          }
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Issued</p>
+        <p class="text-slate-900 dark:text-slate-100">
+          @if (inv.issuedAt) {
+            {{ inv.issuedAt | date: 'medium' }}
+          } @else {
+            —
+          }
+        </p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Gateway</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ inv.gatewayProvider ?? '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">External Invoice ID</p>
+        <p class="truncate font-mono text-xs text-slate-700 dark:text-slate-300" [title]="inv.externalInvoiceId ?? ''">
+          {{ inv.externalInvoiceId ?? '—' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+      <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Amount Breakdown</p>
+      <div class="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div class="flex justify-between gap-4 sm:block">
+          <span class="text-slate-500 dark:text-slate-400">Subtotal</span>
+          <p class="font-medium text-slate-900 dark:text-slate-100">
+            {{ formatInvoiceAmount(inv.currency, inv.subtotalAmount ?? 0) }}
+          </p>
+        </div>
+        <div class="flex justify-between gap-4 sm:block">
+          <span class="text-slate-500 dark:text-slate-400">Tax</span>
+          <p class="font-medium text-slate-900 dark:text-slate-100">
+            {{ formatInvoiceAmount(inv.currency, inv.taxAmount ?? 0) }}
+          </p>
+        </div>
+        <div class="flex justify-between gap-4 sm:block">
+          <span class="text-slate-500 dark:text-slate-400">Discount</span>
+          <p class="font-medium text-slate-900 dark:text-slate-100">
+            {{ formatInvoiceAmount(inv.currency, inv.discountAmount ?? 0) }}
+          </p>
+        </div>
+        <div class="flex justify-between gap-4 sm:block">
+          <span class="text-slate-500 dark:text-slate-400">Total</span>
+          <p class="text-base font-semibold text-slate-900 dark:text-slate-100">
+            {{ formatInvoiceAmount(inv.currency, inv.totalAmount) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Audit Timeline</p>
+      @if (sortedAuditLogs().length === 0) {
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">No billing audit events yet.</p>
+      } @else {
+        <div class="mt-3 flex flex-col gap-3">
+          @for (log of sortedAuditLogs(); track log.id) {
+            <div class="rounded-lg border border-slate-200 px-4 py-3 dark:border-slate-700">
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ auditActionLabel(log) }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ log.createdAt | date: 'medium' }}</p>
+              </div>
+              <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">{{ log.message }}</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (canManage()) {
+      <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+        @if (canResendInvoiceEmail(inv.status)) {
+          <app-button
+            label="Resend Email"
+            variant="secondary"
+            [loading]="resendingEmail()"
+            (clicked)="startResendEmail()"
+          />
+        }
+        @if (canMarkPaidInvoice(inv.status)) {
+          <app-button
+            label="Mark Paid"
+            variant="indigo"
+            [loading]="markingPaid()"
+            (clicked)="startMarkPaid()"
+          />
+        }
+        @if (canVoidInvoice(inv.status)) {
+          <app-button label="Void" variant="danger" [loading]="voiding()" (clicked)="startVoid()" />
+        }
+      </div>
+    }
+  </div>
+
+  <app-confirmation-dialog
+    [open]="pendingMarkPaid()"
+    title="Mark invoice as paid?"
+    message="This will record the invoice as paid in the platform billing ledger."
+    confirmLabel="Mark Paid"
+    confirmVariant="indigo"
+    (confirm)="confirmMarkPaid()"
+    (cancelled)="cancelMarkPaid()"
+  />
+
+  <app-confirmation-dialog
+    [open]="pendingVoid()"
+    title="Void invoice?"
+    message="Voided invoices cannot be paid or emailed. This action is intended for cancelled billing."
+    confirmLabel="Void Invoice"
+    (confirm)="confirmVoid()"
+    (cancelled)="cancelVoid()"
+  />
+
+  <app-confirmation-dialog
+    [open]="pendingResendEmail()"
+    title="Resend invoice email?"
+    message="The billing contact on file will receive another copy of this invoice email."
+    confirmLabel="Resend Email"
+    confirmVariant="indigo"
+    (confirm)="confirmResendEmail()"
+    (cancelled)="cancelResendEmail()"
+  />
+}

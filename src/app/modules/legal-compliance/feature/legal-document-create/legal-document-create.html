@@ -1,0 +1,14 @@
+@if (!permissionStore.hasPermission('platform.compliance.manage')) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to create legal documents</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div>
+      <h1 class="page-title">New Legal Document</h1>
+      <p class="page-subtitle">Create a draft version of Terms or Privacy Notice</p>
+    </div>
+
+    <app-legal-document-form mode="create" [saving]="saving()" (submitted)="submit($event)" />
+  </div>
+}

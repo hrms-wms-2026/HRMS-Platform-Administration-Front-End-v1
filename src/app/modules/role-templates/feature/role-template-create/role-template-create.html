@@ -1,0 +1,8 @@
+<div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+  <div>
+    <h1 class="page-title">Create Role Template</h1>
+    <p class="page-subtitle">Define modules and permissions for tenant role provisioning</p>
+  </div>
+
+  <app-role-template-form mode="create" [saving]="saving()" (submitted)="submit($event)" />
+</div>

@@ -100,6 +100,96 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'invoices',
+        data: { breadcrumb: { section: 'Subscription & Billing', page: 'Invoices' } },
+        loadComponent: () =>
+          import('./modules/invoices/feature/invoices-list/invoices-list').then((m) => m.InvoicesList),
+      },
+      {
+        path: 'invoices/:id',
+        data: {
+          breadcrumb: {
+            section: 'Subscription & Billing',
+            parent: { label: 'Invoices', route: '/invoices' },
+            page: 'Invoice Details',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/invoices/feature/invoice-detail/invoice-detail').then((m) => m.InvoiceDetail),
+      },
+      {
+        path: 'configuration-templates',
+        data: { breadcrumb: { section: 'Template Management', page: 'Configuration Templates' } },
+        loadComponent: () =>
+          import('./modules/configuration-templates/feature/configuration-templates-list/configuration-templates-list').then(
+            (m) => m.ConfigurationTemplatesList,
+          ),
+      },
+      {
+        path: 'configuration-templates/new',
+        data: {
+          breadcrumb: {
+            section: 'Template Management',
+            parent: { label: 'Configuration Templates', route: '/configuration-templates' },
+            page: 'New Template',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/configuration-templates/feature/configuration-template-create/configuration-template-create').then(
+            (m) => m.ConfigurationTemplateCreate,
+          ),
+      },
+      {
+        path: 'configuration-templates/:id',
+        data: {
+          breadcrumb: {
+            section: 'Template Management',
+            parent: { label: 'Configuration Templates', route: '/configuration-templates' },
+            page: 'Template Details',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/configuration-templates/feature/configuration-template-detail/configuration-template-detail').then(
+            (m) => m.ConfigurationTemplateDetail,
+          ),
+      },
+      {
+        path: 'role-templates',
+        data: { breadcrumb: { section: 'Template Management', page: 'Role Templates' } },
+        loadComponent: () =>
+          import('./modules/role-templates/feature/role-templates-list/role-templates-list').then(
+            (m) => m.RoleTemplatesList,
+          ),
+      },
+      {
+        path: 'role-templates/new',
+        data: {
+          breadcrumb: {
+            section: 'Template Management',
+            parent: { label: 'Role Templates', route: '/role-templates' },
+            page: 'New Template',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/role-templates/feature/role-template-create/role-template-create').then(
+            (m) => m.RoleTemplateCreate,
+          ),
+      },
+      {
+        path: 'role-templates/:id',
+        data: {
+          breadcrumb: {
+            section: 'Template Management',
+            parent: { label: 'Role Templates', route: '/role-templates' },
+            page: 'Template Details',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/role-templates/feature/role-template-detail/role-template-detail').then(
+            (m) => m.RoleTemplateDetail,
+          ),
+      },
+      {
         path: 'users',
         data: { breadcrumb: { section: 'Access Control', page: 'Users' } },
         loadComponent: () =>
@@ -129,6 +219,42 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'legal-documents',
+        data: { breadcrumb: { section: 'Security & Compliance', page: 'Legal Documents' } },
+        loadComponent: () =>
+          import('./modules/legal-compliance/feature/legal-documents-list/legal-documents-list').then(
+            (m) => m.LegalDocumentsList,
+          ),
+      },
+      {
+        path: 'legal-documents/new',
+        data: {
+          breadcrumb: {
+            section: 'Security & Compliance',
+            parent: { label: 'Legal Documents', route: '/legal-documents' },
+            page: 'New Document',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/legal-compliance/feature/legal-document-create/legal-document-create').then(
+            (m) => m.LegalDocumentCreate,
+          ),
+      },
+      {
+        path: 'legal-documents/:id',
+        data: {
+          breadcrumb: {
+            section: 'Security & Compliance',
+            parent: { label: 'Legal Documents', route: '/legal-documents' },
+            page: 'Document Details',
+          },
+        },
+        loadComponent: () =>
+          import('./modules/legal-compliance/feature/legal-document-detail/legal-document-detail').then(
+            (m) => m.LegalDocumentDetail,
+          ),
+      },
+      {
         path: 'system-config/oauth-apps',
         data: { breadcrumb: { section: 'Platform Configuration', page: 'OAuth Apps' } },
         loadComponent: () =>
@@ -150,6 +276,30 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./modules/system-config/feature/providers-overview/providers-overview').then(
             (m) => m.ProvidersOverview,
+          ),
+      },
+      {
+        path: 'system-config/integrations',
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'Integration Catalog' } },
+        loadComponent: () =>
+          import('./modules/system-config/feature/integration-catalog-list/integration-catalog-list').then(
+            (m) => m.IntegrationCatalogList,
+          ),
+      },
+      {
+        path: 'system-config/payment-gateways',
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'Payment Gateways' } },
+        loadComponent: () =>
+          import('./modules/system-config/feature/payment-gateways-list/payment-gateways-list').then(
+            (m) => m.PaymentGatewaysList,
+          ),
+      },
+      {
+        path: 'system-config/tenant-integrations',
+        data: { breadcrumb: { section: 'Platform Configuration', page: 'Tenant Integrations' } },
+        loadComponent: () =>
+          import('./modules/system-config/feature/tenant-integrations-list/tenant-integrations-list').then(
+            (m) => m.TenantIntegrationsList,
           ),
       },
     ],

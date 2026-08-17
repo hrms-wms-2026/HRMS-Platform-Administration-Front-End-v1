@@ -1,0 +1,78 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div
+    class="fixed inset-0 bg-slate-900/50"
+    role="button"
+    tabindex="0"
+    aria-label="Close dialog"
+    (click)="cancel()"
+    (keydown.enter)="cancel()"
+    (keydown.space)="$event.preventDefault(); cancel()"
+  ></div>
+  <div class="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
+    <h2 class="page-title text-xl">Add Integration</h2>
+    <p class="page-subtitle">Register a tenant-facing integration in the catalog</p>
+
+    @if (errorMessage(); as message) {
+      <p class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{{ message }}</p>
+    }
+
+    <form class="mt-4 flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
+      <div>
+        <label class="audit-filter-label" for="integrationKey">Integration Key</label>
+        <input
+          id="integrationKey"
+          type="text"
+          formControlName="integrationKey"
+          placeholder="github"
+          class="audit-filter-input font-mono"
+        />
+        <p class="mt-1 text-xs text-slate-500">Lowercase slug: letters, digits, underscores (max 50)</p>
+      </div>
+
+      <div>
+        <label class="audit-filter-label" for="addDisplayName">Display Name</label>
+        <input id="addDisplayName" type="text" formControlName="displayName" class="audit-filter-input" />
+      </div>
+
+      <div>
+        <label class="audit-filter-label" for="addDescription">Description</label>
+        <textarea id="addDescription" formControlName="description" rows="2" class="audit-filter-input !h-auto min-h-[72px] py-2"></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label class="audit-filter-label" for="addConnectionScope">Connection Scope</label>
+          <select id="addConnectionScope" formControlName="connectionScope" class="audit-filter-input">
+            @for (option of scopeOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="audit-filter-label" for="addOAuthProvider">OAuth Provider</label>
+          <select id="addOAuthProvider" formControlName="onevoAppProvider" class="audit-filter-input">
+            @for (provider of oauthProviders(); track provider) {
+              <option [value]="provider">{{ provider }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="audit-filter-label" for="addLogoUrl">Logo URL</label>
+        <input id="addLogoUrl" type="url" formControlName="logoUrl" class="audit-filter-input" />
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+        <input type="checkbox" formControlName="isActive" class="h-4 w-4 rounded border-slate-300 text-indigo-600" />
+        Active on create
+      </label>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <app-button label="Cancel" variant="secondary" (clicked)="cancel()" />
+        <app-button type="submit" label="Create Integration" variant="indigo" [loading]="loading()" />
+      </div>
+    </form>
+  </div>
+</div>

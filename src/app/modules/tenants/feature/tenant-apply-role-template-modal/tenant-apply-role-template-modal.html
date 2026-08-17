@@ -1,0 +1,50 @@
+<app-modal [open]="open()" title="Apply Role Template" (closed)="closed.emit()">
+  @if (errorMessage(); as message) {
+    <app-error-banner [message]="message" (retry)="loadTemplates()" />
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-4 flex flex-col gap-4">
+    <div>
+      <label for="templateId" class="audit-filter-label">Role Template</label>
+      <select id="templateId" formControlName="templateId" class="audit-filter-input">
+        <option value="">Select a template</option>
+        @for (template of templates(); track template.id) {
+          <option [value]="template.id">
+            {{ template.name }} ({{ template.moduleKeys.length }} modules)
+          </option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label for="roleNameOverride" class="audit-filter-label">Role Name Override (optional)</label>
+      <input
+        id="roleNameOverride"
+        type="text"
+        formControlName="roleNameOverride"
+        class="audit-filter-input"
+        placeholder="Leave blank to use the template name"
+      />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+      <input
+        type="checkbox"
+        formControlName="forceUpdate"
+        class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+      />
+      Force update if a role from this template already exists
+    </label>
+
+    <div class="flex justify-end gap-2">
+      <app-button label="Cancel" variant="secondary" type="button" (clicked)="closed.emit()" />
+      <app-button
+        label="Apply Template"
+        variant="indigo"
+        type="submit"
+        [loading]="submitting()"
+        [disabled]="loadingTemplates()"
+      />
+    </div>
+  </form>
+</app-modal>

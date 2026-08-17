@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TenantWizard } from './tenant-wizard';
 import { TenantsService } from '../../data/tenants.service';
+import { CountryDefaultsService } from '../../data/country-defaults.service';
 import { SubscriptionPlansService } from '../../../subscription-plans/data/subscription-plans.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -13,6 +14,7 @@ describe('TenantWizard', () => {
     create: jest.Mock;
   };
   let plansService: { list: jest.Mock };
+  let countryDefaultsService: { getDefaults: jest.Mock };
   let notificationService: { success: jest.Mock; error: jest.Mock };
   let router: { navigate: jest.Mock };
 
@@ -37,6 +39,18 @@ describe('TenantWizard', () => {
   beforeEach(async () => {
     tenantsService = { validate: jest.fn().mockReturnValue(of({ valid: true, conflicts: [], warnings: [] })), create: jest.fn() };
     plansService = { list: jest.fn().mockReturnValue(of([plan])) };
+    countryDefaultsService = {
+      getDefaults: jest.fn().mockReturnValue(
+        of({
+          countryCode: 'US',
+          countryName: 'United States',
+          defaultTimezone: 'America/New_York',
+          timezones: ['America/New_York', 'America/Chicago'],
+          defaultCurrency: 'USD',
+          currencies: [{ code: 'USD', name: 'US Dollar', symbol: '$' }],
+        }),
+      ),
+    };
     notificationService = { success: jest.fn(), error: jest.fn() };
     router = { navigate: jest.fn() };
 
@@ -44,6 +58,7 @@ describe('TenantWizard', () => {
       imports: [TenantWizard],
       providers: [
         { provide: TenantsService, useValue: tenantsService },
+        { provide: CountryDefaultsService, useValue: countryDefaultsService },
         { provide: SubscriptionPlansService, useValue: plansService },
         { provide: NotificationService, useValue: notificationService },
         { provide: Router, useValue: router },
@@ -84,8 +99,7 @@ describe('TenantWizard', () => {
     expect(text).toContain('Company name is required.');
     expect(text).toContain('Legal entity name is required.');
     expect(text).toContain('Country is required.');
-    expect(text).toContain('Timezone is required.');
-    expect(text).toContain('Currency is required.');
+    expect(text).toContain('Pick a country first');
   });
 
   it('shows a slug format error when the auto-generated slug is too short', () => {

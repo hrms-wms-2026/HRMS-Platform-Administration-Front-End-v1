@@ -4,8 +4,11 @@ import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TenantDetailComponent } from './tenant-detail';
 import { TenantsService } from '../../data/tenants.service';
+import { TenantAdminService } from '../../data/tenant-admin.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { TenantSubscriptionService } from '../../data/tenant-subscription.service';
+import { InvoicesService } from '../../../invoices/data/invoices.service';
 
 describe('TenantDetail', () => {
   let tenantsService: {
@@ -44,13 +47,61 @@ describe('TenantDetail', () => {
       getProvisioningSummary: jest.fn().mockReturnValue(of(provisioningSummary)),
       confirmProvisioning: jest.fn(),
     };
+    const tenantAdminService = {
+      updateTenant: jest.fn().mockReturnValue(of(undefined)),
+      listRoles: jest.fn().mockReturnValue(of([])),
+    };
     notificationService = { success: jest.fn(), error: jest.fn() };
+    const tenantSubscriptionService = {
+      get: jest.fn().mockReturnValue(
+        of({
+          tenantId: 't1',
+          tenantName: 'Acme Inc',
+          tenantSlug: 'acme',
+          subscriptionId: 'sub-1',
+          subscriptionPlanId: 'plan-1',
+          planName: 'Growth',
+          planCode: 'growth',
+          status: 'active',
+          billingCycle: 'monthly',
+          currency: 'USD',
+          amount: 199,
+          currentPeriodStart: '2026-01-01',
+          currentPeriodEnd: '2026-01-31',
+          trialEndsAt: null,
+          graceEndsAt: null,
+          accessEndsAt: null,
+          unpaidGracePeriodDays: 7,
+          gatewayProvider: null,
+          gatewayCustomerRef: null,
+          gatewaySubscriptionRef: null,
+          maintenanceStatus: null,
+          maintenanceBillingCycle: null,
+          maintenanceRenewalAt: null,
+          maintenanceAmount: null,
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedAt: null,
+          isActiveAccess: true,
+          isInTrial: false,
+          isPastDue: false,
+          isInGracePeriod: false,
+          daysUntilRenewal: 12,
+          daysUntilAccessEnds: null,
+        }),
+      ),
+    };
+    const invoicesService = {
+      listByTenant: jest.fn().mockReturnValue(of({ items: [], total: 0, page: 1, pageSize: 25 })),
+    };
 
     TestBed.configureTestingModule({
       imports: [TenantDetailComponent],
       providers: [
         { provide: TenantsService, useValue: tenantsService },
+        { provide: TenantAdminService, useValue: tenantAdminService },
         { provide: NotificationService, useValue: notificationService },
+        { provide: TenantSubscriptionService, useValue: tenantSubscriptionService },
+        { provide: InvoicesService, useValue: invoicesService },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: convertToParamMap({ id: 't1' }) } },
@@ -79,6 +130,17 @@ describe('TenantDetail', () => {
     expect(tenantsService.getById).toHaveBeenCalledWith('t1');
     expect(fixture.nativeElement.textContent).toContain('Acme Inc');
     expect(fixture.nativeElement.textContent).toContain('REG123');
+  });
+
+  it('includes billing and invoice panels with the tenant id', () => {
+    const fixture = setup();
+    const subscriptionService = TestBed.inject(TenantSubscriptionService) as { get: jest.Mock };
+    const invoicesService = TestBed.inject(InvoicesService) as { listByTenant: jest.Mock };
+
+    expect(fixture.nativeElement.textContent).toContain('Billing & Renewal');
+    expect(fixture.nativeElement.textContent).toContain('Recent Invoices');
+    expect(subscriptionService.get).toHaveBeenCalledWith('t1');
+    expect(invoicesService.listByTenant).toHaveBeenCalledWith('t1');
   });
 
   it('shows Suspend and Cancel actions for an active tenant when the user can manage', () => {

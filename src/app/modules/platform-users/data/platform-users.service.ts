@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 import { environment } from '../../../../environments/environment';
 import { PlatformUser, PlatformUserDetail } from './platform-user.model';
 import { PlatformRoleSummary } from './platform-role-summary.model';
+import { PlatformUserSession } from './platform-user-session.model';
 
 @Injectable({ providedIn: 'root' })
 export class PlatformUsersService {
@@ -49,6 +50,29 @@ export class PlatformUsersService {
     return this.http.put<void>(
       `${this.baseUrl}${API_ENDPOINTS.platformUsers.updateRoles(id)}`,
       { roleIds },
+      { withCredentials: true },
+    );
+  }
+
+  listSessions(platformUserId: string): Observable<PlatformUserSession[]> {
+    return this.http.get<PlatformUserSession[]>(
+      `${this.baseUrl}${API_ENDPOINTS.platformUsers.sessions.list(platformUserId)}`,
+      { withCredentials: true },
+    );
+  }
+
+  revokeSession(platformUserId: string, sessionId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.platformUsers.sessions.revoke(platformUserId, sessionId)}`,
+      {},
+      { withCredentials: true },
+    );
+  }
+
+  revokeAllSessions(platformUserId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.platformUsers.sessions.revokeAll(platformUserId)}`,
+      {},
       { withCredentials: true },
     );
   }

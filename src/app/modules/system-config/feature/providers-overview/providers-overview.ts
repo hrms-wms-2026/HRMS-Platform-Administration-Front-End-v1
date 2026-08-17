@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { ProvidersService } from '../../data/providers.service';
 import { PlatformProviderCard } from '../../data/provider-card.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { ListRowsSkeleton } from '../../../../shared/ui/list-rows-skeleton/list-rows-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 
@@ -23,7 +23,7 @@ const FAMILY_ORDER: readonly { key: string; label: string }[] = [
 
 @Component({
   selector: 'app-providers-overview',
-  imports: [Loader, ErrorBanner, StatusBadge, DatePipe],
+  imports: [ListRowsSkeleton, ErrorBanner, StatusBadge, DatePipe],
   templateUrl: './providers-overview.html',
 })
 export class ProvidersOverview implements OnInit {

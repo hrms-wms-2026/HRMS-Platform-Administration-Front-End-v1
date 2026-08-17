@@ -5,7 +5,7 @@ import { TenantsService } from '../../data/tenants.service';
 import { TenantListItem } from '../../data/tenant.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { TableSkeleton } from '../../../../shared/ui/table-skeleton/table-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
@@ -24,7 +24,7 @@ const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> 
 
 @Component({
   selector: 'app-tenants-list',
-  imports: [RouterLink, StatusBadge, Loader, ErrorBanner, EmptyState, Pagination, DatePipe, Button],
+  imports: [RouterLink, StatusBadge, TableSkeleton, ErrorBanner, EmptyState, Pagination, DatePipe, Button],
   templateUrl: './tenants-list.html',
 })
 export class TenantsList implements OnInit {

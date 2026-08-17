@@ -1,0 +1,122 @@
+@if (loading()) {
+  <app-page-detail-skeleton [fieldCount]="4" [showContentBlock]="true" [showActionBar]="true" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadDocument()" />
+} @else if (document(); as doc) {
+  @if (editing()) {
+    <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <h1 class="page-title">Edit {{ doc.title }}</h1>
+      <app-legal-document-form
+        mode="edit"
+        [initialValue]="doc"
+        [saving]="saving()"
+        (submitted)="saveEdit($event)"
+      />
+      <div class="flex justify-end border-t border-slate-100 pt-4 dark:border-slate-800">
+        <app-button label="Cancel" variant="secondary" (clicked)="cancelEdit()" />
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 class="page-title">{{ doc.title }}</h1>
+          <p class="page-subtitle">
+            {{ legalDocumentTypeLabel(doc.documentType) }} · v{{ doc.version }}
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <app-status-badge
+            [label]="doc.status | titlecase"
+            [tone]="legalDocumentStatusTone(doc.status)"
+          />
+          @if (doc.isRequired) {
+            <app-status-badge label="Required" tone="indigo" />
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-sm lg:grid-cols-4">
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Block Scope</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ doc.blockScope }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Published</p>
+          <p class="text-slate-900 dark:text-slate-100">
+            @if (doc.publishedAt) {
+              {{ doc.publishedAt | date: 'medium' }}
+            } @else {
+              —
+            }
+          </p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Content Hash</p>
+          <p class="truncate font-mono text-xs text-slate-700 dark:text-slate-300" [title]="doc.contentHash">
+            {{ doc.contentHash }}
+          </p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Last Updated</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ doc.updatedAt | date: 'medium' }}</p>
+        </div>
+      </div>
+
+      @if (isDraft() && canManage()) {
+        <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          This version is a draft. Publish it to make it live for users. The current published version for this document type will be archived automatically.
+        </div>
+      }
+
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Preview</p>
+        <div
+          class="prose prose-sm mt-2 max-w-none rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800 dark:prose-invert"
+          [innerHTML]="previewHtml()"
+        ></div>
+      </div>
+
+      @if (canManage()) {
+        <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+          @if (isDraft()) {
+            <app-button label="Edit Draft" variant="secondary" (clicked)="startEdit()" />
+            <app-button
+              label="Publish"
+              variant="indigo"
+              [loading]="publishing()"
+              (clicked)="startPublish()"
+            />
+          }
+          @if (isPublished()) {
+            <app-button
+              label="Archive"
+              variant="danger"
+              [loading]="archiving()"
+              (clicked)="startArchive()"
+            />
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <app-confirmation-dialog
+    [open]="pendingPublish()"
+    title="Publish legal document?"
+    message="This will make this version live for users and archive the currently published version of the same document type."
+    confirmLabel="Publish"
+    confirmVariant="indigo"
+    (confirm)="confirmPublish()"
+    (cancelled)="cancelPublish()"
+  />
+
+  <app-confirmation-dialog
+    [open]="pendingArchive()"
+    title="Archive legal document?"
+    message="Archived versions remain readable but are no longer shown to users during login or consent flows."
+    confirmLabel="Archive"
+    (confirm)="confirmArchive()"
+    (cancelled)="cancelArchive()"
+  />
+}

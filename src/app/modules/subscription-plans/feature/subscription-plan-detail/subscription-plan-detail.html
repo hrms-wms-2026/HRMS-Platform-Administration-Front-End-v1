@@ -1,11 +1,11 @@
 @if (loading()) {
-  <app-loader label="Loading…" />
+  <app-page-detail-skeleton [fieldCount]="6" [showActionBar]="true" />
 } @else if (errorMessage(); as message) {
   <app-error-banner [message]="message" (retry)="loadPlan()" />
 } @else if (plan(); as p) {
   @if (editing()) {
     <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
-      <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Edit {{ p.name }}</h1>
+      <h1 class="page-title">Edit {{ p.name }}</h1>
       <app-subscription-plan-form
         mode="edit"
         [initialValue]="p"
@@ -20,8 +20,8 @@
     <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ p.name }}</h1>
-          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ p.code }}</p>
+          <h1 class="page-title">{{ p.name }}</h1>
+          <p class="page-subtitle">{{ p.code }}</p>
         </div>
         <app-status-badge [label]="p.isActive ? 'Active' : 'Archived'" [tone]="p.isActive ? 'success' : 'neutral'" />
       </div>

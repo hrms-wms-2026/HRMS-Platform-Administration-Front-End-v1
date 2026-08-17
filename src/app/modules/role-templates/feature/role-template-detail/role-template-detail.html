@@ -1,0 +1,37 @@
+@if (loading()) {
+  <app-page-detail-skeleton [fieldCount]="2" [showActionBar]="true" />
+} @else if (errorMessage(); as message) {
+  <app-error-banner [message]="message" (retry)="loadTemplate()" />
+} @else if (template(); as item) {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="page-title">{{ item.name }}</h1>
+        <p class="page-subtitle">Version {{ item.version }}</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        @if (item.isSystem) {
+          <app-status-badge label="System Template" tone="indigo" />
+        }
+        <app-status-badge
+          [label]="item.isActive ? 'Active' : 'Inactive'"
+          [tone]="item.isActive ? 'success' : 'neutral'"
+        />
+      </div>
+    </div>
+
+    @if (item.isSystem) {
+      <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        System role templates are read-only in the platform admin.
+      </p>
+    }
+
+    <app-role-template-form
+      mode="edit"
+      [initialValue]="item"
+      [readOnly]="readOnly()"
+      [saving]="saving()"
+      (submitted)="submit($event)"
+    />
+  </div>
+}

@@ -1,0 +1,64 @@
+<div class="flex h-full flex-col gap-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Recent Invoices</h2>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Latest billing documents for this tenant</p>
+    </div>
+    <a routerLink="/invoices">
+      <app-button label="View all invoices" variant="secondary" />
+    </a>
+  </div>
+
+  @if (loading()) {
+    <app-table-skeleton [rows]="4" [columns]="['8rem', '4rem', '5rem', '5rem', '3rem']" />
+  } @else if (errorMessage(); as message) {
+    <app-error-banner [message]="message" (retry)="loadInvoices(tenantId())" />
+  } @else if (invoices().length === 0) {
+    <app-empty-state
+      title="No invoices yet"
+      description="Invoices for this tenant will appear here once billing activity starts."
+    />
+  } @else {
+    <div class="overflow-x-auto scrollbar-hidden">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Invoice</th>
+            <th>Status</th>
+            <th>Due</th>
+            <th>Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (invoice of invoices(); track invoice.id) {
+            <tr>
+              <td class="table-primary">{{ invoice.invoiceNumber }}</td>
+              <td>
+                <app-status-badge
+                  [label]="invoice.status | titlecase"
+                  [tone]="invoiceStatusTone(invoice.status)"
+                />
+              </td>
+              <td class="table-meta whitespace-nowrap">
+                @if (invoice.dueAt) {
+                  {{ invoice.dueAt | date: 'mediumDate' }}
+                } @else {
+                  —
+                }
+              </td>
+              <td class="table-secondary whitespace-nowrap">
+                {{ formatInvoiceAmount(invoice.currency, invoice.totalAmount) }}
+              </td>
+              <td class="py-3 pr-4 text-right">
+                <a [routerLink]="['/invoices', invoice.id]" class="text-sm font-medium text-indigo-600 hover:underline">
+                  View
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

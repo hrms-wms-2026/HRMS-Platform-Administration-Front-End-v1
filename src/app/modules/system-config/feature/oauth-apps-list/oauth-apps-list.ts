@@ -3,14 +3,14 @@ import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { OAuthAppsService } from '../../data/oauth-apps.service';
 import { OAuthApp } from '../../data/oauth-app.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { ListRowsSkeleton } from '../../../../shared/ui/list-rows-skeleton/list-rows-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { OAuthAppDetailDrawer } from '../oauth-app-detail-drawer/oauth-app-detail-drawer';
 
 @Component({
   selector: 'app-oauth-apps-list',
-  imports: [Loader, ErrorBanner, StatusBadge, DatePipe, OAuthAppDetailDrawer, NgTemplateOutlet],
+  imports: [ListRowsSkeleton, ErrorBanner, StatusBadge, DatePipe, OAuthAppDetailDrawer, NgTemplateOutlet],
   templateUrl: './oauth-apps-list.html',
 })
 export class OAuthAppsList implements OnInit {

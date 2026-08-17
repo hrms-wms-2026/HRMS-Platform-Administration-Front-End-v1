@@ -6,8 +6,8 @@
   <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Subscription Plans</h1>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage pricing tiers, module bundles, and billing terms</p>
+        <h1 class="page-title">Subscription Plans</h1>
+        <p class="page-subtitle">Manage pricing tiers, module bundles, and billing terms</p>
       </div>
       @if (canManage()) {
         <a routerLink="/subscription-plans/new">
@@ -17,34 +17,38 @@
     </div>
 
     @if (loading()) {
-      <app-loader label="Loading…" />
+      <app-table-skeleton
+        [rows]="8"
+        [columns]="['8rem', '6rem', '5rem', '7rem', '6rem', '5rem']"
+        [showPagination]="false"
+      />
     } @else if (errorMessage(); as message) {
       <app-error-banner [message]="message" (retry)="loadPlans()" />
     } @else if (plans().length === 0) {
       <app-empty-state title="No subscription plans yet" />
     } @else {
-      <table class="w-full text-left text-sm">
+      <table class="data-table">
         <thead>
-          <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-            <th class="py-2 pr-4">Name</th>
-            <th class="py-2 pr-4">Code</th>
-            <th class="py-2 pr-4">Tier</th>
-            <th class="py-2 pr-4">Company Size</th>
-            <th class="py-2 pr-4">Price</th>
-            <th class="py-2 pr-4">Status</th>
+          <tr>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Tier</th>
+            <th>Company Size</th>
+            <th>Price</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
           @for (plan of plans(); track plan.id) {
             <tr
               [routerLink]="['/subscription-plans', plan.id]"
-              class="cursor-pointer border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+              class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
             >
-              <td class="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">{{ plan.name }}</td>
-              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.code }}</td>
-              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.tier }}</td>
-              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.companySizeRange }}</td>
-              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</td>
+              <td class="table-primary">{{ plan.name }}</td>
+              <td class="table-secondary">{{ plan.code }}</td>
+              <td class="table-secondary">{{ plan.tier }}</td>
+              <td class="table-secondary">{{ plan.companySizeRange }}</td>
+              <td class="table-secondary">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</td>
               <td class="py-3 pr-4">
                 <app-status-badge
                   [label]="plan.isActive ? 'Active' : 'Archived'"

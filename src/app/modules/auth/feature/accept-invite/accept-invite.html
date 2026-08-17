@@ -34,21 +34,21 @@
     }
     @case ('success') {
       <div class="text-center">
-        <h1 class="text-xl font-semibold text-slate-900">Access activated</h1>
+        <h1 class="page-title">Access activated</h1>
         <p class="mt-2 text-sm text-slate-500">Your account is ready. Sign in with your new password.</p>
         <app-button label="Sign in" (clicked)="continueToSignIn()" [fullWidth]="true" />
       </div>
     }
     @case ('error') {
       <div class="text-center">
-        <h1 class="text-xl font-semibold text-slate-900">Invitation problem</h1>
+        <h1 class="page-title">Invitation problem</h1>
         <p class="mt-2 text-sm text-red-700">{{ errorMessage() }}</p>
         <app-button label="Go to sign in" (clicked)="continueToSignIn()" [fullWidth]="true" />
       </div>
     }
     @case ('invalid') {
       <div class="text-center">
-        <h1 class="text-xl font-semibold text-slate-900">Invitation not found</h1>
+        <h1 class="page-title">Invitation not found</h1>
         <p class="mt-2 text-sm text-slate-500">This invitation link is missing or invalid.</p>
         <app-button label="Go to sign in" (clicked)="continueToSignIn()" [fullWidth]="true" />
       </div>

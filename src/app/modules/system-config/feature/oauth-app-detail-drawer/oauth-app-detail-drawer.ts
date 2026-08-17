@@ -7,12 +7,12 @@ import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button } from '../../../../shared/ui/button/button';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { DrawerContentSkeleton } from '../../../../shared/ui/drawer-content-skeleton/drawer-content-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 
 @Component({
   selector: 'app-oauth-app-detail-drawer',
-  imports: [ReactiveFormsModule, Button, StatusBadge, Loader, ErrorBanner],
+  imports: [ReactiveFormsModule, Button, StatusBadge, DrawerContentSkeleton, ErrorBanner],
   templateUrl: './oauth-app-detail-drawer.html',
 })
 export class OAuthAppDetailDrawer {
@@ -138,7 +138,7 @@ export class OAuthAppDetailDrawer {
       },
       error: () => {
         this.validating.set(false);
-        this.notificationService.error('Could not validate the configuration.');
+        this.notificationService.error('Could not run the local config check.');
       },
     });
   }

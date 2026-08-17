@@ -1,0 +1,150 @@
+<div class="fixed inset-0 z-50 flex justify-end">
+  <div
+    class="fixed inset-0 bg-slate-900/50"
+    role="button"
+    tabindex="0"
+    aria-label="Close drawer"
+    (click)="close()"
+    (keydown.enter)="close()"
+    (keydown.space)="$event.preventDefault(); close()"
+  ></div>
+  <div class="relative z-10 flex h-full w-full max-w-lg flex-col bg-white dark:bg-slate-900 shadow-2xl">
+    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Integration Details</h2>
+        @if (integration(); as item) {
+          <p class="text-sm text-slate-500 dark:text-slate-400">{{ item.integrationKey }}</p>
+        }
+      </div>
+      <button
+        type="button"
+        (click)="close()"
+        class="text-xl leading-none text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+        aria-label="Close"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto scrollbar-hidden px-6 py-4">
+      @if (loading()) {
+        <app-drawer-content-skeleton />
+      } @else if (errorMessage(); as message) {
+        <app-error-banner [message]="message" (retry)="close()" />
+      } @else if (integration(); as item) {
+        <div class="mb-4 flex items-center gap-3">
+          @if (item.logoUrl) {
+            <img [src]="item.logoUrl" alt="" class="h-10 w-10 rounded-lg object-contain" />
+          }
+          <div>
+            <p class="font-medium text-slate-900 dark:text-slate-100">{{ item.displayName }}</p>
+            <app-status-badge
+              [label]="item.isActive ? 'Active' : 'Inactive'"
+              [tone]="item.isActive ? 'success' : 'neutral'"
+            />
+          </div>
+        </div>
+
+        <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="save()">
+          <div>
+            <label class="audit-filter-label" for="displayName">Display Name</label>
+            <input id="displayName" type="text" formControlName="displayName" class="audit-filter-input" />
+          </div>
+
+          <div>
+            <label class="audit-filter-label" for="description">Description</label>
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="3"
+              class="audit-filter-input !h-auto min-h-[88px] py-2"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="audit-filter-label" for="connectionScope">Connection Scope</label>
+            <select id="connectionScope" formControlName="connectionScope" class="audit-filter-input">
+              @for (option of scopeOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="audit-filter-label" for="onevoAppProvider">OAuth Provider</label>
+            <select id="onevoAppProvider" formControlName="onevoAppProvider" class="audit-filter-input">
+              @for (provider of oauthProviders(); track provider) {
+                <option [value]="provider">{{ provider }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="audit-filter-label" for="logoUrl">Logo URL</label>
+            <input id="logoUrl" type="url" formControlName="logoUrl" class="audit-filter-input" />
+          </div>
+
+          @if (canManage()) {
+            <div class="flex flex-wrap gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <app-button type="submit" label="Save Changes" variant="indigo" [loading]="saving()" />
+              <app-button
+                type="button"
+                [label]="item.isActive ? 'Deactivate' : 'Activate'"
+                variant="secondary"
+                [loading]="togglingActive()"
+                (clicked)="toggleActive()"
+              />
+            </div>
+          }
+        </form>
+
+        <div class="mt-6 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <p class="audit-filter-label">Linked Modules</p>
+          @if (item.linkedModuleKeys.length === 0) {
+            <p class="table-secondary">No modules linked yet.</p>
+          } @else {
+            <div class="mt-2 flex flex-wrap gap-2">
+              @for (moduleKey of item.linkedModuleKeys; track moduleKey) {
+                <span class="audit-active-filter-chip">
+                  {{ moduleKey }}
+                  @if (canManage()) {
+                    <button
+                      type="button"
+                      class="rounded-full p-0.5 hover:bg-indigo-100 dark:hover:bg-indigo-900"
+                      [attr.aria-label]="'Unlink ' + moduleKey"
+                      [disabled]="moduleActionKey() === moduleKey"
+                      (click)="unlinkModule(moduleKey)"
+                    >
+                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  }
+                </span>
+              }
+            </div>
+          }
+
+          @if (canManage() && availableModules().length > 0) {
+            <div class="mt-4">
+              <label class="audit-filter-label" for="linkModule">Link Module</label>
+              <div class="flex gap-2">
+                <select #moduleSelect id="linkModule" class="audit-filter-input min-w-0 flex-1">
+                  @for (module of availableModules(); track module.moduleKey) {
+                    <option [value]="module.moduleKey">{{ module.name }} ({{ module.moduleKey }})</option>
+                  }
+                </select>
+                <app-button
+                  label="Link"
+                  variant="secondary"
+                  [disabled]="moduleActionKey() !== null"
+                  (clicked)="linkModule(moduleSelect.value)"
+                />
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,12 +1,17 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { ServiceKeysService } from '../../data/service-keys.service';
-import { ServiceKey } from '../../data/service-key.model';
+import {
+  ServiceKey,
+  formatServiceKeyVerificationToast,
+  getServiceKeyVerificationBadgeLabel,
+  getServiceKeyVerificationMode,
+} from '../../data/service-key.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button } from '../../../../shared/ui/button/button';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
-import { Loader } from '../../../../shared/ui/loader/loader';
+import { TableSkeleton } from '../../../../shared/ui/table-skeleton/table-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { AddServiceKeyModal } from '../add-service-key-modal/add-service-key-modal';
@@ -17,7 +22,7 @@ import { RotateServiceKeyModal } from '../rotate-service-key-modal/rotate-servic
   imports: [
     Button,
     StatusBadge,
-    Loader,
+    TableSkeleton,
     ErrorBanner,
     EmptyState,
     DatePipe,
@@ -69,15 +74,24 @@ export class ServiceKeysList implements OnInit {
     });
   }
 
+  protected verificationBadgeLabel(serviceKey: string): string {
+    return getServiceKeyVerificationBadgeLabel(serviceKey);
+  }
+
+  protected verificationBadgeTone(serviceKey: string): 'indigo' | 'neutral' {
+    return getServiceKeyVerificationMode(serviceKey) === 'live' ? 'indigo' : 'neutral';
+  }
+
   protected verifyKey(serviceKey: string): void {
     this.verifyingKey.set(serviceKey);
     this.serviceKeysService.verify(serviceKey).subscribe({
       next: (result) => {
         this.verifyingKey.set(null);
+        const message = formatServiceKeyVerificationToast(serviceKey, result);
         if (result.success) {
-          this.notificationService.success(result.message);
+          this.notificationService.success(message);
         } else {
-          this.notificationService.error(result.message);
+          this.notificationService.error(message);
         }
         this.loadKeys();
       },
