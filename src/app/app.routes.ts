@@ -133,6 +133,34 @@ export const routes: Routes = [
           import('./modules/invoices/feature/invoices-list/invoices-list').then((m) => m.InvoicesList),
       },
       {
+        path: 'module-catalog',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Subscription & Billing', page: 'Module Catalog' },
+          permission: 'platform.module_catalog.read',
+        },
+        loadComponent: () =>
+          import('./modules/module-catalog/feature/module-catalog-list/module-catalog-list').then(
+            (m) => m.ModuleCatalogList,
+          ),
+      },
+      {
+        path: 'module-catalog/:moduleKey',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Subscription & Billing',
+            parent: { label: 'Module Catalog', route: '/module-catalog' },
+            page: 'Module Details',
+          },
+          permission: 'platform.module_catalog.read',
+        },
+        loadComponent: () =>
+          import('./modules/module-catalog/feature/module-catalog-detail/module-catalog-detail').then(
+            (m) => m.ModuleCatalogDetail,
+          ),
+      },
+      {
         path: 'invoices/:id',
         canActivate: [permissionGuard],
         data: {
