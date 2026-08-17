@@ -1,0 +1,161 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+  <div>
+    <label for="name" class="text-sm font-medium text-slate-700">Plan Name</label>
+    <input
+      id="name"
+      type="text"
+      formControlName="name"
+      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+    />
+  </div>
+  <div>
+    <label for="code" class="text-sm font-medium text-slate-700">Code</label>
+    <input
+      id="code"
+      type="text"
+      formControlName="code"
+      placeholder="e.g. starter_1_10"
+      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-400"
+    />
+    @if (!isCreate()) {
+      <p class="mt-1 text-xs text-slate-500">Code cannot be changed after creation.</p>
+    }
+  </div>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label for="tier" class="text-sm font-medium text-slate-700">Tier</label>
+      <input
+        id="tier"
+        type="text"
+        formControlName="tier"
+        placeholder="e.g. Starter, Professional, Enterprise"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+    <div>
+      <label for="companySizeRange" class="text-sm font-medium text-slate-700">Company Size</label>
+      <select
+        id="companySizeRange"
+        formControlName="companySizeRange"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      >
+        <option value="">Select…</option>
+        @for (option of companySizeOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <p class="text-sm font-medium text-slate-700">Modules</p>
+    @if (loadingModules()) {
+      <app-loader label="Loading modules…" />
+    } @else if (modulesError(); as message) {
+      <p class="mt-1 text-xs text-red-700">{{ message }}</p>
+    } @else {
+      <div class="mt-1 grid grid-cols-2 gap-2 rounded-lg border border-slate-200 p-3">
+        @for (module of modules(); track module.moduleKey) {
+          <label class="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              [checked]="selectedModuleKeys().has(module.moduleKey)"
+              (change)="toggleModule(module.moduleKey)"
+              class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+            />
+            {{ module.name }}
+          </label>
+        }
+      </div>
+      @if (selectedModuleKeys().size === 0) {
+        <p class="mt-1 text-xs text-red-700">Select at least one module.</p>
+      }
+    }
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label for="currency" class="text-sm font-medium text-slate-700">Currency</label>
+      <select
+        id="currency"
+        formControlName="currency"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      >
+        @for (option of currencyOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label for="aiTokenLimitPerMonth" class="text-sm font-medium text-slate-700">
+        AI Token Limit / Month (optional)
+      </label>
+      <input
+        id="aiTokenLimitPerMonth"
+        type="number"
+        formControlName="aiTokenLimitPerMonth"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label for="overrideMonthlyPrice" class="text-sm font-medium text-slate-700">
+        Override Monthly Price (optional)
+      </label>
+      <input
+        id="overrideMonthlyPrice"
+        type="number"
+        step="0.01"
+        formControlName="overrideMonthlyPrice"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+    <div>
+      <label for="overrideAnnualPrice" class="text-sm font-medium text-slate-700">
+        Override Annual Price (optional)
+      </label>
+      <input
+        id="overrideAnnualPrice"
+        type="number"
+        step="0.01"
+        formControlName="overrideAnnualPrice"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label for="trialPeriodDays" class="text-sm font-medium text-slate-700">Trial Period (days)</label>
+      <input
+        id="trialPeriodDays"
+        type="number"
+        formControlName="trialPeriodDays"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+    <div>
+      <label for="unpaidGracePeriodDays" class="text-sm font-medium text-slate-700">
+        Unpaid Grace Period (days)
+      </label>
+      <input
+        id="unpaidGracePeriodDays"
+        type="number"
+        formControlName="unpaidGracePeriodDays"
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      />
+    </div>
+  </div>
+
+  <div class="flex justify-end border-t border-slate-100 pt-4">
+    <app-button
+      type="submit"
+      [label]="isCreate() ? 'Create Plan' : 'Save Changes'"
+      variant="indigo"
+      [loading]="saving()"
+      [disabled]="!canSubmit()"
+    />
+  </div>
+</form>

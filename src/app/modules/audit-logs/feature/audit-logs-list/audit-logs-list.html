@@ -1,0 +1,43 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm">
+    <div>
+      <h1 class="text-xl font-semibold text-slate-900">Audit Logs</h1>
+      <p class="mt-1 text-sm text-slate-500">Platform authentication and security events</p>
+    </div>
+
+    @if (loading()) {
+      <app-loader label="Loading…" />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadEvents()" />
+    } @else if (events().length === 0) {
+      <app-empty-state title="No audit log events yet" />
+    } @else {
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 text-xs font-medium uppercase text-slate-500">
+            <th class="py-2 pr-4">Event Type</th>
+            <th class="py-2 pr-4">User ID</th>
+            <th class="py-2 pr-4">Source IP</th>
+            <th class="py-2 pr-4">User Agent</th>
+            <th class="py-2 pr-4">Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (event of events(); track event.id) {
+            <tr class="border-b border-slate-100">
+              <td class="py-3 pr-4 font-medium text-slate-900">{{ event.eventType }}</td>
+              <td class="py-3 pr-4 text-slate-600">{{ event.userId || '—' }}</td>
+              <td class="py-3 pr-4 text-slate-600">{{ event.sourceIp || '—' }}</td>
+              <td class="py-3 pr-4 text-slate-600">{{ event.userAgent || '—' }}</td>
+              <td class="py-3 pr-4 text-slate-600">{{ event.createdAt | date: 'medium' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}

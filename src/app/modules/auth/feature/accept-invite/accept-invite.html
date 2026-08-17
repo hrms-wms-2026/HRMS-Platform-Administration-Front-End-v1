@@ -1,0 +1,55 @@
+<div class="w-full max-w-md rounded-2xl bg-white p-10 shadow-2xl">
+  @switch (view()) {
+    @case ('form') {
+      <div class="mb-8 text-center">
+        <p class="text-3xl font-extrabold tracking-tight text-blue-700">ONEXSO</p>
+        <p class="mt-1 text-sm font-medium text-slate-500">Set your password</p>
+      </div>
+
+      <form class="flex flex-col gap-5" [formGroup]="acceptInviteForm" (ngSubmit)="submit()" novalidate>
+        <div>
+          <label for="password" class="sr-only">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="New password"
+            class="w-full rounded-lg border border-slate-300 py-3 px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+        </div>
+        <div>
+          <label for="confirmPassword" class="sr-only">Confirm password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="Confirm password"
+            class="w-full rounded-lg border border-slate-300 py-3 px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+        </div>
+        <app-button type="submit" label="Activate account" loadingText="Activating…" [loading]="loading()" [fullWidth]="true" />
+      </form>
+    }
+    @case ('success') {
+      <div class="text-center">
+        <h1 class="text-xl font-semibold text-slate-900">Access activated</h1>
+        <p class="mt-2 text-sm text-slate-500">Your account is ready. Sign in with your new password.</p>
+        <app-button label="Sign in" (clicked)="continueToSignIn()" [fullWidth]="true" />
+      </div>
+    }
+    @case ('error') {
+      <div class="text-center">
+        <h1 class="text-xl font-semibold text-slate-900">Invitation problem</h1>
+        <p class="mt-2 text-sm text-red-700">{{ errorMessage() }}</p>
+        <app-button label="Go to sign in" (clicked)="continueToSignIn()" [fullWidth]="true" />
+      </div>
+    }
+    @case ('invalid') {
+      <div class="text-center">
+        <h1 class="text-xl font-semibold text-slate-900">Invitation not found</h1>
+        <p class="mt-2 text-sm text-slate-500">This invitation link is missing or invalid.</p>
+        <app-button label="Go to sign in" (clicked)="continueToSignIn()" [fullWidth]="true" />
+      </div>
+    }
+  }
+</div>

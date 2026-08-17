@@ -38,6 +38,14 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+/test-results
+/playwright-report
+
+# mkcert local dev certificates
+.certs/
+
+# Superpowers brainstorming companion mockups
+.superpowers/
 
 # System files
 .DS_Store
