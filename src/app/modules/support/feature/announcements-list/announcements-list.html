@@ -1,0 +1,110 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Announcements</h1>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Publish platform-wide notices to tenants and admins</p>
+      </div>
+      @if (canManage()) {
+        <a routerLink="/support/announcements/new">
+          <app-button label="New Announcement" variant="indigo" />
+        </a>
+      }
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <select
+        [value]="statusFilter()"
+        (change)="onStatusFilterChange($any($event.target).value)"
+        class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+      >
+        <option value="">All Statuses</option>
+        <option value="published">Published</option>
+        <option value="draft">Draft</option>
+      </select>
+      <select
+        [value]="severityFilter()"
+        (change)="onSeverityFilterChange($any($event.target).value)"
+        class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+      >
+        <option value="">All Severities</option>
+        @for (option of severityOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    @if (loading()) {
+      <app-loader label="Loading…" />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadAnnouncements()" />
+    } @else if (announcements().length === 0) {
+      <app-empty-state
+        [title]="statusFilter() || severityFilter() ? 'No announcements match your filters' : 'No announcements yet'"
+      />
+    } @else {
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 dark:border-slate-700 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            <th class="py-2 pr-4">Title</th>
+            <th class="py-2 pr-4">Severity</th>
+            <th class="py-2 pr-4">Audience</th>
+            <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Created</th>
+            <th class="py-2 pr-4"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (announcement of announcements(); track announcement.id) {
+            <tr class="border-b border-slate-100 dark:border-slate-800">
+              <td class="py-3 pr-4 font-medium text-slate-900 dark:text-slate-100">{{ announcement.title }}</td>
+              <td class="py-3 pr-4">
+                <app-status-badge [label]="announcement.severity" [tone]="severityTone(announcement.severity)" />
+              </td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ announcement.audience }}</td>
+              <td class="py-3 pr-4">
+                <app-status-badge
+                  [label]="announcement.isPublished ? 'Published' : 'Draft'"
+                  [tone]="publishedTone(announcement.isPublished)"
+                />
+              </td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ announcement.createdAt | date: 'mediumDate' }}</td>
+              <td class="py-3 pr-4 text-right">
+                @if (canManage()) {
+                  <app-button
+                    [label]="announcement.isPublished ? 'Unpublish' : 'Publish'"
+                    variant="secondary"
+                    [loading]="togglingId() === announcement.id"
+                    (clicked)="startToggle(announcement)"
+                  />
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <app-pagination [page]="currentPage()" [pageSize]="pageSize" [total]="total()" (pageChange)="goToPage($event)" />
+    }
+  </div>
+
+  @if (pendingToggle(); as announcement) {
+    <app-confirmation-dialog
+      [open]="true"
+      [title]="announcement.isPublished ? 'Unpublish announcement?' : 'Publish announcement?'"
+      [message]="
+        announcement.isPublished
+          ? 'Tenants and admins will no longer see this announcement.'
+          : 'This announcement will become visible to its audience immediately.'
+      "
+      [confirmLabel]="announcement.isPublished ? 'Unpublish' : 'Publish'"
+      confirmVariant="indigo"
+      (confirm)="confirmToggle()"
+      (cancelled)="cancelToggle()"
+    />
+  }
+}

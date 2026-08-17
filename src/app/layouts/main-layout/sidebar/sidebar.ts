@@ -120,6 +120,18 @@ const NAV_SECTIONS: SidebarNavSection[] = [
       },
     ],
   },
+  {
+    label: 'Support',
+    indent: true,
+    items: [
+      {
+        label: 'Announcements',
+        route: '/support/announcements',
+        icon: 'announcements',
+        permission: 'platform.support.read',
+      },
+    ],
+  },
 ];
 
 @Component({

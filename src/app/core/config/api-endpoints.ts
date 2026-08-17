@@ -156,6 +156,14 @@ export const API_ENDPOINTS = {
       disconnect: (id: string) => `/system-config/tenant-integrations/${id}/disconnect`,
     },
   },
+  support: {
+    announcements: {
+      list: '/support/announcements',
+      create: '/support/announcements',
+      publish: (announcementId: string) => `/support/announcements/${announcementId}/publish`,
+      unpublish: (announcementId: string) => `/support/announcements/${announcementId}/unpublish`,
+    },
+  },
   logs: {
     create: '/logs',
   },
