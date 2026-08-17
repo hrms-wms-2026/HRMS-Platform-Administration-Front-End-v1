@@ -152,6 +152,9 @@ a real permission is confirmed.
   may simply live on a branch that hasn't merged to `development` yet. Check the backend repo's
   branches/PRs before concluding an endpoint is missing.
 
+- Google SSO frontend journey (`google-callback`) is out of Release 1 scope for now — don't wire
+  it up until it's explicitly scoped.
+
 ### CSRF cookie/header names (verified against live backend)
 The admin API does **not** use the Angular-default `XSRF-TOKEN` cookie / `X-XSRF-TOKEN` header
 convention. It sets a cookie named **`admin_csrf`** on login and expects it echoed back as an
