@@ -65,7 +65,7 @@
               <td class="py-3 pr-4">
                 <app-status-badge [label]="announcement.severity" [tone]="severityTone(announcement.severity)" />
               </td>
-              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ announcement.audience }}</td>
+              <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ audienceLabel(announcement) }}</td>
               <td class="py-3 pr-4">
                 <app-status-badge
                   [label]="announcement.isPublished ? 'Published' : 'Draft'"

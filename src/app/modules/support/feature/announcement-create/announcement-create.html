@@ -31,31 +31,196 @@
       }
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label for="severity" class="text-sm font-medium text-slate-700 dark:text-slate-300">Severity</label>
-        <select
-          id="severity"
-          formControlName="severity"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        >
-          @for (option of severityOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
-          }
-        </select>
+    <div>
+      <label for="severity" class="text-sm font-medium text-slate-700 dark:text-slate-300">Severity</label>
+      <select
+        id="severity"
+        formControlName="severity"
+        class="mt-1 w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      >
+        @for (option of severityOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="border-t border-slate-100 dark:border-slate-800 pt-4">
+      <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Target Audience</p>
+
+      <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        @for (option of audienceScopeOptions; track option.value) {
+          <label
+            class="flex cursor-pointer flex-col gap-1 rounded-lg border px-3 py-2 text-sm"
+            [class.border-indigo-500]="audienceScope() === option.value"
+            [class.bg-indigo-50]="audienceScope() === option.value"
+            [class.dark:bg-indigo-950]="audienceScope() === option.value"
+            [class.border-slate-200]="audienceScope() !== option.value"
+            [class.dark:border-slate-700]="audienceScope() !== option.value"
+          >
+            <span class="flex items-center gap-2">
+              <input
+                type="radio"
+                name="audienceScope"
+                [value]="option.value"
+                [checked]="audienceScope() === option.value"
+                (change)="onAudienceScopeChange(option.value)"
+              />
+              <span class="font-medium text-slate-800 dark:text-slate-200">{{ option.label }}</span>
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">{{ option.hint }}</span>
+          </label>
+        }
       </div>
-      <div>
-        <label for="audience" class="text-sm font-medium text-slate-700 dark:text-slate-300">Audience</label>
-        <select
-          id="audience"
-          formControlName="audience"
-          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-        >
-          @for (option of audienceOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
+
+      @if (audienceScope() === 'platform_admins') {
+        <div class="mt-4 flex flex-col gap-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 p-3">
+          <div class="flex items-center gap-4 text-sm">
+            <label class="flex items-center gap-1.5">
+              <input
+                type="radio"
+                name="platformAdminScope"
+                value="all"
+                [checked]="platformAdminScope() === 'all'"
+                (change)="onPlatformAdminScopeChange('all')"
+              />
+              All Platform Admins
+            </label>
+            <label class="flex items-center gap-1.5">
+              <input
+                type="radio"
+                name="platformAdminScope"
+                value="selected_roles"
+                [checked]="platformAdminScope() === 'selected_roles'"
+                (change)="onPlatformAdminScopeChange('selected_roles')"
+              />
+              Selected Platform Roles
+            </label>
+          </div>
+
+          @if (platformAdminScope() === 'selected_roles') {
+            @if (platformRolesLoading()) {
+              <p class="text-xs text-slate-500 dark:text-slate-400">Loading roles…</p>
+            } @else {
+              <div class="flex flex-wrap gap-2">
+                @for (role of platformRoles(); track role.id) {
+                  <label
+                    class="flex items-center gap-1.5 rounded-full border border-slate-300 dark:border-slate-600 px-3 py-1 text-xs"
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="selectedPlatformRoleIds().has(role.id)"
+                      (change)="togglePlatformRole(role.id)"
+                    />
+                    {{ role.name }}
+                  </label>
+                }
+              </div>
+            }
           }
-        </select>
-      </div>
+        </div>
+      }
+
+      @if (audienceScope() === 'tenant_users') {
+        <div class="mt-4 flex flex-col gap-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 p-3">
+          <div class="flex items-center gap-4 text-sm">
+            <label class="flex items-center gap-1.5">
+              <input
+                type="radio"
+                name="tenantScope"
+                value="all_tenants"
+                [checked]="tenantScope() === 'all_tenants'"
+                (change)="onTenantScopeChange('all_tenants')"
+              />
+              All Tenants
+            </label>
+            <label class="flex items-center gap-1.5">
+              <input
+                type="radio"
+                name="tenantScope"
+                value="selected_tenants"
+                [checked]="tenantScope() === 'selected_tenants'"
+                (change)="onTenantScopeChange('selected_tenants')"
+              />
+              Selected Tenants
+            </label>
+          </div>
+
+          @if (tenantScope() === 'selected_tenants') {
+            @if (tenantsLoading()) {
+              <p class="text-xs text-slate-500 dark:text-slate-400">Loading tenants…</p>
+            } @else {
+              <div class="flex max-h-40 flex-col gap-1 overflow-y-auto rounded border border-slate-200 dark:border-slate-700 p-2">
+                @for (tenant of allTenants(); track tenant.id) {
+                  <label class="flex items-center gap-1.5 text-xs">
+                    <input
+                      type="checkbox"
+                      [checked]="selectedTenantIds().has(tenant.id)"
+                      (change)="toggleSelectedTenant(tenant.id)"
+                    />
+                    {{ tenant.name }}
+                  </label>
+                }
+              </div>
+            }
+
+            <div class="flex items-center gap-4 text-sm">
+              <label class="flex items-center gap-1.5">
+                <input
+                  type="radio"
+                  name="recipientScope"
+                  value="all_users"
+                  [checked]="recipientScope() === 'all_users'"
+                  (change)="onRecipientScopeChange('all_users')"
+                />
+                All Users in these tenants
+              </label>
+              <label class="flex items-center gap-1.5">
+                <input
+                  type="radio"
+                  name="recipientScope"
+                  value="selected_roles"
+                  [checked]="recipientScope() === 'selected_roles'"
+                  (change)="onRecipientScopeChange('selected_roles')"
+                />
+                Selected Roles
+              </label>
+            </div>
+
+            @if (recipientScope() === 'selected_roles') {
+              <div class="flex flex-col gap-2">
+                @for (tenant of selectedTenants(); track tenant.id) {
+                  <div class="rounded border border-slate-200 dark:border-slate-700 p-2">
+                    <p class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ tenant.name }}</p>
+                    @if (isLoadingRolesForTenant(tenant.id)) {
+                      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Loading roles…</p>
+                    } @else {
+                      <div class="mt-1 flex flex-wrap gap-2">
+                        @for (role of rolesForTenant(tenant.id); track role.id) {
+                          <label
+                            class="flex items-center gap-1.5 rounded-full border border-slate-300 dark:border-slate-600 px-3 py-1 text-xs"
+                          >
+                            <input
+                              type="checkbox"
+                              [checked]="isTenantRoleSelected(tenant.id, role.id)"
+                              (change)="toggleTenantRole(tenant.id, role.id)"
+                            />
+                            {{ role.name }}
+                          </label>
+                        }
+                        @if (rolesForTenant(tenant.id).length === 0) {
+                          <p class="text-xs text-slate-400">No roles found.</p>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          } @else {
+            <p class="text-xs text-slate-500 dark:text-slate-400">Reaches every user in every active tenant.</p>
+          }
+        </div>
+      }
     </div>
 
     <div class="flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">

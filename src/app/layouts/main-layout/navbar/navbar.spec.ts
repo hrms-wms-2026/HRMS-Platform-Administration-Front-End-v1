@@ -1,16 +1,31 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
+import { of } from 'rxjs';
 import { Navbar } from './navbar';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SessionService } from '../../../core/auth/session.service';
 import { MobileNavService } from '../mobile-nav.service';
+import { PlatformNotificationsService } from '../../../modules/notifications/data/platform-notifications.service';
 
 describe('Navbar', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Navbar],
-      providers: [{ provide: AuthService, useValue: { logout: jest.fn() } }, provideRouter([]), SessionService],
+      providers: [
+        { provide: AuthService, useValue: { logout: jest.fn() } },
+        provideRouter([]),
+        SessionService,
+        {
+          provide: PlatformNotificationsService,
+          useValue: {
+            list: jest.fn().mockReturnValue(of([])),
+            unreadCount: jest.fn().mockReturnValue(of({ count: 0 })),
+            markRead: jest.fn().mockReturnValue(of(undefined)),
+            markAllRead: jest.fn().mockReturnValue(of(undefined)),
+          },
+        },
+      ],
     }).compileComponents();
   });
 
@@ -49,13 +64,13 @@ describe('Navbar', () => {
     expect(input.nativeElement.getAttribute('placeholder')).toBe('Search tenants, users, settings...');
   });
 
-  it('renders a disabled notification button', () => {
+  it('renders the notification bell', () => {
     const fixture = TestBed.createComponent(Navbar);
     fixture.detectChanges();
 
+    expect(fixture.nativeElement.querySelector('app-notification-bell')).toBeTruthy();
     const button = fixture.debugElement.query(By.css('button[aria-label="Notifications"]'));
     expect(button).toBeTruthy();
-    expect(button.nativeElement.disabled).toBe(true);
   });
 
   it('renders a hamburger button with an aria-label', () => {

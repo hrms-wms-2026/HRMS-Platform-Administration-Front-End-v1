@@ -6,6 +6,7 @@ import { AnnouncementsService } from '../../data/announcements.service';
 import {
   ANNOUNCEMENT_SEVERITY_OPTIONS,
   AnnouncementSummary,
+  announcementAudienceLabel,
   announcementPublishedTone,
   announcementSeverityTone,
 } from '../../data/announcement.model';
@@ -49,6 +50,7 @@ export class AnnouncementsList implements OnInit {
 
   protected readonly severityTone = announcementSeverityTone;
   protected readonly publishedTone = announcementPublishedTone;
+  protected readonly audienceLabel = announcementAudienceLabel;
 
   ngOnInit(): void {
     if (!this.canView()) {

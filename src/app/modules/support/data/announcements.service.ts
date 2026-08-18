@@ -7,14 +7,26 @@ import {
   AnnouncementListResponse,
   AnnouncementSummary,
   CreateAnnouncementRequest,
+  TenantRoleTarget,
 } from './announcement.model';
+
+interface TenantRoleTargetApi {
+  tenantId: string;
+  roleId: string;
+}
 
 interface AnnouncementApi {
   id: string;
   title: string;
   body: string;
   severity: string;
-  audience: string;
+  audienceScope: string;
+  platformAdminScope: string | null;
+  platformRoleIds: string[];
+  tenantScope: string | null;
+  tenantIds: string[];
+  recipientScope: string | null;
+  tenantRoleTargets: TenantRoleTargetApi[];
   is_published: boolean;
   published_at: string | null;
   created_at: string;
@@ -71,7 +83,13 @@ export class AnnouncementsService {
           title: request.title,
           body: request.body,
           severity: request.severity,
-          audience: request.audience,
+          audienceScope: request.audienceScope,
+          platformAdminScope: request.platformAdminScope,
+          platformRoleIds: request.platformRoleIds,
+          tenantScope: request.tenantScope,
+          tenantIds: request.tenantIds,
+          recipientScope: request.recipientScope,
+          tenantRoleTargets: request.tenantRoleTargets,
         },
         { withCredentials: true },
       )
@@ -113,7 +131,15 @@ export class AnnouncementsService {
       title: item.title,
       body: item.body,
       severity: item.severity as AnnouncementSummary['severity'],
-      audience: item.audience as AnnouncementSummary['audience'],
+      audienceScope: item.audienceScope as AnnouncementSummary['audienceScope'],
+      platformAdminScope: item.platformAdminScope as AnnouncementSummary['platformAdminScope'],
+      platformRoleIds: item.platformRoleIds ?? [],
+      tenantScope: item.tenantScope as AnnouncementSummary['tenantScope'],
+      tenantIds: item.tenantIds ?? [],
+      recipientScope: item.recipientScope as AnnouncementSummary['recipientScope'],
+      tenantRoleTargets: (item.tenantRoleTargets ?? []).map(
+        (t): TenantRoleTarget => ({ tenantId: t.tenantId, roleId: t.roleId }),
+      ),
       isPublished: item.is_published,
       publishedAt: item.published_at,
       createdAt: item.created_at,

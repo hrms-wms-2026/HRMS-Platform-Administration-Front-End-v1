@@ -13,7 +13,13 @@ describe('AnnouncementsService', () => {
     title: 'Scheduled maintenance',
     body: 'Down for 1 hour on Saturday.',
     severity: 'warning',
-    audience: 'all',
+    audienceScope: 'platform_wide',
+    platformAdminScope: null,
+    platformRoleIds: [],
+    tenantScope: null,
+    tenantIds: [],
+    recipientScope: null,
+    tenantRoleTargets: [],
     is_published: false,
     published_at: null,
     created_at: '2026-08-14T10:00:00Z',
@@ -49,7 +55,13 @@ describe('AnnouncementsService', () => {
           title: 'Scheduled maintenance',
           body: 'Down for 1 hour on Saturday.',
           severity: 'warning',
-          audience: 'all',
+          audienceScope: 'platform_wide',
+          platformAdminScope: null,
+          platformRoleIds: [],
+          tenantScope: null,
+          tenantIds: [],
+          recipientScope: null,
+          tenantRoleTargets: [],
           isPublished: false,
           publishedAt: null,
           createdAt: '2026-08-14T10:00:00Z',
@@ -62,9 +74,18 @@ describe('AnnouncementsService', () => {
     });
   });
 
-  it('creates an announcement', () => {
+  it('creates an announcement with tenant role targets', () => {
     service
-      .create({ title: 'Scheduled maintenance', body: 'Down for 1 hour on Saturday.', severity: 'warning', audience: 'all' })
+      .create({
+        title: 'Scheduled maintenance',
+        body: 'Down for 1 hour on Saturday.',
+        severity: 'warning',
+        audienceScope: 'tenant_users',
+        tenantScope: 'selected_tenants',
+        tenantIds: ['tenant-1'],
+        recipientScope: 'selected_roles',
+        tenantRoleTargets: [{ tenantId: 'tenant-1', roleId: 'role-1' }],
+      })
       .subscribe();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/support/announcements`);
@@ -73,7 +94,13 @@ describe('AnnouncementsService', () => {
       title: 'Scheduled maintenance',
       body: 'Down for 1 hour on Saturday.',
       severity: 'warning',
-      audience: 'all',
+      audienceScope: 'tenant_users',
+      platformAdminScope: undefined,
+      platformRoleIds: undefined,
+      tenantScope: 'selected_tenants',
+      tenantIds: ['tenant-1'],
+      recipientScope: 'selected_roles',
+      tenantRoleTargets: [{ tenantId: 'tenant-1', roleId: 'role-1' }],
     });
     req.flush(announcementApi);
   });

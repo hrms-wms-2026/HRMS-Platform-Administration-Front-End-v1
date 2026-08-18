@@ -183,6 +183,12 @@ export const API_ENDPOINTS = {
   logs: {
     create: '/logs',
   },
+  notifications: {
+    list: '/notifications',
+    unreadCount: '/notifications/unread-count',
+    markRead: (id: string) => `/notifications/${id}/read`,
+    markAllRead: '/notifications/read-all',
+  },
   reference: {
     countryDefaults: (countryCode: string) => `/reference/countries/${countryCode}/defaults`,
   },
