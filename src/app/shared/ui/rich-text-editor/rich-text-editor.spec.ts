@@ -55,6 +55,26 @@ describe('RichTextEditor', () => {
     expect(emitted).toBe('');
   });
 
+  it('clears a leftover empty list/formatting scaffold on blur', () => {
+    const fixture = setup();
+
+    const el = editableEl(fixture);
+    el.innerHTML = '<ul><li><br></li></ul>';
+    el.dispatchEvent(new Event('blur'));
+
+    expect(el.innerHTML).toBe('');
+  });
+
+  it('keeps real content on blur', () => {
+    const fixture = setup();
+
+    const el = editableEl(fixture);
+    el.innerHTML = '<p>Hello</p>';
+    el.dispatchEvent(new Event('blur'));
+
+    expect(el.innerHTML).toBe('<p>Hello</p>');
+  });
+
   it('calls onTouched on blur', () => {
     const fixture = setup();
     const component = fixture.componentInstance;

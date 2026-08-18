@@ -85,14 +85,24 @@ export class RichTextEditor implements ControlValueAccessor {
   }
 
   protected onBlur(): void {
+    // Clicking a list/bold/etc. toolbar button on empty content leaves an empty
+    // <ul><li><br></li></ul> (or similar) behind - textContent is empty so the form already
+    // treats this as blank, but the leftover markup still renders a visible bullet/marker with
+    // nothing typed into it. Clear it on blur so the box actually looks as empty as it is.
+    if (this.isEmpty()) {
+      this.editableRef.nativeElement.innerHTML = '';
+    }
     this.onTouched();
+  }
+
+  private isEmpty(): boolean {
+    return this.editableRef.nativeElement.textContent?.trim().length === 0;
   }
 
   private emitChange(): void {
     const element = this.editableRef.nativeElement;
     // An "emptied" contenteditable div is left holding a stray <br> by some browsers -
     // normalize that back to '' so required-field validation sees it as empty.
-    const isEmpty = element.textContent?.trim().length === 0;
-    this.onChange(isEmpty ? '' : element.innerHTML);
+    this.onChange(this.isEmpty() ? '' : element.innerHTML);
   }
 }
