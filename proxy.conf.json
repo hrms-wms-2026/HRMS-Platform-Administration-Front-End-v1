@@ -1,0 +1,7 @@
+{
+  "/admin/v1": {
+    "target": "https://localhost:7229",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

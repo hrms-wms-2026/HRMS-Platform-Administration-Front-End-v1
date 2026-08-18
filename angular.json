@@ -85,7 +85,8 @@
             "allowedHosts": ["admin.localhost"],
             "ssl": true,
             "sslCert": ".certs/localhost-cert.pem",
-            "sslKey": ".certs/localhost-key.pem"
+            "sslKey": ".certs/localhost-key.pem",
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
