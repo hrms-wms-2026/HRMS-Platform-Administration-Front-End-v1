@@ -8,18 +8,23 @@ interface ToolbarButton {
   command: string;
   label: string;
   icon: string;
-  value?: string;
 }
 
 const TOOLBAR_BUTTONS: ToolbarButton[] = [
   { command: 'bold', label: 'Bold', icon: 'B' },
   { command: 'italic', label: 'Italic', icon: 'I' },
   { command: 'underline', label: 'Underline', icon: 'U' },
-  { command: 'insertUnorderedList', label: 'Bulleted list', icon: '• List' },
-  { command: 'insertOrderedList', label: 'Numbered list', icon: '1. List' },
 ];
 
-type PromptKind = 'link' | 'image' | null;
+// A small curated set rather than a full emoji library - keeps the picker a lightweight
+// dependency-free panel instead of pulling in an emoji-data package for a single toolbar button.
+const EMOJIS: readonly string[] = [
+  '😀', '😊', '🙂', '😉', '😍', '🎉', '👍', '👏',
+  '🙏', '💡', '📢', '🚀', '🔥', '✅', '❌', '⚠️',
+  '❗', '❓', '📌', '📅', '🔧', '📈', '📉', '💬',
+];
+
+type ActivePanel = 'link' | 'image' | 'emoji' | null;
 
 @Component({
   selector: 'app-rich-text-editor',
@@ -38,15 +43,18 @@ export class RichTextEditor implements ControlValueAccessor {
   @ViewChild('promptInput') private readonly promptInputRef?: ElementRef<HTMLInputElement>;
 
   protected readonly toolbarButtons = TOOLBAR_BUTTONS;
+  protected readonly emojis = EMOJIS;
   protected readonly disabled = signal(false);
-  protected readonly activePrompt = signal<PromptKind>(null);
+  protected readonly activePanel = signal<ActivePanel>(null);
   protected readonly promptValue = signal('');
 
   // window.prompt() is a blocking native dialog that many embedding contexts (sandboxed
   // iframes without allow-modals, some PWA/webview shells) refuse to show at all, so Link/Image
   // use this inline input instead. Opening it moves focus out of the contenteditable region,
   // which collapses its selection - the Range is captured here and restored just before the
-  // command runs so createLink/insertImage still apply at the right spot.
+  // command runs so createLink/insertImage still apply at the right spot. The emoji panel never
+  // needs this: every clickable in it prevents mousedown's default focus shift, so the
+  // contenteditable region (and its caret) never actually loses focus in the first place.
   private savedRange: Range | null = null;
 
   private onChange: (value: string) => void = () => undefined;
@@ -54,7 +62,7 @@ export class RichTextEditor implements ControlValueAccessor {
 
   constructor() {
     effect(() => {
-      if (this.activePrompt()) {
+      if (this.activePanel() === 'link' || this.activePanel() === 'image') {
         queueMicrotask(() => this.promptInputRef?.nativeElement.focus());
       }
     });
@@ -93,10 +101,19 @@ export class RichTextEditor implements ControlValueAccessor {
     this.openPrompt('image');
   }
 
+  protected toggleEmojiPicker(): void {
+    this.activePanel.set(this.activePanel() === 'emoji' ? null : 'emoji');
+  }
+
+  protected insertEmoji(emoji: string): void {
+    this.runCommand('insertText', emoji);
+    this.activePanel.set(null);
+  }
+
   protected confirmPrompt(): void {
-    const kind = this.activePrompt();
+    const kind = this.activePanel();
     const url = this.promptValue().trim();
-    if (!kind || !url) {
+    if ((kind !== 'link' && kind !== 'image') || !url) {
       this.closePrompt();
       return;
     }
@@ -132,15 +149,15 @@ export class RichTextEditor implements ControlValueAccessor {
     this.onTouched();
   }
 
-  private openPrompt(kind: PromptKind): void {
+  private openPrompt(kind: 'link' | 'image'): void {
     const selection = window.getSelection();
     this.savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
     this.promptValue.set('');
-    this.activePrompt.set(kind);
+    this.activePanel.set(kind);
   }
 
   private closePrompt(): void {
-    this.activePrompt.set(null);
+    this.activePanel.set(null);
     this.promptValue.set('');
     this.savedRange = null;
   }

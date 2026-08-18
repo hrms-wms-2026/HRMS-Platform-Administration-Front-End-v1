@@ -123,7 +123,7 @@ describe('RichTextEditor', () => {
     findButton(fixture, 'Insert link').click();
     fixture.detectChanges();
 
-    expect(component['activePrompt']()).toBe('link');
+    expect(component['activePanel']()).toBe('link');
     expect(fixture.nativeElement.querySelector('input[type="url"]')).toBeTruthy();
   });
 
@@ -138,7 +138,7 @@ describe('RichTextEditor', () => {
     component['confirmPrompt']();
 
     expect(execSpy).toHaveBeenCalledWith('createLink', false, 'https://onevo.io');
-    expect(component['activePrompt']()).toBeNull();
+    expect(component['activePanel']()).toBeNull();
     execSpy.mockRestore();
   });
 
@@ -149,7 +149,7 @@ describe('RichTextEditor', () => {
 
     findButton(fixture, 'Insert image').click();
     fixture.detectChanges();
-    expect(component['activePrompt']()).toBe('image');
+    expect(component['activePanel']()).toBe('image');
 
     component['promptValue'].set('https://onevo.io/pic.png');
     component['confirmPrompt']();
@@ -167,7 +167,7 @@ describe('RichTextEditor', () => {
     component['confirmPrompt']();
 
     expect(execSpy).not.toHaveBeenCalled();
-    expect(component['activePrompt']()).toBeNull();
+    expect(component['activePanel']()).toBeNull();
     execSpy.mockRestore();
   });
 
@@ -181,7 +181,37 @@ describe('RichTextEditor', () => {
     component['cancelPrompt']();
 
     expect(execSpy).not.toHaveBeenCalled();
-    expect(component['activePrompt']()).toBeNull();
+    expect(component['activePanel']()).toBeNull();
+    execSpy.mockRestore();
+  });
+
+  it('toggleEmojiPicker opens and closes the emoji panel', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+
+    findButton(fixture, 'Insert emoji').click();
+    fixture.detectChanges();
+    expect(component['activePanel']()).toBe('emoji');
+    expect(fixture.nativeElement.textContent).toContain('😀');
+
+    findButton(fixture, 'Insert emoji').click();
+    fixture.detectChanges();
+    expect(component['activePanel']()).toBeNull();
+  });
+
+  it('insertEmoji runs insertText with the emoji and closes the panel', () => {
+    const fixture = setup();
+    const execSpy = jest.spyOn(document, 'execCommand').mockReturnValue(true);
+    const component = fixture.componentInstance;
+
+    findButton(fixture, 'Insert emoji').click();
+    fixture.detectChanges();
+
+    const emojiButton = fixture.nativeElement.querySelector('[aria-label="Insert 👍"]') as HTMLButtonElement;
+    emojiButton.click();
+
+    expect(execSpy).toHaveBeenCalledWith('insertText', false, '👍');
+    expect(component['activePanel']()).toBeNull();
     execSpy.mockRestore();
   });
 });
