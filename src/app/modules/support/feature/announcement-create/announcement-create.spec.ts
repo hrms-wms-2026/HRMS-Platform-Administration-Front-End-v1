@@ -85,9 +85,66 @@ describe('AnnouncementCreate', () => {
       tenantIds: undefined,
       recipientScope: undefined,
       tenantRoleTargets: undefined,
+      sendEmail: false,
     });
     expect(notificationService.success).toHaveBeenCalledWith('Announcement created.');
     expect(router.navigateByUrl).toHaveBeenCalledWith('/support/announcements');
+  });
+
+  it('includes sendEmail: true once the Email delivery channel is toggled on', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    announcementsService.create.mockReturnValue(of({ id: 'announcement-1' }));
+
+    const component = fixture.componentInstance;
+    fillBaseForm(component);
+    component['toggleSendEmail']();
+    component['submit']();
+
+    expect(announcementsService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ sendEmail: true }),
+    );
+  });
+
+  it('tracks title and body character counts', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component['form'].controls.title.setValue('Hello');
+    component['form'].controls.body.setValue('<p>Hi there</p>');
+
+    expect(component['titleLength']()).toBe(5);
+    expect(component['bodyPlainTextLength']()).toBe(8);
+  });
+
+  it('blocks submit when the body plain text exceeds the max length', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    announcementsService.create.mockReturnValue(of({ id: 'announcement-1' }));
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      title: 'Scheduled maintenance',
+      body: `<p>${'a'.repeat(5001)}</p>`,
+      severity: 'warning',
+    });
+    component['submit']();
+
+    expect(announcementsService.create).not.toHaveBeenCalled();
+    expect(notificationService.error).toHaveBeenCalledWith('Body must be at most 5000 characters.');
+  });
+
+  it('toggles the preview modal open and closed', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+
+    expect(component['previewOpen']()).toBe(false);
+    component['togglePreview']();
+    expect(component['previewOpen']()).toBe(true);
+    component['togglePreview']();
+    expect(component['previewOpen']()).toBe(false);
   });
 
   it('requires at least one platform role when platform admin scope is selected_roles', () => {

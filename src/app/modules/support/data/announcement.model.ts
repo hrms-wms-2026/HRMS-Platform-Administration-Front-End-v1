@@ -24,6 +24,7 @@ export interface AnnouncementSummary {
   tenantIds: string[];
   recipientScope: RecipientScope | null;
   tenantRoleTargets: TenantRoleTarget[];
+  sendEmail: boolean;
   isPublished: boolean;
   publishedAt: string | null;
   createdAt: string;
@@ -48,6 +49,25 @@ export interface CreateAnnouncementRequest {
   tenantIds?: string[];
   recipientScope?: RecipientScope;
   tenantRoleTargets?: TenantRoleTarget[];
+  sendEmail?: boolean;
+}
+
+export const ANNOUNCEMENT_TITLE_MAX_LENGTH = 150;
+export const ANNOUNCEMENT_BODY_MAX_LENGTH = 5000;
+
+/** Strips HTML tags and decodes the handful of entities the rich text editor can produce,
+ * matching the backend's AnnouncementHtmlValidator.ExtractPlainText - used for the live
+ * character counter so it reflects what the 5000-char limit is actually measured against. */
+export function extractPlainText(html: string): string {
+  const withoutTags = html.replace(/<[^>]*>/g, ' ');
+  const decoded = withoutTags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  return decoded.replace(/\s+/g, ' ').trim();
 }
 
 export const ANNOUNCEMENT_SEVERITY_OPTIONS: { value: AnnouncementSeverity; label: string }[] = [

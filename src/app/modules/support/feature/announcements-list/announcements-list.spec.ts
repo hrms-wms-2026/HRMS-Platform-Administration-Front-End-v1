@@ -22,6 +22,7 @@ describe('AnnouncementsList', () => {
     tenantIds: [],
     recipientScope: null,
     tenantRoleTargets: [],
+    sendEmail: false,
     isPublished: false,
     publishedAt: null,
     createdAt: '2026-08-14T10:00:00Z',

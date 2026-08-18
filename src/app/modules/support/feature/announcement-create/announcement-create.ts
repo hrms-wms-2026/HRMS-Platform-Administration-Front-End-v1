@@ -1,10 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AnnouncementsService } from '../../data/announcements.service';
 import {
+  ANNOUNCEMENT_BODY_MAX_LENGTH,
   ANNOUNCEMENT_SEVERITY_OPTIONS,
+  ANNOUNCEMENT_TITLE_MAX_LENGTH,
   AUDIENCE_SCOPE_OPTIONS,
   AnnouncementAudienceScope,
   AnnouncementSeverity,
@@ -12,9 +15,12 @@ import {
   RecipientScope,
   TenantRoleTarget,
   TenantScope,
+  extractPlainText,
 } from '../../data/announcement.model';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button } from '../../../../shared/ui/button/button';
+import { Modal } from '../../../../shared/ui/modal/modal';
+import { RichTextEditor } from '../../../../shared/ui/rich-text-editor/rich-text-editor';
 import { PlatformRolesService } from '../../../roles/data/platform-roles.service';
 import { PlatformRole } from '../../../roles/data/platform-role.model';
 import { TenantsService } from '../../../tenants/data/tenants.service';
@@ -24,7 +30,7 @@ import { TenantRoleSummary } from '../../../tenants/data/tenant-admin.model';
 
 @Component({
   selector: 'app-announcement-create',
-  imports: [ReactiveFormsModule, Button],
+  imports: [ReactiveFormsModule, Button, Modal, RichTextEditor],
   templateUrl: './announcement-create.html',
 })
 export class AnnouncementCreate {
@@ -39,12 +45,28 @@ export class AnnouncementCreate {
   protected readonly severityOptions = ANNOUNCEMENT_SEVERITY_OPTIONS;
   protected readonly audienceScopeOptions = AUDIENCE_SCOPE_OPTIONS;
   protected readonly saving = signal(false);
+  protected readonly previewOpen = signal(false);
+  protected readonly sendEmail = signal(false);
+
+  protected readonly titleMaxLength = ANNOUNCEMENT_TITLE_MAX_LENGTH;
+  protected readonly bodyMaxLength = ANNOUNCEMENT_BODY_MAX_LENGTH;
 
   protected readonly form = this.formBuilder.nonNullable.group({
-    title: ['', [Validators.required, Validators.maxLength(200)]],
+    title: ['', [Validators.required, Validators.maxLength(ANNOUNCEMENT_TITLE_MAX_LENGTH)]],
     body: ['', [Validators.required]],
     severity: ['info' as AnnouncementSeverity, [Validators.required]],
   });
+
+  private readonly titleValue = toSignal(this.form.controls.title.valueChanges, {
+    initialValue: this.form.controls.title.value,
+  });
+  private readonly bodyValue = toSignal(this.form.controls.body.valueChanges, {
+    initialValue: this.form.controls.body.value,
+  });
+
+  protected readonly titleLength = computed(() => this.titleValue().length);
+  protected readonly bodyPlainTextLength = computed(() => extractPlainText(this.bodyValue()).length);
+  protected readonly bodyOverLimit = computed(() => this.bodyPlainTextLength() > this.bodyMaxLength);
 
   protected readonly audienceScope = signal<AnnouncementAudienceScope>('platform_wide');
 
@@ -205,9 +227,22 @@ export class AnnouncementCreate {
     });
   }
 
+  protected togglePreview(): void {
+    this.previewOpen.set(!this.previewOpen());
+  }
+
+  protected toggleSendEmail(): void {
+    this.sendEmail.set(!this.sendEmail());
+  }
+
   protected submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.bodyOverLimit()) {
+      this.notificationService.error(`Body must be at most ${this.bodyMaxLength} characters.`);
       return;
     }
 
@@ -252,6 +287,7 @@ export class AnnouncementCreate {
           scope === 'tenant_users' && this.recipientScope() === 'selected_roles'
             ? this.selectedTenantRoleTargets()
             : undefined,
+        sendEmail: this.sendEmail(),
       })
       .subscribe({
         next: () => {

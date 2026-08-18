@@ -6,7 +6,16 @@
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
     <div>
-      <label for="title" class="text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
+      <div class="flex items-baseline justify-between">
+        <label for="title" class="text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
+        <span
+          class="text-xs"
+          [class.text-red-600]="titleLength() > titleMaxLength"
+          [class.text-slate-400]="titleLength() <= titleMaxLength"
+        >
+          {{ titleLength() }}/{{ titleMaxLength }}
+        </span>
+      </div>
       <input
         id="title"
         type="text"
@@ -19,16 +28,35 @@
     </div>
 
     <div>
-      <label for="body" class="text-sm font-medium text-slate-700 dark:text-slate-300">Body</label>
-      <textarea
-        id="body"
-        rows="4"
-        formControlName="body"
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-      ></textarea>
+      <div class="flex items-baseline justify-between">
+        <label for="body" class="text-sm font-medium text-slate-700 dark:text-slate-300">Body</label>
+        <span class="text-xs" [class.text-red-600]="bodyOverLimit()" [class.text-slate-400]="!bodyOverLimit()">
+          {{ bodyPlainTextLength() }}/{{ bodyMaxLength }}
+        </span>
+      </div>
+      <app-rich-text-editor id="body" formControlName="body" class="mt-1 block" />
       @if (form.controls.body.invalid && form.controls.body.touched) {
         <p class="mt-1 text-xs text-red-700">Body is required.</p>
       }
+    </div>
+
+    <div class="border-t border-slate-100 dark:border-slate-800 pt-4">
+      <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Delivery Channels</p>
+      <div class="mt-2 flex flex-wrap gap-4 text-sm text-slate-700 dark:text-slate-300">
+        <label class="flex items-center gap-1.5 opacity-70">
+          <input type="checkbox" checked disabled />
+          In-App
+        </label>
+        <label class="flex items-center gap-1.5">
+          <input type="checkbox" [checked]="sendEmail()" (change)="toggleSendEmail()" />
+          Email
+        </label>
+        <label class="flex items-center gap-1.5 opacity-50" title="Coming soon">
+          <input type="checkbox" disabled />
+          Web Push
+          <span class="text-xs text-slate-400">(Coming soon)</span>
+        </label>
+      </div>
     </div>
 
     <div>
@@ -223,8 +251,21 @@
       }
     </div>
 
-    <div class="flex justify-end border-t border-slate-100 dark:border-slate-800 pt-4">
+    <div class="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-800 pt-4">
+      <app-button type="button" label="Preview" variant="secondary" (clicked)="togglePreview()" />
       <app-button type="submit" label="Create Announcement" variant="indigo" [loading]="saving()" />
     </div>
   </form>
 </div>
+
+<app-modal [open]="previewOpen()" title="Preview" (closed)="togglePreview()">
+  <div class="max-h-[70vh] overflow-y-auto">
+    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+      {{ form.controls.title.value || '(Untitled announcement)' }}
+    </h3>
+    <div
+      class="mt-3 text-sm text-slate-700 dark:text-slate-300 [&_a]:text-indigo-600 [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_img]:max-w-full"
+      [innerHTML]="form.controls.body.value"
+    ></div>
+  </div>
+</app-modal>

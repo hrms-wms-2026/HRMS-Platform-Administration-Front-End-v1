@@ -27,6 +27,7 @@ interface AnnouncementApi {
   tenantIds: string[];
   recipientScope: string | null;
   tenantRoleTargets: TenantRoleTargetApi[];
+  sendEmail: boolean;
   is_published: boolean;
   published_at: string | null;
   created_at: string;
@@ -90,6 +91,7 @@ export class AnnouncementsService {
           tenantIds: request.tenantIds,
           recipientScope: request.recipientScope,
           tenantRoleTargets: request.tenantRoleTargets,
+          sendEmail: request.sendEmail ?? false,
         },
         { withCredentials: true },
       )
@@ -140,6 +142,7 @@ export class AnnouncementsService {
       tenantRoleTargets: (item.tenantRoleTargets ?? []).map(
         (t): TenantRoleTarget => ({ tenantId: t.tenantId, roleId: t.roleId }),
       ),
+      sendEmail: item.sendEmail,
       isPublished: item.is_published,
       publishedAt: item.published_at,
       createdAt: item.created_at,

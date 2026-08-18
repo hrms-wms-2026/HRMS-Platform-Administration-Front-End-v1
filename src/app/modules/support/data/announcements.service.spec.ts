@@ -20,6 +20,7 @@ describe('AnnouncementsService', () => {
     tenantIds: [],
     recipientScope: null,
     tenantRoleTargets: [],
+    sendEmail: false,
     is_published: false,
     published_at: null,
     created_at: '2026-08-14T10:00:00Z',
@@ -62,6 +63,7 @@ describe('AnnouncementsService', () => {
           tenantIds: [],
           recipientScope: null,
           tenantRoleTargets: [],
+          sendEmail: false,
           isPublished: false,
           publishedAt: null,
           createdAt: '2026-08-14T10:00:00Z',
@@ -85,6 +87,7 @@ describe('AnnouncementsService', () => {
         tenantIds: ['tenant-1'],
         recipientScope: 'selected_roles',
         tenantRoleTargets: [{ tenantId: 'tenant-1', roleId: 'role-1' }],
+        sendEmail: true,
       })
       .subscribe();
 
@@ -101,6 +104,7 @@ describe('AnnouncementsService', () => {
       tenantIds: ['tenant-1'],
       recipientScope: 'selected_roles',
       tenantRoleTargets: [{ tenantId: 'tenant-1', roleId: 'role-1' }],
+      sendEmail: true,
     });
     req.flush(announcementApi);
   });
