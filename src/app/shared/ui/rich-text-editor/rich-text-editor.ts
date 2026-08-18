@@ -1,5 +1,5 @@
-import { Component, ElementRef, ViewChild, forwardRef, signal } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, ElementRef, ViewChild, effect, forwardRef, signal } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 /** Toolbar action wired to document.execCommand - deprecated but still the only
  * dependency-free way to drive a contenteditable region's rich text formatting;
@@ -19,8 +19,11 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
   { command: 'insertOrderedList', label: 'Numbered list', icon: '1. List' },
 ];
 
+type PromptKind = 'link' | 'image' | null;
+
 @Component({
   selector: 'app-rich-text-editor',
+  imports: [FormsModule],
   templateUrl: './rich-text-editor.html',
   providers: [
     {
@@ -32,12 +35,30 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
 })
 export class RichTextEditor implements ControlValueAccessor {
   @ViewChild('editable', { static: true }) private readonly editableRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('promptInput') private readonly promptInputRef?: ElementRef<HTMLInputElement>;
 
   protected readonly toolbarButtons = TOOLBAR_BUTTONS;
   protected readonly disabled = signal(false);
+  protected readonly activePrompt = signal<PromptKind>(null);
+  protected readonly promptValue = signal('');
+
+  // window.prompt() is a blocking native dialog that many embedding contexts (sandboxed
+  // iframes without allow-modals, some PWA/webview shells) refuse to show at all, so Link/Image
+  // use this inline input instead. Opening it moves focus out of the contenteditable region,
+  // which collapses its selection - the Range is captured here and restored just before the
+  // command runs so createLink/insertImage still apply at the right spot.
+  private savedRange: Range | null = null;
 
   private onChange: (value: string) => void = () => undefined;
   private onTouched: () => void = () => undefined;
+
+  constructor() {
+    effect(() => {
+      if (this.activePrompt()) {
+        queueMicrotask(() => this.promptInputRef?.nativeElement.focus());
+      }
+    });
+  }
 
   writeValue(value: string | null): void {
     const html = value ?? '';
@@ -65,19 +86,35 @@ export class RichTextEditor implements ControlValueAccessor {
   }
 
   protected insertLink(): void {
-    const url = window.prompt('Link URL (https://...)');
-    if (!url) {
-      return;
-    }
-    this.runCommand('createLink', url);
+    this.openPrompt('link');
   }
 
   protected insertImage(): void {
-    const url = window.prompt('Image URL (https://...)');
-    if (!url) {
+    this.openPrompt('image');
+  }
+
+  protected confirmPrompt(): void {
+    const kind = this.activePrompt();
+    const url = this.promptValue().trim();
+    if (!kind || !url) {
+      this.closePrompt();
       return;
     }
-    this.runCommand('insertImage', url);
+
+    this.editableRef.nativeElement.focus();
+    const selection = window.getSelection();
+    if (this.savedRange && selection) {
+      selection.removeAllRanges();
+      selection.addRange(this.savedRange);
+    }
+
+    document.execCommand(kind === 'link' ? 'createLink' : 'insertImage', false, url);
+    this.emitChange();
+    this.closePrompt();
+  }
+
+  protected cancelPrompt(): void {
+    this.closePrompt();
   }
 
   protected onInput(): void {
@@ -93,6 +130,19 @@ export class RichTextEditor implements ControlValueAccessor {
       this.editableRef.nativeElement.innerHTML = '';
     }
     this.onTouched();
+  }
+
+  private openPrompt(kind: PromptKind): void {
+    const selection = window.getSelection();
+    this.savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+    this.promptValue.set('');
+    this.activePrompt.set(kind);
+  }
+
+  private closePrompt(): void {
+    this.activePrompt.set(null);
+    this.promptValue.set('');
+    this.savedRange = null;
   }
 
   private isEmpty(): boolean {

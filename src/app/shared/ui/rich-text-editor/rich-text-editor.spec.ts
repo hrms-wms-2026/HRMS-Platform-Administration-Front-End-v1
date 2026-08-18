@@ -110,31 +110,78 @@ describe('RichTextEditor', () => {
     execSpy.mockRestore();
   });
 
-  it('insertLink prompts for a URL and runs createLink when a URL is given', () => {
+  function findButton(fixture: ReturnType<typeof setup>, title: string): HTMLButtonElement {
+    return Array.from(fixture.nativeElement.querySelectorAll('button')).find(
+      (b) => (b as HTMLButtonElement).title === title,
+    ) as HTMLButtonElement;
+  }
+
+  it('insertLink opens an inline URL prompt instead of window.prompt', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+
+    findButton(fixture, 'Insert link').click();
+    fixture.detectChanges();
+
+    expect(component['activePrompt']()).toBe('link');
+    expect(fixture.nativeElement.querySelector('input[type="url"]')).toBeTruthy();
+  });
+
+  it('confirmPrompt runs createLink with the entered URL and closes the prompt', () => {
     const fixture = setup();
     const execSpy = jest.spyOn(document, 'execCommand').mockReturnValue(true);
-    jest.spyOn(window, 'prompt').mockReturnValue('https://onevo.io');
+    const component = fixture.componentInstance;
 
-    const linkButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
-      (b) => (b as HTMLButtonElement).title === 'Insert link',
-    ) as HTMLButtonElement;
-    linkButton.click();
+    findButton(fixture, 'Insert link').click();
+    fixture.detectChanges();
+    component['promptValue'].set('https://onevo.io');
+    component['confirmPrompt']();
 
     expect(execSpy).toHaveBeenCalledWith('createLink', false, 'https://onevo.io');
+    expect(component['activePrompt']()).toBeNull();
     execSpy.mockRestore();
   });
 
-  it('insertLink does nothing when the prompt is cancelled', () => {
+  it('insertImage opens the same inline prompt wired to insertImage', () => {
     const fixture = setup();
     const execSpy = jest.spyOn(document, 'execCommand').mockReturnValue(true);
-    jest.spyOn(window, 'prompt').mockReturnValue(null);
+    const component = fixture.componentInstance;
 
-    const linkButton = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
-      (b) => (b as HTMLButtonElement).title === 'Insert link',
-    ) as HTMLButtonElement;
-    linkButton.click();
+    findButton(fixture, 'Insert image').click();
+    fixture.detectChanges();
+    expect(component['activePrompt']()).toBe('image');
+
+    component['promptValue'].set('https://onevo.io/pic.png');
+    component['confirmPrompt']();
+
+    expect(execSpy).toHaveBeenCalledWith('insertImage', false, 'https://onevo.io/pic.png');
+    execSpy.mockRestore();
+  });
+
+  it('confirmPrompt does nothing and closes when the URL is blank', () => {
+    const fixture = setup();
+    const execSpy = jest.spyOn(document, 'execCommand').mockReturnValue(true);
+    const component = fixture.componentInstance;
+
+    findButton(fixture, 'Insert link').click();
+    component['confirmPrompt']();
 
     expect(execSpy).not.toHaveBeenCalled();
+    expect(component['activePrompt']()).toBeNull();
+    execSpy.mockRestore();
+  });
+
+  it('cancelPrompt closes without running any command', () => {
+    const fixture = setup();
+    const execSpy = jest.spyOn(document, 'execCommand').mockReturnValue(true);
+    const component = fixture.componentInstance;
+
+    findButton(fixture, 'Insert link').click();
+    component['promptValue'].set('https://onevo.io');
+    component['cancelPrompt']();
+
+    expect(execSpy).not.toHaveBeenCalled();
+    expect(component['activePrompt']()).toBeNull();
     execSpy.mockRestore();
   });
 });
