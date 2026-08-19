@@ -16,6 +16,12 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
   { command: 'underline', label: 'Underline', icon: 'U' },
 ];
 
+// TODO: The original mockup also had a "Normal"/Heading paragraph-style dropdown - explicitly
+// skipped per user decision (low value for a short announcement body). If added later: use
+// execCommand('formatBlock', false, '<h1>'|'<p>'), AND add h1-h4 to the backend's
+// AnnouncementHtmlValidator allowlist (see ONEVO.Application/Features/DevPlatform/Support/Helpers)
+// - it will otherwise reject any heading tag with a 400 on save.
+
 // A small curated set rather than a full emoji library - keeps the picker a lightweight
 // dependency-free panel instead of pulling in an emoji-data package for a single toolbar button.
 const EMOJIS: readonly string[] = [

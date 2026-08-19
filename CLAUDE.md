@@ -39,12 +39,14 @@ src/app/
 ├── modules/                  one folder per business domain, each with feature/<screen-name>/
 │   ├── tenants, platform-users, roles, subscription-plans, invoices,
 │   ├── configuration-templates, role-templates, system-config, audit-logs,
-│   ├── legal-compliance, module-catalog, dashboard, auth
+│   ├── legal-compliance, module-catalog, dashboard, auth,
+│   ├── support (announcements, tickets), notifications (platform notification bell/list)
 ├── shared/
 │   ├── directives/            PermissionDirective (*appPermission — NOT fail-open, see below)
 │   └── ui/                     Button, Modal, ConfirmationDialog, Table, Pagination, StatusBadge,
 │                                EmptyState, ErrorBanner, TableSkeleton + domain skeleton variants,
-│                                DateRangePicker, SearchableSelect, Loader, ToastContainer
+│                                DateRangePicker, SearchableSelect, Loader, ToastContainer, MetricCard,
+│                                RichTextEditor (contenteditable, no editor library — see below)
 └── environments/             environment.ts (dev), environment.prod.ts, environment.staging.ts
 ```
 
@@ -194,6 +196,24 @@ cookie needs to be JS-readable, for the double-submit-cookie pattern to work.
 - Styling: Tailwind utility classes in the template; component `.css` files stay empty/minimal.
   Every new class needs a `dark:` counterpart — this app is dark-mode-complete, not dark-mode-optional.
 - No `NgModule` — every component is standalone with an explicit `imports` array.
+
+## Rich text editing (`shared/ui/rich-text-editor/`)
+
+- `RichTextEditor` is a `ControlValueAccessor` wrapping a plain `contenteditable` div driven by
+  `document.execCommand` — no editor library (Quill/TipTap/etc.) is in this repo, and none should
+  be added for this component; keep extending it the same way if new formatting is needed.
+- **Never use `window.prompt()`** for Link/Image URL entry — it is blocked outright in sandboxed
+  iframes and some embedded/PWA shells (confirmed via a real runtime error in this app's own
+  preview sandbox). Use the inline input pattern already in this component instead: open a small
+  panel, save the current `Selection` `Range` before focus moves to the input, restore it just
+  before running `execCommand`.
+- HTML produced here must stay inside the backend's `AnnouncementHtmlValidator` allowlist
+  (`p, br, strong, b, em, i, u, s, ul, ol, li, a, img` — no headings, no `style`/`class`
+  attributes). If you add a new toolbar command, add the matching tag/attribute to that validator
+  in the same change, or the backend will reject the content with a 400.
+- The emoji picker is a small hardcoded `EMOJIS` array (plain unicode, inserted via
+  `execCommand('insertText', ...)`) — deliberately not an emoji-picker package, to match this
+  component's zero-dependency approach. Expand the array directly if more emoji are needed.
 
 ## Responsive design
 

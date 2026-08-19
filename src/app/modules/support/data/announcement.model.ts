@@ -76,6 +76,9 @@ export const ANNOUNCEMENT_SEVERITY_OPTIONS: { value: AnnouncementSeverity; label
   { value: 'critical', label: 'Critical' },
 ];
 
+// TODO: The original mockup also had a "By User Group" targeting mode - explicitly skipped per
+// user decision, since no "user group" concept exists anywhere in the codebase yet (would need a
+// new domain entity + backend targeting support before a frontend option here means anything).
 export const AUDIENCE_SCOPE_OPTIONS: { value: AnnouncementAudienceScope; label: string; hint: string }[] = [
   { value: 'platform_wide', label: 'Platform-wide', hint: 'Every platform admin and every tenant user.' },
   { value: 'platform_admins', label: 'Platform Admins', hint: 'Only staff who manage the platform.' },

@@ -51,6 +51,11 @@
           <input type="checkbox" [checked]="sendEmail()" (change)="toggleSendEmail()" />
           Email
         </label>
+        <!-- TODO: Web Push is a disabled placeholder (explicit user decision, not yet built).
+             Enabling this needs new infrastructure end-to-end: VAPID key pair, a Service Worker
+             registration + push subscription endpoint on the frontend, subscription storage +
+             web-push send integration on the backend. None of that exists yet - don't just
+             remove `disabled` here without building the rest. -->
         <label class="flex items-center gap-1.5 opacity-50" title="Coming soon">
           <input type="checkbox" disabled />
           Web Push
