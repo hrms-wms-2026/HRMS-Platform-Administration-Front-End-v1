@@ -72,10 +72,10 @@ describe('ServiceKeysList', () => {
     expect(fixture.nativeElement.textContent).toContain('resend');
     expect(fixture.nativeElement.textContent).toContain('Active');
     expect(fixture.nativeElement.textContent).toContain('Live provider');
-    expect(fixture.nativeElement.textContent).toContain('live provider verification');
+    expect(fixture.nativeElement.textContent).toContain('live check against');
   });
 
-  it('shows format-only verification badge for non-email providers', () => {
+  it('shows live verification badge for Cloudflare', () => {
     const fixture = setup(['platform.system_config.read', 'platform.system_config.manage'], [
       {
         ...sampleKey,
@@ -84,8 +84,7 @@ describe('ServiceKeysList', () => {
       },
     ]);
 
-    expect(fixture.nativeElement.textContent).toContain('Format only');
-    expect(fixture.nativeElement.textContent).toContain('local format-only checks');
+    expect(fixture.nativeElement.textContent).toContain('Live provider');
   });
 
   it('hides row actions without manage permission', () => {
@@ -130,14 +129,13 @@ describe('ServiceKeysList', () => {
     );
   });
 
-  it('shows a local-format success toast when Cloudflare verify succeeds', () => {
+  it('shows a live-provider success toast when Cloudflare verify succeeds', () => {
     const fixture = setup();
     serviceKeysService.verify.mockReturnValue(
       of({
         success: true,
         checkedAt: '2026-01-01T00:00:00Z',
-        message:
-          'Local format-only verification passed. Live provider check is not wired for this service.',
+        message: 'Cloudflare API key verified successfully.',
       }),
     );
     const component = fixture.componentInstance;
@@ -145,7 +143,7 @@ describe('ServiceKeysList', () => {
     component['verifyKey']('cloudflare');
 
     expect(notificationService.success).toHaveBeenCalledWith(
-      'Local format check: Local format-only verification passed. Live provider check is not wired for this service.',
+      'Live provider check: Cloudflare API key verified successfully.',
     );
   });
 

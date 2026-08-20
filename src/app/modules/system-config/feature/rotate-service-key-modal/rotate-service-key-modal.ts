@@ -1,7 +1,8 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServiceKeysService } from '../../data/service-keys.service';
+import { getJsonCredentialProviderInfo } from '../../data/service-key.model';
 import { Button } from '../../../../shared/ui/button/button';
 
 @Component({
@@ -23,6 +24,8 @@ export class RotateServiceKeyModal {
   protected readonly form = this.formBuilder.nonNullable.group({
     apiKey: ['', Validators.required],
   });
+
+  protected readonly jsonCredentialInfo = computed(() => getJsonCredentialProviderInfo(this.serviceKey()));
 
   protected submit(): void {
     if (this.form.invalid) {

@@ -8,8 +8,8 @@
       <div>
         <h1 class="page-title">Service Keys</h1>
         <p class="page-subtitle">
-          Platform-owned API credentials for third-party services. Resend and SendGrid use live provider
-          verification; Cloudflare, R2, and AWS Rekognition use local format-only checks.
+          Platform-owned API credentials for third-party services. Every provider is verified with a
+          live check against the provider's own API.
         </p>
       </div>
       @if (canManage()) {

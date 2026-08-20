@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServiceKeysService } from '../../data/service-keys.service';
-import { ServiceKeyProviderOption } from '../../data/service-key.model';
+import { ServiceKeyProviderOption, getJsonCredentialProviderInfo } from '../../data/service-key.model';
 import { Button } from '../../../../shared/ui/button/button';
 
 @Component({
@@ -26,6 +27,14 @@ export class AddServiceKeyModal implements OnInit {
     displayName: ['', [Validators.required, Validators.maxLength(80)]],
     apiKey: ['', Validators.required],
   });
+
+  private readonly selectedServiceKey = toSignal(this.form.controls.serviceKey.valueChanges, {
+    initialValue: this.form.controls.serviceKey.value,
+  });
+
+  protected readonly jsonCredentialInfo = computed(() =>
+    getJsonCredentialProviderInfo(this.selectedServiceKey()),
+  );
 
   ngOnInit(): void {
     this.serviceKeysService.listProviders().subscribe({

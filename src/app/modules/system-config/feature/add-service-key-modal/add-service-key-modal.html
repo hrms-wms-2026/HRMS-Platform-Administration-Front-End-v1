@@ -45,8 +45,12 @@
           type="password"
           formControlName="apiKey"
           autocomplete="new-password"
+          [placeholder]="jsonCredentialInfo()?.placeholder ?? ''"
           class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
         />
+        @if (jsonCredentialInfo(); as info) {
+          <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{{ info.hint }}</p>
+        }
       </div>
 
       <div class="mt-2 flex justify-end gap-3">
