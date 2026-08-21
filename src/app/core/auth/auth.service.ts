@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
 import { API_ENDPOINTS } from '../config/api-endpoints';
 import { AuthContext } from './auth-context.model';
+import { CsrfTokenService } from './csrf-token.service';
 import { MfaSetupResponse } from './mfa-setup-response.model';
 import { SessionService } from './session.service';
 import { PermissionStore } from '../permissions/permission.store';
@@ -13,7 +14,9 @@ export interface LoginRequest {
   password: string;
 }
 
-/** Wire shape returned by admin/v1/auth/login, /me, and /mfa/verify. */
+/** Wire shape returned by admin/v1/auth/login, /me, and /mfa/verify. csrf_token is empty until
+ * a real (non-MFA-pending) session exists - see AdminAuthController.Me's doc-comment for why
+ * it travels here instead of a cookie. */
 interface AdminSessionResponse {
   platform_user_id: string;
   email: string;
@@ -21,6 +24,7 @@ interface AdminSessionResponse {
   expires_at: string;
   mfa_required: boolean;
   permissions?: string[];
+  csrf_token?: string;
 }
 
 function toAuthContext(response: AdminSessionResponse): AuthContext {
@@ -41,6 +45,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private readonly sessionService = inject(SessionService);
   private readonly permissionStore = inject(PermissionStore);
+  private readonly csrfTokenService = inject(CsrfTokenService);
   private readonly baseUrl = environment.apiUrl;
 
   login(request: LoginRequest): Observable<AuthContext> {
@@ -48,7 +53,10 @@ export class AuthService {
       .post<AdminSessionResponse>(`${this.baseUrl}${API_ENDPOINTS.auth.login}`, request, {
         withCredentials: true,
       })
-      .pipe(map(toAuthContext));
+      .pipe(
+        tap((response) => this.csrfTokenService.set(response.csrf_token ?? null)),
+        map(toAuthContext),
+      );
   }
 
   loadContext(): Observable<AuthContext> {
@@ -56,7 +64,10 @@ export class AuthService {
       .get<AdminSessionResponse>(`${this.baseUrl}${API_ENDPOINTS.auth.context}`, {
         withCredentials: true,
       })
-      .pipe(map(toAuthContext));
+      .pipe(
+        tap((response) => this.csrfTokenService.set(response.csrf_token ?? null)),
+        map(toAuthContext),
+      );
   }
 
   logout(): Observable<void> {
@@ -66,6 +77,7 @@ export class AuthService {
         tap(() => {
           this.sessionService.clearSession();
           this.permissionStore.clear();
+          this.csrfTokenService.set(null);
         }),
       );
   }
@@ -117,6 +129,9 @@ export class AuthService {
         { code },
         { withCredentials: true },
       )
-      .pipe(map(toAuthContext));
+      .pipe(
+        tap((response) => this.csrfTokenService.set(response.csrf_token ?? null)),
+        map(toAuthContext),
+      );
   }
 }
