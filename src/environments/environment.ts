@@ -1,7 +1,11 @@
+import { buildLocalApiUrl, buildLocalWsUrl } from './environment-url.helper';
+
+const { hostname } = window.location;
+
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:7229/admin/v1',
-  wsUrl: 'wss://localhost:7229/ws',
+  apiUrl: buildLocalApiUrl(hostname),
+  wsUrl: buildLocalWsUrl(hostname),
   enableDebugLogs: true,
   appName: 'Platform Administration',
 };
