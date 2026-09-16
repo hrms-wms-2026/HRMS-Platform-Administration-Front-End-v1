@@ -1,19 +1,16 @@
-import { Component, OnInit, inject, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ServiceKeysService } from '../../data/service-keys.service';
 import { ServiceKeyProviderOption } from '../../data/service-key.model';
-import {
-  AWS_REKOGNITION_DEFAULT_REGION,
-  AWS_REKOGNITION_REGIONS,
-  buildAwsRekognitionBundle,
-  isAwsRekognitionServiceKey,
-} from '../../data/aws-rekognition-credentials';
+import { buildCredentialGroup, credentialValues } from '../../data/service-key-fields';
 import { Button } from '../../../../shared/ui/button/button';
+import { ServiceKeyFieldsForm } from '../service-key-fields-form/service-key-fields-form';
 
 @Component({
   selector: 'app-add-service-key-modal',
-  imports: [ReactiveFormsModule, Button],
+  imports: [ReactiveFormsModule, Button, ServiceKeyFieldsForm],
   templateUrl: './add-service-key-modal.html',
 })
 export class AddServiceKeyModal implements OnInit {
@@ -27,20 +24,24 @@ export class AddServiceKeyModal implements OnInit {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly providers = signal<ServiceKeyProviderOption[]>([]);
 
-  protected readonly regions = AWS_REKOGNITION_REGIONS;
-
   protected readonly form = this.formBuilder.nonNullable.group({
     serviceKey: ['', Validators.required],
     displayName: ['', [Validators.required, Validators.maxLength(80)]],
-    apiKey: [''],
-    accessKeyId: [''],
-    secretAccessKey: [''],
-    region: [AWS_REKOGNITION_DEFAULT_REGION],
   });
 
-  protected isRekognition(): boolean {
-    return isAwsRekognitionServiceKey(this.form.controls.serviceKey.value);
-  }
+  private readonly selectedKey = toSignal(this.form.controls.serviceKey.valueChanges, {
+    initialValue: '',
+  });
+
+  protected readonly selectedProvider = computed(
+    () => this.providers().find((provider) => provider.providerKey === this.selectedKey()) ?? null,
+  );
+
+  /** A fresh credential form is built whenever a different provider is picked. */
+  protected readonly credentialGroup = computed(() => {
+    const provider = this.selectedProvider();
+    return provider ? buildCredentialGroup(provider.fields) : null;
+  });
 
   ngOnInit(): void {
     this.serviceKeysService.listProviders().subscribe({
@@ -49,31 +50,24 @@ export class AddServiceKeyModal implements OnInit {
     });
   }
 
+  protected canSubmit(): boolean {
+    const group = this.credentialGroup();
+    return this.form.valid && group !== null && group.valid;
+  }
+
   protected submit(): void {
-    if (this.form.invalid) {
+    const group = this.credentialGroup();
+    if (this.form.invalid || !group || group.invalid) {
       this.form.markAllAsTouched();
-      return;
-    }
-
-    this.errorMessage.set(null);
-    const { serviceKey, displayName, apiKey, accessKeyId, secretAccessKey, region } =
-      this.form.getRawValue();
-
-    let credential = apiKey.trim();
-    if (isAwsRekognitionServiceKey(serviceKey)) {
-      if (!accessKeyId.trim() || !secretAccessKey.trim() || !region.trim()) {
-        this.errorMessage.set('Access Key ID, Secret Access Key, and region are required.');
-        return;
-      }
-      credential = buildAwsRekognitionBundle(accessKeyId, secretAccessKey, region);
-    } else if (!credential) {
-      this.form.markAllAsTouched();
-      this.errorMessage.set('API key is required.');
+      group?.markAllAsTouched();
       return;
     }
 
     this.loading.set(true);
-    this.serviceKeysService.create(serviceKey, displayName, credential).subscribe({
+    this.errorMessage.set(null);
+    const { serviceKey, displayName } = this.form.getRawValue();
+
+    this.serviceKeysService.create(serviceKey, displayName, credentialValues(group)).subscribe({
       next: () => {
         this.loading.set(false);
         this.created.emit();
