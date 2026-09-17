@@ -137,8 +137,13 @@ a real permission is confirmed.
 
 - **All endpoint paths live in `core/config/api-endpoints.ts`** — never hardcode a path string in
   a service.
-- **Base URL comes from `environment.apiUrl`** (`https://localhost:7229/admin/v1` in dev) — never
-  concatenate host/port elsewhere.
+- **Base URL comes from `environment.apiUrl`** (`https://onexso.com:7229/admin/v1` in dev) — never
+  concatenate host/port elsewhere. The dev server itself runs on `https://admin.onexso.com:4300`
+  (`npm start`), not `localhost`, and not port 4200 — the tenant frontend already owns
+  `onexso.com:4200`, and only one dev server can bind a given port, so this app gets its own
+  dedicated port (see `PORTS.md`). This app's CORS/cookie config on the backend
+  (`AllowedOrigins`, `Urls:AdminConsoleBaseUrl`) only allows `onexso.com`/`admin.onexso.com`
+  origins, matching the tenant frontend's onexso.com dev-domain setup.
 - **This app talks to the Admin API (`/admin/v1/...`), not the Tenant API (`/api/v1/...`).** They
   are separate controllers on the same backend. Hitting `/api/v1/*` from this app returns
   `400 Tenant context is not resolved` — that error means the request went to the wrong API
