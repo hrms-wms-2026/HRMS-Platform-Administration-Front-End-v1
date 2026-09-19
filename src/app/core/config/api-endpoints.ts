@@ -115,6 +115,11 @@ export const API_ENDPOINTS = {
   auditLogs: {
     list: '/platform-access/auth-events',
   },
+  trayReleases: {
+    list: '/tray-releases',
+    create: '/tray-releases',
+    update: (id: string) => `/tray-releases/${id}`,
+  },
   systemConfig: {
     oauthApps: {
       list: '/system-config/oauth-apps',
