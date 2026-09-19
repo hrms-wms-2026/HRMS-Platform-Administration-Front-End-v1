@@ -1,0 +1,158 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+  <div class="max-h-full w-full max-w-lg overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl sm:p-8">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">New tray release</h2>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+      Register an installer that is already uploaded to storage. Nothing is offered to employees until it is active.
+    </p>
+
+    <form class="mt-6 flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <div
+          class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+          role="alert"
+        >
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="tray-release-version" class="text-sm font-medium text-slate-700 dark:text-slate-300">Version</label>
+          <input
+            id="tray-release-version"
+            type="text"
+            formControlName="version"
+            placeholder="1.2.0"
+            class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+          @if (showError('version')) {
+            <p class="mt-1 text-xs text-red-600">Use the x.y.z format, numbers only.</p>
+          }
+        </div>
+
+        <div>
+          <label for="tray-release-channel" class="text-sm font-medium text-slate-700 dark:text-slate-300">Channel</label>
+          <select
+            id="tray-release-channel"
+            formControlName="channel"
+            class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          >
+            <option value="beta">Beta</option>
+            <option value="stable">Stable</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="tray-release-url" class="text-sm font-medium text-slate-700 dark:text-slate-300">Download URL</label>
+        <input
+          id="tray-release-url"
+          type="url"
+          formControlName="downloadUrl"
+          placeholder="https://downloads.example.com/onevo-1.2.0.msix"
+          class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+        @if (showError('downloadUrl')) {
+          <p class="mt-1 text-xs text-red-600">Enter an https:// URL.</p>
+        }
+      </div>
+
+      <div>
+        <label for="tray-release-sha" class="text-sm font-medium text-slate-700 dark:text-slate-300">SHA-256</label>
+        <input
+          id="tray-release-sha"
+          type="text"
+          formControlName="sha256"
+          class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 font-mono text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        />
+        @if (showError('sha256')) {
+          <p class="mt-1 text-xs text-red-600">Enter the 64-character hex SHA-256 of the installer.</p>
+        }
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="tray-release-size" class="text-sm font-medium text-slate-700 dark:text-slate-300">File size (bytes)</label>
+          <input
+            id="tray-release-size"
+            type="number"
+            formControlName="fileSizeBytes"
+            min="1"
+            class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+          @if (showError('fileSizeBytes')) {
+            <p class="mt-1 text-xs text-red-600">Must be greater than zero.</p>
+          }
+        </div>
+
+        <div>
+          <label for="tray-release-publisher" class="text-sm font-medium text-slate-700 dark:text-slate-300">Publisher</label>
+          <input
+            id="tray-release-publisher"
+            type="text"
+            formControlName="publisher"
+            class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+          @if (showError('publisher')) {
+            <p class="mt-1 text-xs text-red-600">Publisher is required.</p>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label for="tray-release-minwin" class="text-sm font-medium text-slate-700 dark:text-slate-300">Minimum Windows version</label>
+          <input
+            id="tray-release-minwin"
+            type="text"
+            formControlName="minimumWindowsVersion"
+            class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+          @if (showError('minimumWindowsVersion')) {
+            <p class="mt-1 text-xs text-red-600">Required.</p>
+          }
+        </div>
+
+        <div>
+          <label for="tray-release-minsupported" class="text-sm font-medium text-slate-700 dark:text-slate-300">Min supported version (optional)</label>
+          <input
+            id="tray-release-minsupported"
+            type="text"
+            formControlName="minSupportedVersion"
+            placeholder="1.1.0"
+            class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          />
+          @if (showError('minSupportedVersion')) {
+            <p class="mt-1 text-xs text-red-600">Use the x.y.z format, numbers only.</p>
+          }
+        </div>
+      </div>
+
+      <div>
+        <label for="tray-release-notes" class="text-sm font-medium text-slate-700 dark:text-slate-300">Release notes (optional)</label>
+        <textarea
+          id="tray-release-notes"
+          formControlName="releaseNotes"
+          rows="3"
+          class="mt-1 w-full rounded-lg border border-slate-300 dark:border-slate-700 dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+        ></textarea>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+        <input type="checkbox" formControlName="isActive" class="h-4 w-4 rounded border-slate-300" />
+        Make active immediately
+      </label>
+
+      <div class="mt-2 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancel()"
+          class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+        >
+          Cancel
+        </button>
+        <app-button type="submit" label="Create release" loadingText="Saving…" [loading]="loading()" [disabled]="form.invalid" />
+      </div>
+    </form>
+  </div>
+</div>

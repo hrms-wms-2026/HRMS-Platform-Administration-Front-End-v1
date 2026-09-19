@@ -94,6 +94,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         permission: 'platform.system_config.read',
       },
       {
+        label: 'Tray Releases',
+        route: '/system-config/tray-releases',
+        icon: 'tray-releases',
+        permission: 'platform.system_config.read',
+      },
+      {
         label: 'OAuth Apps',
         route: '/system-config/oauth-apps',
         icon: 'oauth-apps',

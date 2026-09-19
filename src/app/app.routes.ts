@@ -368,6 +368,18 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'system-config/tray-releases',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'Tray Releases' },
+          permission: 'platform.system_config.read',
+        },
+        loadComponent: () =>
+          import('./modules/tray-releases/feature/tray-releases-list/tray-releases-list').then(
+            (m) => m.TrayReleasesList,
+          ),
+      },
+      {
         path: 'system-config/providers',
         canActivate: [permissionGuard],
         data: {
