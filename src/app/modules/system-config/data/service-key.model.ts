@@ -41,6 +41,10 @@ export interface ServiceKeyVerificationResult {
   success: boolean;
   checkedAt: string;
   message: string;
+  /** Who the provider says the credential belongs to; only some providers report this. */
+  identity?: string | null;
+  region?: string | null;
+  service?: string | null;
 }
 
 export function getServiceKeyVerificationModeLabel(mode: ServiceKeyVerificationMode): string {

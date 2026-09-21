@@ -97,7 +97,14 @@ describe('RotateServiceKeyModal', () => {
     const fixture = setup('aws_rekognition');
     serviceKeysService.rotateKey.mockReturnValue(of({}));
     serviceKeysService.verify.mockReturnValue(
-      of({ success: true, checkedAt: '2026-09-18T00:00:00Z', message: 'AWS credentials verified successfully.' }),
+      of({
+        success: true,
+        checkedAt: '2026-09-18T00:00:00Z',
+        message: 'Connected to Amazon Rekognition.',
+        identity: 'onevo-rekognition',
+        region: 'eu-west-2',
+        service: 'Amazon Rekognition',
+      }),
     );
     type(fixture, 'rotate-service-key-accessKeyId', 'AKIAEXAMPLE');
     type(fixture, 'rotate-service-key-secretAccessKey', 'secret-value');
@@ -111,7 +118,9 @@ describe('RotateServiceKeyModal', () => {
     });
     expect(serviceKeysService.verify).toHaveBeenCalledWith('aws_rekognition');
     expect(fixture.nativeElement.textContent).toContain('Saved and verified');
-    expect(fixture.nativeElement.textContent).toContain('AWS credentials verified successfully.');
+    expect(fixture.nativeElement.textContent).toContain('Connected to Amazon Rekognition.');
+    expect(fixture.nativeElement.textContent).toContain('onevo-rekognition');
+    expect(fixture.nativeElement.textContent).toContain('eu-west-2');
   });
 
   it('reports a failed provider check without pretending it succeeded', () => {
