@@ -19,18 +19,20 @@ export interface ServiceKeyVerificationResult {
   success: boolean;
   checkedAt: string;
   message: string;
+  identity?: string | null;
+  region?: string | null;
+  service?: string | null;
 }
 
 export type ServiceKeyVerificationMode = 'live' | 'format-only';
 
 /** Providers verified with a lightweight live API call (no email sent). */
-export const LIVE_VERIFICATION_SERVICE_KEYS = ['resend', 'sendgrid'] as const;
+export const LIVE_VERIFICATION_SERVICE_KEYS = ['resend', 'sendgrid', 'aws_rekognition'] as const;
 
 /** Providers checked locally for plausible key shape only. */
 export const FORMAT_ONLY_VERIFICATION_SERVICE_KEYS = [
   'cloudflare',
   'cloudflare_r2',
-  'aws_rekognition',
 ] as const;
 
 export function getServiceKeyVerificationMode(serviceKey: string): ServiceKeyVerificationMode {

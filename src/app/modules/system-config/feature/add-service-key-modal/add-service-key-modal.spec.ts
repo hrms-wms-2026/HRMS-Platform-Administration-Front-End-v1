@@ -48,7 +48,7 @@ describe('AddServiceKeyModal', () => {
     let created = false;
     component.created.subscribe(() => (created = true));
 
-    component['form'].setValue({ serviceKey: 'resend', displayName: 'Resend', apiKey: 'secret' });
+    component['form'].patchValue({ serviceKey: 'resend', displayName: 'Resend', apiKey: 'secret' });
     component['submit']();
 
     expect(serviceKeysService.create).toHaveBeenCalledWith('resend', 'Resend', 'secret');
@@ -67,12 +67,34 @@ describe('AddServiceKeyModal', () => {
       ),
     );
     const component = fixture.componentInstance;
-    component['form'].setValue({ serviceKey: 'resend', displayName: 'Resend', apiKey: 'secret' });
+    component['form'].patchValue({ serviceKey: 'resend', displayName: 'Resend', apiKey: 'secret' });
 
     component['submit']();
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('already exists');
+  });
+
+  it('creates aws_rekognition with a JSON credential bundle', () => {
+    const fixture = setup();
+    serviceKeysService.create.mockReturnValue(of({}));
+    const component = fixture.componentInstance;
+    component['form'].patchValue({
+      serviceKey: 'aws_rekognition',
+      displayName: 'AWS',
+      accessKeyId: 'AKIAEXAMPLE',
+      secretAccessKey: 'secret-value',
+      region: 'eu-west-2',
+    });
+    fixture.detectChanges();
+
+    component['submit']();
+
+    expect(serviceKeysService.create).toHaveBeenCalledWith(
+      'aws_rekognition',
+      'AWS',
+      '{"accessKeyId":"AKIAEXAMPLE","secretAccessKey":"secret-value","region":"eu-west-2"}',
+    );
   });
 
   it('emits closed on cancel', () => {
