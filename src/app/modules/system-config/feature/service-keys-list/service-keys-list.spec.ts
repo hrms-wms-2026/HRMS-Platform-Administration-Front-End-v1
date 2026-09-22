@@ -8,6 +8,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 describe('ServiceKeysList', () => {
   let serviceKeysService: {
     list: jest.Mock;
+    listProviders: jest.Mock;
     verify: jest.Mock;
     setActive: jest.Mock;
     updateDisplayName: jest.Mock;
@@ -24,12 +25,19 @@ describe('ServiceKeysList', () => {
     updatedAt: '2026-01-01T00:00:00Z',
   };
 
+  const providerOptions = [
+    { providerKey: 'resend', displayName: 'Resend', configured: true, isActive: true, verificationMode: 'live', fields: [] },
+    { providerKey: 'sendgrid', displayName: 'SendGrid', configured: true, isActive: true, verificationMode: 'live', fields: [] },
+    { providerKey: 'cloudflare', displayName: 'Cloudflare', configured: true, isActive: true, verificationMode: 'format-only', fields: [] },
+  ];
+
   function setup(
     permissions: string[] = ['platform.system_config.read', 'platform.system_config.manage'],
     keys = [sampleKey],
   ) {
     serviceKeysService = {
       list: jest.fn().mockReturnValue(of(keys)),
+      listProviders: jest.fn().mockReturnValue(of(providerOptions)),
       verify: jest.fn(),
       setActive: jest.fn(),
       updateDisplayName: jest.fn(),
@@ -72,7 +80,7 @@ describe('ServiceKeysList', () => {
     expect(fixture.nativeElement.textContent).toContain('resend');
     expect(fixture.nativeElement.textContent).toContain('Active');
     expect(fixture.nativeElement.textContent).toContain('Live provider');
-    expect(fixture.nativeElement.textContent).toContain('live provider verification');
+    expect(fixture.nativeElement.textContent).toContain('checked against the provider itself');
   });
 
   it('shows format-only verification badge for non-email providers', () => {
@@ -85,7 +93,7 @@ describe('ServiceKeysList', () => {
     ]);
 
     expect(fixture.nativeElement.textContent).toContain('Format only');
-    expect(fixture.nativeElement.textContent).toContain('local format-only checks');
+    expect(fixture.nativeElement.textContent).toContain('only its shape is checked locally');
   });
 
   it('hides row actions without manage permission', () => {
@@ -172,7 +180,7 @@ describe('ServiceKeysList', () => {
   });
 
   it('shows the empty state when there are no keys', () => {
-    serviceKeysService = { list: jest.fn().mockReturnValue(of([])), verify: jest.fn(), setActive: jest.fn(), updateDisplayName: jest.fn() };
+    serviceKeysService = { list: jest.fn().mockReturnValue(of([])), listProviders: jest.fn().mockReturnValue(of([])), verify: jest.fn(), setActive: jest.fn(), updateDisplayName: jest.fn() };
     notificationService = { success: jest.fn(), error: jest.fn() };
     TestBed.configureTestingModule({
       imports: [ServiceKeysList],

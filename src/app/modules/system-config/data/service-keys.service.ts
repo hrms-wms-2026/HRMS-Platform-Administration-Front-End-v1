@@ -24,10 +24,14 @@ export class ServiceKeysService {
     );
   }
 
-  create(serviceKey: string, displayName: string, apiKey: string): Observable<ServiceKey> {
+  create(
+    serviceKey: string,
+    displayName: string,
+    fields: Record<string, string>,
+  ): Observable<ServiceKey> {
     return this.http.post<ServiceKey>(
       `${this.baseUrl}${API_ENDPOINTS.systemConfig.serviceKeys.create}`,
-      { serviceKey, displayName, apiKey },
+      { serviceKey, displayName, fields },
       { withCredentials: true },
     );
   }
@@ -40,10 +44,10 @@ export class ServiceKeysService {
     );
   }
 
-  rotateKey(serviceKey: string, apiKey: string): Observable<ServiceKey> {
+  rotateKey(serviceKey: string, fields: Record<string, string>): Observable<ServiceKey> {
     return this.http.post<ServiceKey>(
       `${this.baseUrl}${API_ENDPOINTS.systemConfig.serviceKeys.rotateKey(serviceKey)}`,
-      { apiKey },
+      { fields },
       { withCredentials: true },
     );
   }

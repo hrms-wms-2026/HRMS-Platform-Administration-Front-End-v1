@@ -3,9 +3,10 @@ import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { ServiceKeysService } from '../../data/service-keys.service';
 import {
   ServiceKey,
+  ServiceKeyProviderOption,
+  ServiceKeyVerificationMode,
   formatServiceKeyVerificationToast,
   getServiceKeyVerificationBadgeLabel,
-  getServiceKeyVerificationMode,
 } from '../../data/service-key.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -45,6 +46,7 @@ export class ServiceKeysList implements OnInit {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly keys = signal<ServiceKey[]>([]);
+  private readonly providers = signal<ServiceKeyProviderOption[]>([]);
   protected readonly verifyingKey = signal<string | null>(null);
   protected readonly editingKey = signal<string | null>(null);
   protected readonly editingName = signal('');
@@ -56,6 +58,10 @@ export class ServiceKeysList implements OnInit {
       return;
     }
     this.loadKeys();
+    this.serviceKeysService.listProviders().subscribe({
+      next: (providers) => this.providers.set(providers),
+      error: () => this.providers.set([]),
+    });
   }
 
   protected loadKeys(): void {
@@ -74,12 +80,20 @@ export class ServiceKeysList implements OnInit {
     });
   }
 
+  /** Verification style comes from the backend; unknown providers read as the safer "format only". */
+  private verificationMode(serviceKey: string): ServiceKeyVerificationMode {
+    return (
+      this.providers().find((provider) => provider.providerKey === serviceKey)?.verificationMode ??
+      'format-only'
+    );
+  }
+
   protected verificationBadgeLabel(serviceKey: string): string {
-    return getServiceKeyVerificationBadgeLabel(serviceKey);
+    return getServiceKeyVerificationBadgeLabel(this.verificationMode(serviceKey));
   }
 
   protected verificationBadgeTone(serviceKey: string): 'indigo' | 'neutral' {
-    return getServiceKeyVerificationMode(serviceKey) === 'live' ? 'indigo' : 'neutral';
+    return this.verificationMode(serviceKey) === 'live' ? 'indigo' : 'neutral';
   }
 
   protected verifyKey(serviceKey: string): void {
@@ -87,7 +101,7 @@ export class ServiceKeysList implements OnInit {
     this.serviceKeysService.verify(serviceKey).subscribe({
       next: (result) => {
         this.verifyingKey.set(null);
-        const message = formatServiceKeyVerificationToast(serviceKey, result);
+        const message = formatServiceKeyVerificationToast(this.verificationMode(serviceKey), result);
         if (result.success) {
           this.notificationService.success(message);
         } else {

@@ -43,20 +43,29 @@ describe('ServiceKeysService', () => {
 
     const req = httpMock.expectOne(`${environment.apiUrl}/system-config/service-key-providers`);
     expect(req.request.method).toBe('GET');
-    const option = { providerKey: 'resend', displayName: 'Resend', configured: false, isActive: true };
+    const option = {
+      providerKey: 'resend',
+      displayName: 'Resend',
+      configured: false,
+      isActive: true,
+      verificationMode: 'live',
+      fields: [
+        { name: 'apiKey', label: 'API key', kind: 'secret', required: true, placeholder: 're_…', defaultValue: null, options: [] },
+      ],
+    };
     req.flush([option]);
     expect(result).toEqual([option]);
   });
 
   it('creates a service key', () => {
-    service.create('resend', 'Resend', 'secret-key').subscribe();
+    service.create('resend', 'Resend', { apiKey: 'secret-key' }).subscribe();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/system-config/service-keys`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
       serviceKey: 'resend',
       displayName: 'Resend',
-      apiKey: 'secret-key',
+      fields: { apiKey: 'secret-key' },
     });
     req.flush({});
   });
@@ -71,11 +80,11 @@ describe('ServiceKeysService', () => {
   });
 
   it('rotates the key', () => {
-    service.rotateKey('resend', 'new-secret').subscribe();
+    service.rotateKey('resend', { apiKey: 'new-secret' }).subscribe();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/system-config/service-keys/resend/rotate-key`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ apiKey: 'new-secret' });
+    expect(req.request.body).toEqual({ fields: { apiKey: 'new-secret' } });
     req.flush({});
   });
 
