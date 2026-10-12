@@ -344,6 +344,18 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'app-catalog',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'System Config', page: 'Application Catalog' },
+          permission: 'platform.app_catalog.read',
+        },
+        loadComponent: () =>
+          import('./modules/app-catalog/feature/global-app-catalog-list/global-app-catalog-list').then(
+            (m) => m.GlobalAppCatalogList,
+          ),
+      },
+      {
         path: 'system-config/oauth-apps',
         canActivate: [permissionGuard],
         data: {

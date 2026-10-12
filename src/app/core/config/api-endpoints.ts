@@ -120,6 +120,11 @@ export const API_ENDPOINTS = {
     create: '/tray-releases',
     update: (id: string) => `/tray-releases/${id}`,
   },
+  appCatalog: {
+    list: '/app-catalog',
+    byId: (id: string) => `/app-catalog/${id}`,
+    logo: (id: string) => `/app-catalog/${id}/logo`,
+  },
   systemConfig: {
     oauthApps: {
       list: '/system-config/oauth-apps',
