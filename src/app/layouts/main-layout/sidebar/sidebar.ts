@@ -76,6 +76,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     indent: true,
     items: [
       {
+        label: 'Application Catalog',
+        route: '/app-catalog',
+        icon: 'app-catalog',
+        permission: 'platform.app_catalog.read',
+      },
+      {
         label: 'Providers',
         route: '/system-config/providers',
         icon: 'providers',
