@@ -100,6 +100,18 @@ export const API_ENDPOINTS = {
     publish: (id: string) => `/legal-document-versions/${id}/publish`,
     archive: (id: string) => `/legal-document-versions/${id}/archive`,
   },
+  notificationEvents: {
+    list: '/notification-events',
+  },
+  notificationTemplates: {
+    list: '/notification-templates',
+    byId: (id: string) => `/notification-templates/${id}`,
+    draft: (id: string) => `/notification-templates/${id}/draft`,
+    preview: (id: string) => `/notification-templates/${id}/preview`,
+    publish: (id: string) => `/notification-templates/${id}/publish`,
+    restore: (id: string, versionId: string) => `/notification-templates/${id}/versions/${versionId}/restore`,
+    test: (id: string) => `/notification-templates/${id}/test`,
+  },
   configurationTemplates: {
     list: '/configuration-templates',
     byId: (id: string) => `/configuration-templates/${id}`,

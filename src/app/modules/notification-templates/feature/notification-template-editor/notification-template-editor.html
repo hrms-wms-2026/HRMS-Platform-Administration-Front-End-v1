@@ -1,0 +1,221 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else if (loading()) {
+  <app-page-detail-skeleton />
+} @else if (loadError(); as message) {
+  <app-error-banner [message]="message" (retry)="load()" />
+} @else {
+  <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="min-w-0">
+          <a routerLink="/notification-templates" class="text-sm text-indigo-600 hover:underline">← Notification Templates</a>
+          <h1 class="page-title mt-1 break-words">{{ isNew ? 'New notification template' : name() }}</h1>
+          @if (event(); as ev) {
+            <p class="page-subtitle">{{ ev.displayName }} · {{ ev.module }}</p>
+          }
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            @if (live(); as liveVersion) {
+              <span class="text-sm text-slate-600 dark:text-slate-300">Published v{{ liveVersion.version }}</span>
+            } @else if (!isNew) {
+              <span class="text-sm text-slate-600 dark:text-slate-300">Not published yet</span>
+            }
+            @if (draft(); as d) {
+              <app-status-badge [label]="'Draft v' + d.version" tone="warning" />
+            }
+          </div>
+        </div>
+        @if (canManage()) {
+          <div class="flex flex-wrap gap-2">
+            @if (!isNew) {
+              <app-button label="Preview" variant="secondary" (clicked)="preview()" />
+              <app-button label="Send Test" variant="secondary" (clicked)="sendTest()" />
+            }
+            <app-button label="Save Draft" variant="secondary" [loading]="busy()" (clicked)="saveDraft()" />
+            @if (!isNew) {
+              <app-button label="Publish" variant="indigo" [disabled]="!draft() || busy()" (clicked)="publish()" />
+            }
+          </div>
+        } @else if (!isNew) {
+          <app-button label="Preview" variant="secondary" (clicked)="preview()" />
+        }
+      </div>
+
+      @if (conflict(); as message) {
+        <div role="alert" class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          {{ message }}
+          <button type="button" class="ml-2 font-medium underline" (click)="load()">Reload</button>
+        </div>
+      }
+      @if (validationErrors().length > 0) {
+        <div role="alert" class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200">
+          <p class="font-medium">Fix these before publishing:</p>
+          <ul class="mt-1 list-disc pl-5">
+            @for (error of validationErrors(); track error) {
+              <li>{{ error }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (isNew) {
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="eventKey" class="text-sm font-medium text-slate-700 dark:text-slate-300">Event</label>
+            <select id="eventKey" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [value]="eventKey()" (change)="setEventKey($any($event.target).value)">
+              <option value="">Select a registered event</option>
+              @for (ev of events(); track ev.key) {
+                <option [value]="ev.key">{{ ev.displayName }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label for="templateName" class="text-sm font-medium text-slate-700 dark:text-slate-300">Template name</label>
+            <input id="templateName" type="text" maxlength="150" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [value]="name()" (input)="setName($any($event.target).value)" />
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div class="flex min-w-0 flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div role="tablist" aria-label="Channel" class="flex gap-1 border-b border-slate-200 dark:border-slate-700">
+          @for (tab of tabs; track tab.key) {
+            <button type="button" role="tab" [attr.aria-selected]="activeTab() === tab.key"
+              class="px-3 py-2 text-sm font-medium border-b-2 -mb-px"
+              [class.border-indigo-600]="activeTab() === tab.key" [class.text-indigo-700]="activeTab() === tab.key"
+              [class.border-transparent]="activeTab() !== tab.key" [class.text-slate-600]="activeTab() !== tab.key"
+              (click)="setTab(tab.key)">
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+
+        @switch (activeTab()) {
+          @case ('email') {
+            <p class="text-xs text-slate-500">Leave a field empty to reuse the in-app text. CSS supports element, .class and #id rules and is inlined when sent.</p>
+            <label for="emailSubject" class="text-sm font-medium text-slate-700 dark:text-slate-300">Subject</label>
+            <input id="emailSubject" type="text" maxlength="255" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [disabled]="readOnly()" [value]="value('emailSubject')" (focus)="focusField('emailSubject')"
+              (input)="updateField('emailSubject', $any($event.target).value)" />
+            <label for="emailHtml" class="text-sm font-medium text-slate-700 dark:text-slate-300">HTML</label>
+            <textarea id="emailHtml" rows="10" class="rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs"
+              [disabled]="readOnly()" [value]="value('emailHtml')" (focus)="focusField('emailHtml')"
+              (input)="updateField('emailHtml', $any($event.target).value)"></textarea>
+            <label for="emailCss" class="text-sm font-medium text-slate-700 dark:text-slate-300">CSS</label>
+            <textarea id="emailCss" rows="5" class="rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs"
+              [disabled]="readOnly()" [value]="value('emailCss')" (focus)="focusField('emailCss')"
+              (input)="updateField('emailCss', $any($event.target).value)"></textarea>
+            <label for="emailText" class="text-sm font-medium text-slate-700 dark:text-slate-300">Plain-text fallback</label>
+            <textarea id="emailText" rows="4" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [disabled]="readOnly()" [value]="value('emailText')" (focus)="focusField('emailText')"
+              (input)="updateField('emailText', $any($event.target).value)"></textarea>
+          }
+          @case ('in_app') {
+            <label for="inAppTitle" class="text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
+            <input id="inAppTitle" type="text" maxlength="255" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [disabled]="readOnly()" [value]="value('inAppTitle')" (focus)="focusField('inAppTitle')"
+              (input)="updateField('inAppTitle', $any($event.target).value)" />
+            <label for="inAppBody" class="text-sm font-medium text-slate-700 dark:text-slate-300">Message</label>
+            <textarea id="inAppBody" rows="4" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [disabled]="readOnly()" [value]="value('inAppBody')" (focus)="focusField('inAppBody')"
+              (input)="updateField('inAppBody', $any($event.target).value)"></textarea>
+          }
+          @case ('tray') {
+            <p class="text-xs text-slate-500">Leave empty to reuse the in-app title and message. Plain text only.</p>
+            <label for="trayTitle" class="text-sm font-medium text-slate-700 dark:text-slate-300">Title</label>
+            <input id="trayTitle" type="text" maxlength="255" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [disabled]="readOnly()" [value]="value('trayTitle')" (focus)="focusField('trayTitle')"
+              (input)="updateField('trayTitle', $any($event.target).value)" />
+            <label for="trayBody" class="text-sm font-medium text-slate-700 dark:text-slate-300">Message</label>
+            <textarea id="trayBody" rows="4" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              [disabled]="readOnly()" [value]="value('trayBody')" (focus)="focusField('trayBody')"
+              (input)="updateField('trayBody', $any($event.target).value)"></textarea>
+          }
+        }
+
+        @if (event(); as ev) {
+          <div>
+            <label for="actionKey" class="text-sm font-medium text-slate-700 dark:text-slate-300">Click action</label>
+            <select id="actionKey" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm sm:w-64"
+              [disabled]="readOnly()" [value]="content().actionKey" (change)="setAction($any($event.target).value)">
+              @for (action of ev.actionKeys; track action) {
+                <option [value]="action">{{ action === 'open_related' ? 'Open the related item' : 'No action' }}</option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+
+      <aside class="flex flex-col gap-4">
+        <div class="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-sm">
+          <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Variables</h2>
+          @if (event(); as ev) {
+            <p class="mt-1 text-xs text-slate-500">Click to insert into the field you last edited.</p>
+            <div class="mt-2 flex flex-wrap gap-1">
+              @for (variable of ev.variables; track variable.key) {
+                <button type="button" class="rounded bg-indigo-50 px-2 py-1 font-mono text-xs text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 dark:bg-indigo-950 dark:text-indigo-300"
+                  [disabled]="readOnly()" (click)="insertVariable(variable.key)">
+                  {{ placeholder(variable.key) }}@if (variable.required) {<span aria-label="required">*</span>}
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="mt-1 text-xs text-slate-500">Select an event to see its variables.</p>
+          }
+        </div>
+
+        @if (detail(); as d) {
+          <div class="rounded-2xl bg-white dark:bg-slate-900 p-4 shadow-sm">
+            <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Version History</h2>
+            <ul class="mt-2 flex flex-col gap-2">
+              @for (v of d.versions; track v.id) {
+                <li class="flex items-center justify-between gap-2 text-sm">
+                  <span>
+                    v{{ v.version }}
+                    <span class="text-xs text-slate-500">
+                      {{ v.status === 'draft' ? 'draft' : (v.id === live()?.id ? 'live' : 'published') }}
+                      · {{ (v.publishedAt ?? v.createdAt) | date: 'mediumDate' }}
+                    </span>
+                  </span>
+                  @if (canManage() && v.status !== 'draft' && v.id !== live()?.id) {
+                    <button type="button" class="text-xs font-medium text-indigo-600 hover:underline" (click)="restore(v.id)">Restore to Draft</button>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </aside>
+    </div>
+
+    @if (rendered(); as r) {
+      <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Preview (sample values)</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+            <p class="text-xs uppercase text-slate-500">In-app</p>
+            <p class="mt-1 font-medium break-words">{{ r.inAppTitle }}</p>
+            <p class="text-sm break-words">{{ r.inAppBody }}</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+            <p class="text-xs uppercase text-slate-500">Tray</p>
+            <p class="mt-1 font-medium break-words">{{ r.trayTitle }}</p>
+            <p class="text-sm break-words">{{ r.trayBody }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs uppercase text-slate-500">Email · {{ r.emailSubject }}</p>
+          @if (previewHtml(); as html) {
+            <iframe title="Email preview" sandbox="" referrerpolicy="no-referrer" [srcdoc]="html"
+              class="mt-1 h-96 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700"></iframe>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
