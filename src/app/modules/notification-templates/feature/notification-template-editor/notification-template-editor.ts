@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -22,6 +22,23 @@ import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 
 type EditorTab = 'email' | 'in_app' | 'tray';
 type ContentField = Exclude<keyof NotificationTemplateContent, 'actionKey'>;
+
+const LIVE_PREVIEW_DELAY_MS = 600;
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Starting point for an email design. Only what the server-side validator accepts: plain tags, classes, and
+ * element/.class rules (inlined when sent). */
+const STARTER_CSS = [
+  '.wrapper { background-color: #f4f6fb; padding: 24px; font-family: Arial, Helvetica, sans-serif; }',
+  '.card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; }',
+  '.brand { color: #4f46e5; font-weight: bold; font-size: 13px; letter-spacing: 1px; margin: 0 0 12px; }',
+  'h2 { color: #0f172a; font-size: 20px; margin: 0 0 12px; }',
+  'p { color: #334155; font-size: 14px; line-height: 1.5; }',
+  '.footer { color: #94a3b8; font-size: 12px; margin-top: 24px; }',
+].join('\n');
 
 /** Where an inserted variable goes when the admin switches tab without focusing a field. */
 const TAB_BODY_FIELD: Record<EditorTab, ContentField> = { email: 'emailHtml', in_app: 'inAppBody', tray: 'trayBody' };
@@ -63,6 +80,8 @@ export class NotificationTemplateEditor implements OnInit {
 
   readonly conflict = signal<string | null>(null);
   readonly validationErrors = signal<string[]>([]);
+  private previewTimer: ReturnType<typeof setTimeout> | null = null;
+  private tabInitialised = false;
   protected readonly rendered = signal<RenderedNotification | null>(null);
   protected readonly previewHtml = signal<SafeHtml | null>(null);
 
@@ -86,6 +105,9 @@ export class NotificationTemplateEditor implements OnInit {
   /** Alternate templates are only used by orchestrator-delivered events. */
   protected readonly creatableEvents = computed(() => this.events().filter((e) => e.customizable));
 
+  /** Seeded copy that no feature raises: editing it changes nothing anyone receives. */
+  protected readonly notUsed = computed(() => this.event() !== null && !this.event()!.customizable);
+
   protected readonly supports = (channel: EditorTab) => this.visibleTabs().some((t) => t.key === channel);
 
   /** Unsaved edits relative to what the server holds (draft, else live version). */
@@ -97,9 +119,19 @@ export class NotificationTemplateEditor implements OnInit {
     return JSON.stringify(this.normalised()) !== JSON.stringify(baseline);
   });
 
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.cancelLivePreview());
+  }
+
   ngOnInit(): void {
     if (!this.canView()) return;
-    this.service.listEvents().subscribe({ next: (events) => this.events.set(events), error: () => this.events.set([]) });
+    this.service.listEvents().subscribe({
+      next: (events) => {
+        this.events.set(events);
+        this.initialiseTab();
+      },
+      error: () => this.events.set([]),
+    });
     if (!this.isNew) this.load();
   }
 
@@ -125,6 +157,8 @@ export class NotificationTemplateEditor implements OnInit {
 
   setEventKey(key: string): void {
     this.eventKey.set(key);
+    this.tabInitialised = false;
+    this.initialiseTab();
   }
 
   setName(name: string): void {
@@ -137,6 +171,23 @@ export class NotificationTemplateEditor implements OnInit {
 
   updateField(field: string, value: string): void {
     this.content.update((c) => ({ ...c, [field]: value }));
+    this.scheduleLivePreview();
+  }
+
+  /** Fills a branded HTML + CSS email layout built from the current in-app copy, as a starting point. */
+  useStarterLayout(): void {
+    if (this.readOnly()) return;
+    const c = this.content();
+    const html =
+      '<div class="wrapper"><div class="card">' +
+      '<p class="brand">ONEVO</p>' +
+      `<h2>${escapeHtml(c.inAppTitle)}</h2>` +
+      `<p>${escapeHtml(c.inAppBody)}</p>` +
+      '<p class="footer">You are receiving this because of your notification settings in ONEVO.</p>' +
+      '</div></div>';
+    this.content.update((current) => ({ ...current, emailHtml: html, emailCss: STARTER_CSS }));
+    this.setTab('email');
+    this.scheduleLivePreview();
   }
 
   protected setAction(actionKey: string): void {
@@ -202,6 +253,7 @@ export class NotificationTemplateEditor implements OnInit {
 
   preview(): void {
     if (this.isNew) return;
+    this.cancelLivePreview();
     this.validationErrors.set([]);
     this.service.preview(this.routeId, this.normalised()).subscribe({
       next: (result) => {
@@ -239,6 +291,30 @@ export class NotificationTemplateEditor implements OnInit {
     });
   }
 
+  /** Once the preview is open, keep it in step with the editor (debounced; same server renderer as delivery). */
+  private scheduleLivePreview(): void {
+    if (this.rendered() === null && this.validationErrors().length === 0) return;
+    this.cancelLivePreview();
+    this.previewTimer = setTimeout(() => {
+      this.previewTimer = null;
+      this.preview();
+    }, LIVE_PREVIEW_DELAY_MS);
+  }
+
+  private cancelLivePreview(): void {
+    if (this.previewTimer !== null) {
+      clearTimeout(this.previewTimer);
+      this.previewTimer = null;
+    }
+  }
+
+  /** Open on Email when the event sends email - that is where the HTML/CSS design lives. */
+  private initialiseTab(): void {
+    if (this.tabInitialised || !this.event() || (!this.detail() && !this.isNew)) return;
+    this.tabInitialised = true;
+    this.setTab(this.supports('email') ? 'email' : (this.visibleTabs()[0]?.key ?? 'in_app'));
+  }
+
   private applyDetail(detail: NotificationTemplateDetail): void {
     this.detail.set(detail);
     this.eventKey.set(detail.eventKey);
@@ -246,6 +322,7 @@ export class NotificationTemplateEditor implements OnInit {
     const source = detail.draft ?? detail.activeVersion;
     this.content.set(source ? contentOf(source) : emptyContent());
     this.conflict.set(null);
+    this.initialiseTab();
     if (!this.visibleTabs().some((t) => t.key === this.activeTab())) {
       this.setTab(this.visibleTabs()[0]?.key ?? 'in_app');
     }

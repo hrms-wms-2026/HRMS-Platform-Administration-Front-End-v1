@@ -14,6 +14,7 @@ type EditorApi = {
   updateField(field: string, value: string): void;
   focusField(field: string): void;
   insertVariable(key: string): void;
+  useStarterLayout(): void;
   saveDraft(): void;
   publish(): void;
   preview(): void;
@@ -209,6 +210,50 @@ describe('NotificationTemplateEditor', () => {
     expect(options).toEqual(['', 'work_approval_requested']);
   });
 
+  it('opens on the Email tab when the event sends email, so the HTML/CSS design is the first thing shown', () => {
+    const { editor } = setup();
+    expect(editor.activeTab()).toBe('email');
+  });
+
+  it('fills a starter HTML + CSS layout from the in-app copy', () => {
+    const { fixture, editor } = setup();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Use starter layout');
+
+    editor.useStarterLayout();
+
+    const html = editor.content()['emailHtml'] ?? '';
+    const css = editor.content()['emailCss'] ?? '';
+    expect(html).toContain('class="card"');
+    expect(html).toContain('Approval needed');
+    expect(html).toContain('{{actorName}}');
+    expect(css).toContain('.card');
+    expect(css).not.toMatch(/url\(|@import|<|>/);
+  });
+
+  it('refreshes the preview automatically while editing once it has been opened', () => {
+    jest.useFakeTimers();
+    try {
+      const { editor } = setup();
+      editor.preview();
+      expect(service['preview']).toHaveBeenCalledTimes(1);
+
+      editor.updateField('emailHtml', '<p>{{actorName}} changed</p>');
+      editor.updateField('emailHtml', '<p>{{actorName}} changed again</p>');
+      jest.advanceTimersByTime(800);
+
+      expect(service['preview']).toHaveBeenCalledTimes(2);
+      expect(service['preview']).toHaveBeenLastCalledWith('tpl-1', expect.objectContaining({ emailHtml: '<p>{{actorName}} changed again</p>' }));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('says plainly when no feature sends the event', () => {
+    const { fixture } = setup({ eventKey: 'work_sprint_completed' });
+    expect(fixture.nativeElement.textContent).toContain('No feature sends this notification yet');
+  });
+
   it('restores an old published version into a draft', () => {
     const { editor } = setup();
     editor.restore('ver-1');
@@ -224,7 +269,8 @@ describe('NotificationTemplateEditor', () => {
     expect(buttons).not.toContain('Publish');
     expect(buttons).not.toContain('Send Test');
     expect(buttons).not.toContain('Restore to Draft');
-    expect(fixture.nativeElement.querySelector('#inAppTitle').disabled).toBe(true);
+    expect(fixture.nativeElement.querySelector('#emailSubject').disabled).toBe(true);
+    expect(fixture.nativeElement.textContent).not.toContain('Use starter layout');
   });
 
   it('creates a template for a registered event and opens it', () => {

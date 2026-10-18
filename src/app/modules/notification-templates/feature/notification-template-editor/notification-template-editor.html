@@ -48,7 +48,11 @@
       }
       @if (event(); as ev) {
         @if (!ev.customizable) {
-          <p class="text-xs text-slate-500">This event still uses built-in delivery: only the in-app wording of the default template is sent.</p>
+          <p role="note" class="rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+            <span class="font-semibold">Not used yet.</span>
+            No feature sends this notification yet, so changes here have no effect. Email and tray design is available
+            for notifications that are sent.
+          </p>
         }
       }
 
@@ -106,7 +110,12 @@
 
         @switch (activeTab()) {
           @case ('email') {
-            <p class="text-xs text-slate-500">Leave a field empty to reuse the in-app text. CSS supports element, .class and #id rules and is inlined when sent.</p>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <p class="text-xs text-slate-500">Design the email with HTML and CSS. Leave a field empty to reuse the in-app text. CSS supports element, .class and #id rules and is inlined when sent.</p>
+              @if (!readOnly() && !value('emailHtml')) {
+                <app-button label="Use starter layout" variant="secondary" (clicked)="useStarterLayout()" />
+              }
+            </div>
             <label for="emailSubject" class="text-sm font-medium text-slate-700 dark:text-slate-300">Subject</label>
             <input id="emailSubject" type="text" maxlength="255" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
               [disabled]="readOnly()" [value]="value('emailSubject')" (focus)="focusField('emailSubject')"
