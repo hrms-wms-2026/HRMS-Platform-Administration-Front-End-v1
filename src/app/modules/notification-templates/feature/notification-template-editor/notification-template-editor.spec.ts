@@ -31,7 +31,11 @@ describe('NotificationTemplateEditor', () => {
     key: 'work_approval_requested', module: 'work_management', displayName: 'Work approval requested',
     supportedChannels: ['in_app', 'email', 'tray'], defaultChannels: ['in_app'], requiredChannels: [],
     variables: [{ key: 'actorName', type: 'string', required: true }, { key: 'targetTitle', type: 'string', required: true }],
-    recipientRules: ['default'], actionKeys: ['open_related', 'none'],
+    recipientRules: ['default'], actionKeys: ['open_related', 'none'], customizable: true,
+  };
+  const legacyEvent = {
+    ...event, key: 'work_sprint_completed', displayName: 'Work sprint completed',
+    supportedChannels: ['in_app'], defaultChannels: ['in_app'], customizable: false,
   };
 
   function version(overrides: Partial<NotificationTemplateVersion> = {}): NotificationTemplateVersion {
@@ -55,10 +59,10 @@ describe('NotificationTemplateEditor', () => {
     };
   }
 
-  function setup(opts: { id?: string; draft?: NotificationTemplateVersion | null; permissions?: string[] } = {}) {
-    const current = detail(opts.draft === undefined ? null : opts.draft);
+  function setup(opts: { id?: string; draft?: NotificationTemplateVersion | null; permissions?: string[]; eventKey?: string } = {}) {
+    const current = { ...detail(opts.draft === undefined ? null : opts.draft), eventKey: opts.eventKey ?? event.key };
     service = {
-      listEvents: jest.fn().mockReturnValue(of([event])),
+      listEvents: jest.fn().mockReturnValue(of([event, legacyEvent])),
       get: jest.fn().mockReturnValue(of(current)),
       saveDraft: jest.fn().mockReturnValue(of(current)),
       publish: jest.fn().mockReturnValue(of(current)),
@@ -175,6 +179,34 @@ describe('NotificationTemplateEditor', () => {
 
     expect(editor.validationErrors()).toEqual(["Email CSS: '@import' is not supported."]);
     expect(fixture.nativeElement.textContent).toContain('@import');
+  });
+
+  it('blocks Publish and Restore while there are unsaved edits, so they are never silently discarded', () => {
+    const { fixture, editor } = setup({ draft: version({ id: 'ver-3', version: 3, status: 'draft', revision: 4 }) });
+
+    editor.updateField('inAppTitle', 'Typed but not saved');
+    fixture.detectChanges();
+    editor.publish();
+    editor.restore('ver-1');
+
+    expect(service['publish']).not.toHaveBeenCalled();
+    expect(service['restore']).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('Save the draft');
+    expect(editor.content()['inAppTitle']).toBe('Typed but not saved');
+  });
+
+  it('only shows tabs for channels the event actually delivers', () => {
+    const { fixture } = setup({ eventKey: 'work_sprint_completed' });
+    const tabs = Array.from(fixture.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLElement>).map((t) => t.textContent?.trim());
+
+    expect(tabs).toEqual(['In-app']);
+  });
+
+  it('offers only customizable events when creating a template', () => {
+    const { fixture } = setup({ id: 'new' });
+    const options = Array.from((fixture.nativeElement.querySelector('#eventKey') as HTMLSelectElement).options).map((o) => o.value);
+
+    expect(options).toEqual(['', 'work_approval_requested']);
   });
 
   it('restores an old published version into a draft', () => {

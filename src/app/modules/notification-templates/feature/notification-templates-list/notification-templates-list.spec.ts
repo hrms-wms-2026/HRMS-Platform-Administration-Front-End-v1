@@ -11,10 +11,10 @@ describe('NotificationTemplatesList', () => {
   const events = [
     { key: 'work_approval_requested', module: 'work_management', displayName: 'Work approval requested',
       supportedChannels: ['in_app', 'email', 'tray'], defaultChannels: ['in_app'], requiredChannels: [],
-      variables: [], recipientRules: ['default'], actionKeys: ['open_related'] },
+      variables: [], recipientRules: ['default'], actionKeys: ['open_related'], customizable: true },
     { key: 'monitoring_break_reminder', module: 'monitoring', displayName: 'Break reminder',
       supportedChannels: ['tray'], defaultChannels: ['tray'], requiredChannels: [],
-      variables: [], recipientRules: ['default'], actionKeys: ['none'] },
+      variables: [], recipientRules: ['default'], actionKeys: ['none'], customizable: false },
   ];
   const templates = [
     { id: 'tpl-1', code: 'work_approval_requested', eventKey: 'work_approval_requested', name: 'Default', locale: 'en',

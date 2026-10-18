@@ -19,6 +19,9 @@ export interface NotificationEvent {
   variables: NotificationVariable[];
   recipientRules: string[];
   actionKeys: string[];
+  /** Delivered by the orchestrator: alternate templates and email/tray copy are used. Built-in events only use
+   * the default template's in-app copy. */
+  customizable: boolean;
 }
 
 export interface NotificationTemplateContent {

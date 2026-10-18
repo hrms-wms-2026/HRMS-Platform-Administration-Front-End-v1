@@ -35,13 +35,22 @@
             }
             <app-button label="Save Draft" variant="secondary" [loading]="busy()" (clicked)="saveDraft()" />
             @if (!isNew) {
-              <app-button label="Publish" variant="indigo" [disabled]="!draft() || busy()" (clicked)="publish()" />
+              <app-button label="Publish" variant="indigo" [disabled]="!draft() || busy() || isDirty()" (clicked)="publish()" />
             }
           </div>
         } @else if (!isNew) {
           <app-button label="Preview" variant="secondary" (clicked)="preview()" />
         }
       </div>
+
+      @if (canManage() && !isNew && isDirty()) {
+        <p class="text-sm text-amber-700 dark:text-amber-300">Unsaved changes. Save the draft before publishing or restoring a version.</p>
+      }
+      @if (event(); as ev) {
+        @if (!ev.customizable) {
+          <p class="text-xs text-slate-500">This event still uses built-in delivery: only the in-app wording of the default template is sent.</p>
+        }
+      }
 
       @if (conflict(); as message) {
         <div role="alert" class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
@@ -67,7 +76,7 @@
             <select id="eventKey" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
               [value]="eventKey()" (change)="setEventKey($any($event.target).value)">
               <option value="">Select a registered event</option>
-              @for (ev of events(); track ev.key) {
+              @for (ev of creatableEvents(); track ev.key) {
                 <option [value]="ev.key">{{ ev.displayName }}</option>
               }
             </select>
@@ -84,7 +93,7 @@
     <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div class="flex min-w-0 flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
         <div role="tablist" aria-label="Channel" class="flex gap-1 border-b border-slate-200 dark:border-slate-700">
-          @for (tab of tabs; track tab.key) {
+          @for (tab of visibleTabs(); track tab.key) {
             <button type="button" role="tab" [attr.aria-selected]="activeTab() === tab.key"
               class="px-3 py-2 text-sm font-medium border-b-2 -mb-px"
               [class.border-indigo-600]="activeTab() === tab.key" [class.text-indigo-700]="activeTab() === tab.key"
@@ -183,7 +192,8 @@
                     </span>
                   </span>
                   @if (canManage() && v.status !== 'draft' && v.id !== live()?.id) {
-                    <button type="button" class="text-xs font-medium text-indigo-600 hover:underline" (click)="restore(v.id)">Restore to Draft</button>
+                    <button type="button" class="text-xs font-medium text-indigo-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                      [disabled]="isDirty()" (click)="restore(v.id)">Restore to Draft</button>
                   }
                 </li>
               }
@@ -202,19 +212,23 @@
             <p class="mt-1 font-medium break-words">{{ r.inAppTitle }}</p>
             <p class="text-sm break-words">{{ r.inAppBody }}</p>
           </div>
-          <div class="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
-            <p class="text-xs uppercase text-slate-500">Tray</p>
-            <p class="mt-1 font-medium break-words">{{ r.trayTitle }}</p>
-            <p class="text-sm break-words">{{ r.trayBody }}</p>
-          </div>
-        </div>
-        <div>
-          <p class="text-xs uppercase text-slate-500">Email · {{ r.emailSubject }}</p>
-          @if (previewHtml(); as html) {
-            <iframe title="Email preview" sandbox="" referrerpolicy="no-referrer" [srcdoc]="html"
-              class="mt-1 h-96 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700"></iframe>
+          @if (supports('tray')) {
+            <div class="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+              <p class="text-xs uppercase text-slate-500">Tray</p>
+              <p class="mt-1 font-medium break-words">{{ r.trayTitle }}</p>
+              <p class="text-sm break-words">{{ r.trayBody }}</p>
+            </div>
           }
         </div>
+        @if (supports('email')) {
+          <div>
+            <p class="text-xs uppercase text-slate-500">Email · {{ r.emailSubject }}</p>
+            @if (previewHtml(); as html) {
+              <iframe title="Email preview" sandbox="" referrerpolicy="no-referrer" [srcdoc]="html"
+                class="mt-1 h-96 w-full rounded-lg border border-slate-200 bg-white dark:border-slate-700"></iframe>
+            }
+          </div>
+        }
       </div>
     }
   </div>

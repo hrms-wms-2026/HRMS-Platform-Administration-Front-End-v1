@@ -77,6 +77,26 @@ export class NotificationTemplateEditor implements OnInit {
   protected readonly live = computed(() => this.detail()?.activeVersion ?? null);
   protected readonly readOnly = computed(() => !this.canManage());
 
+  /** Only channels this event really delivers get a tab (built-in events: in-app only). */
+  protected readonly visibleTabs = computed(() => {
+    const supported = this.event()?.supportedChannels;
+    return supported ? this.tabs.filter((t) => supported.includes(t.key)) : this.tabs;
+  });
+
+  /** Alternate templates are only used by orchestrator-delivered events. */
+  protected readonly creatableEvents = computed(() => this.events().filter((e) => e.customizable));
+
+  protected readonly supports = (channel: EditorTab) => this.visibleTabs().some((t) => t.key === channel);
+
+  /** Unsaved edits relative to what the server holds (draft, else live version). */
+  readonly isDirty = computed(() => {
+    const d = this.detail();
+    if (!d) return false;
+    const source = d.draft ?? d.activeVersion;
+    const baseline = source ? this.normalise(contentOf(source)) : this.normalise(emptyContent());
+    return JSON.stringify(this.normalised()) !== JSON.stringify(baseline);
+  });
+
   ngOnInit(): void {
     if (!this.canView()) return;
     this.service.listEvents().subscribe({ next: (events) => this.events.set(events), error: () => this.events.set([]) });
@@ -166,7 +186,8 @@ export class NotificationTemplateEditor implements OnInit {
 
   publish(): void {
     const draft = this.draft();
-    if (this.readOnly() || this.busy() || !draft) return;
+    // Publishing sends the saved draft; unsaved edits would be overwritten by the result, so save first.
+    if (this.readOnly() || this.busy() || !draft || this.isDirty()) return;
     this.busy.set(true);
     this.validationErrors.set([]);
     this.service.publish(this.routeId, draft.revision).subscribe({
@@ -206,7 +227,7 @@ export class NotificationTemplateEditor implements OnInit {
   }
 
   restore(versionId: string): void {
-    if (this.readOnly() || this.busy()) return;
+    if (this.readOnly() || this.busy() || this.isDirty()) return;
     this.busy.set(true);
     this.service.restore(this.routeId, versionId).subscribe({
       next: (detail) => {
@@ -225,11 +246,17 @@ export class NotificationTemplateEditor implements OnInit {
     const source = detail.draft ?? detail.activeVersion;
     this.content.set(source ? contentOf(source) : emptyContent());
     this.conflict.set(null);
+    if (!this.visibleTabs().some((t) => t.key === this.activeTab())) {
+      this.setTab(this.visibleTabs()[0]?.key ?? 'in_app');
+    }
   }
 
   /** Empty optional fields go back as null so the server falls back to the in-app copy. */
   private normalised(): NotificationTemplateContent {
-    const c = this.content();
+    return this.normalise(this.content());
+  }
+
+  private normalise(c: NotificationTemplateContent): NotificationTemplateContent {
     const opt = (v: string | null) => (v && v.trim().length > 0 ? v : null);
     return {
       ...c,
