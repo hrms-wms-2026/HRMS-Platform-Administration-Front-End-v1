@@ -219,6 +219,50 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'notification-templates',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Template Management', page: 'Notification Templates' },
+          permission: 'platform.templates.read',
+        },
+        loadComponent: () =>
+          import('./modules/notification-templates/feature/notification-templates-list/notification-templates-list').then(
+            (m) => m.NotificationTemplatesList,
+          ),
+      },
+      {
+        path: 'notification-templates/new',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Template Management',
+            parent: { label: 'Notification Templates', route: '/notification-templates' },
+            page: 'New Template',
+          },
+          permission: 'platform.templates.manage',
+        },
+        loadComponent: () =>
+          import('./modules/notification-templates/feature/notification-template-editor/notification-template-editor').then(
+            (m) => m.NotificationTemplateEditor,
+          ),
+      },
+      {
+        path: 'notification-templates/:id',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Template Management',
+            parent: { label: 'Notification Templates', route: '/notification-templates' },
+            page: 'Edit Template',
+          },
+          permission: 'platform.templates.read',
+        },
+        loadComponent: () =>
+          import('./modules/notification-templates/feature/notification-template-editor/notification-template-editor').then(
+            (m) => m.NotificationTemplateEditor,
+          ),
+      },
+      {
         path: 'role-templates',
         canActivate: [permissionGuard],
         data: {

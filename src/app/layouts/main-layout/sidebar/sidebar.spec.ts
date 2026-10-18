@@ -58,6 +58,7 @@ describe('Sidebar', () => {
     expect(links).toContain('/subscription-plans');
     expect(links).toContain('/invoices');
     expect(links).toContain('/module-catalog');
+    expect(links).toContain('/notification-templates');
     expect(links).toContain('/system-config/providers');
     expect(links).toContain('/system-config/service-keys');
     expect(links).toContain('/system-config/tray-releases');

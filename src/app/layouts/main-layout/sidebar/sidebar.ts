@@ -69,6 +69,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         icon: 'role-templates',
         permission: 'platform.templates.read',
       },
+      {
+        label: 'Notification Templates',
+        route: '/notification-templates',
+        icon: 'notification-templates',
+        permission: 'platform.templates.read',
+      },
     ],
   },
   {
