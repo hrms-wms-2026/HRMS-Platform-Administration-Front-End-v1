@@ -97,10 +97,20 @@ export class NotificationTemplateEditor implements OnInit {
   protected readonly readOnly = computed(() => !this.canManage());
 
   /** Only channels this event really delivers get a tab (built-in events: in-app only). */
+  /** Email (HTML/CSS design) is always editable; in-app always applies; tray only for events that deliver it. */
   protected readonly visibleTabs = computed(() => {
     const supported = this.event()?.supportedChannels;
-    return supported ? this.tabs.filter((t) => supported.includes(t.key)) : this.tabs;
+    return supported ? this.tabs.filter((t) => t.key === 'email' || supported.includes(t.key)) : this.tabs;
   });
+
+  /** The event exists but its email is not sent today (its producer sends its own, or nothing raises it). */
+  protected readonly emailNotSent = computed(() => {
+    const ev = this.event();
+    return ev !== null && !ev.supportedChannels.includes('email');
+  });
+
+  protected readonly previewWidth = signal<'desktop' | 'mobile'>('desktop');
+  protected readonly previewWidthPx = computed(() => (this.previewWidth() === 'desktop' ? '600px' : '375px'));
 
   /** Alternate templates are only used by orchestrator-delivered events. */
   protected readonly creatableEvents = computed(() => this.events().filter((e) => e.customizable));
@@ -172,6 +182,10 @@ export class NotificationTemplateEditor implements OnInit {
   updateField(field: string, value: string): void {
     this.content.update((c) => ({ ...c, [field]: value }));
     this.scheduleLivePreview();
+  }
+
+  setPreviewWidth(width: string): void {
+    this.previewWidth.set(width === 'mobile' ? 'mobile' : 'desktop');
   }
 
   /** Fills a branded HTML + CSS email layout built from the current in-app copy, as a starting point. */
@@ -326,6 +340,8 @@ export class NotificationTemplateEditor implements OnInit {
     if (!this.visibleTabs().some((t) => t.key === this.activeTab())) {
       this.setTab(this.visibleTabs()[0]?.key ?? 'in_app');
     }
+    // Keep a live preview of how it will arrive on screen whenever a template is open.
+    this.preview();
   }
 
   /** Empty optional fields go back as null so the server falls back to the in-app copy. */

@@ -38,6 +38,10 @@ describe('NotificationTemplateEditor', () => {
     ...event, key: 'work_sprint_completed', displayName: 'Work sprint completed',
     supportedChannels: ['in_app'], defaultChannels: ['in_app'], customizable: false,
   };
+  const ownEmailEvent = {
+    ...event, key: 'leave_request_approved', displayName: 'Leave request approved',
+    supportedChannels: ['in_app', 'tray'], defaultChannels: ['in_app'], customizable: true,
+  };
 
   function version(overrides: Partial<NotificationTemplateVersion> = {}): NotificationTemplateVersion {
     return {
@@ -63,7 +67,7 @@ describe('NotificationTemplateEditor', () => {
   function setup(opts: { id?: string; draft?: NotificationTemplateVersion | null; permissions?: string[]; eventKey?: string } = {}) {
     const current = { ...detail(opts.draft === undefined ? null : opts.draft), eventKey: opts.eventKey ?? event.key };
     service = {
-      listEvents: jest.fn().mockReturnValue(of([event, legacyEvent])),
+      listEvents: jest.fn().mockReturnValue(of([event, legacyEvent, ownEmailEvent])),
       get: jest.fn().mockReturnValue(of(current)),
       saveDraft: jest.fn().mockReturnValue(of(current)),
       publish: jest.fn().mockReturnValue(of(current)),
@@ -196,18 +200,26 @@ describe('NotificationTemplateEditor', () => {
     expect(editor.content()['inAppTitle']).toBe('Typed but not saved');
   });
 
-  it('only shows tabs for channels the event actually delivers', () => {
+  it('always offers the Email (HTML/CSS) tab, and tray only when the event delivers it', () => {
     const { fixture } = setup({ eventKey: 'work_sprint_completed' });
     const tabs = Array.from(fixture.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLElement>).map((t) => t.textContent?.trim());
 
-    expect(tabs).toEqual(['In-app']);
+    expect(tabs).toEqual(['Email', 'In-app']);
+  });
+
+  it('says when the designed email is not currently sent for the event', () => {
+    const { fixture, editor } = setup({ eventKey: 'leave_request_approved' });
+    editor.setTab('email');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('is not sent by email right now');
   });
 
   it('offers only customizable events when creating a template', () => {
     const { fixture } = setup({ id: 'new' });
     const options = Array.from((fixture.nativeElement.querySelector('#eventKey') as HTMLSelectElement).options).map((o) => o.value);
 
-    expect(options).toEqual(['', 'work_approval_requested']);
+    expect(options).toEqual(['', 'work_approval_requested', 'leave_request_approved']);
   });
 
   it('opens on the Email tab when the event sends email, so the HTML/CSS design is the first thing shown', () => {
@@ -235,8 +247,7 @@ describe('NotificationTemplateEditor', () => {
     jest.useFakeTimers();
     try {
       const { editor } = setup();
-      editor.preview();
-      expect(service['preview']).toHaveBeenCalledTimes(1);
+      expect(service['preview']).toHaveBeenCalledTimes(1); // opened with a live preview
 
       editor.updateField('emailHtml', '<p>{{actorName}} changed</p>');
       editor.updateField('emailHtml', '<p>{{actorName}} changed again</p>');
@@ -252,6 +263,47 @@ describe('NotificationTemplateEditor', () => {
   it('says plainly when no feature sends the event', () => {
     const { fixture } = setup({ eventKey: 'work_sprint_completed' });
     expect(fixture.nativeElement.textContent).toContain('No feature sends this notification yet');
+  });
+
+  it('shows the live preview as soon as a template opens', () => {
+    const { fixture } = setup();
+    fixture.detectChanges();
+
+    expect(service['preview']).toHaveBeenCalledWith('tpl-1', expect.objectContaining({ inAppTitle: 'Approval needed' }));
+    expect(fixture.nativeElement.querySelector('[data-testid="preview-inapp"]')).toBeTruthy();
+  });
+
+  it('previews each channel the way it arrives: bell item, Windows toast, and an email window', () => {
+    const { fixture } = setup();
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    const bell = el.querySelector('[data-testid="preview-inapp"]')!;
+    expect(bell.textContent).toContain('Approval needed');
+    expect(bell.textContent).toContain('Priya needs you');
+    expect(bell.textContent).toContain('Just now');
+
+    const toast = el.querySelector('[data-testid="preview-tray"]')!;
+    expect(toast.textContent).toContain('ONEVO');
+    expect(toast.textContent).toContain('Approval needed');
+
+    const email = el.querySelector('[data-testid="preview-email"]')!;
+    expect(email.textContent).toContain('From');
+    expect(email.textContent).toContain('Subject');
+    expect(email.textContent).toContain('Approval needed');
+    expect(email.querySelector('iframe')!.getAttribute('sandbox')).toBe('');
+  });
+
+  it('switches the email preview between desktop and mobile widths', () => {
+    const { fixture, editor } = setup();
+    fixture.detectChanges();
+    const frame = () => fixture.nativeElement.querySelector('[data-testid="preview-email"] iframe') as HTMLIFrameElement;
+    expect(frame().style.width).toBe('600px');
+
+    (editor as unknown as { setPreviewWidth(w: string): void }).setPreviewWidth('mobile');
+    fixture.detectChanges();
+
+    expect(frame().style.width).toBe('375px');
   });
 
   it('restores an old published version into a draft', () => {
