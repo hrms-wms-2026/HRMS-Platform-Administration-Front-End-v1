@@ -99,6 +99,12 @@ export class NotificationTemplatesList implements OnInit {
     return this.eventsByKey().get(key)?.displayName ?? key;
   }
 
+  /** Events no feature raises (seeded copy only); editing them changes nothing anyone receives. */
+  protected isNotUsed(key: string): boolean {
+    const event = this.eventsByKey().get(key);
+    return event !== undefined && !event.customizable;
+  }
+
   protected channels(key: string): string {
     return (this.eventsByKey().get(key)?.supportedChannels ?? []).map((c) => CHANNEL_LABELS[c]).join(', ');
   }

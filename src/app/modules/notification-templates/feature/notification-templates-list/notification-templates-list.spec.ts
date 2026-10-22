@@ -71,6 +71,18 @@ describe('NotificationTemplatesList', () => {
     expect(service.list).toHaveBeenLastCalledWith({ eventKey: 'work_approval_requested', search: undefined });
   });
 
+  it('labels templates whose event no feature sends', () => {
+    service = undefined as never;
+    const fixture = setup();
+    service.list.mockReturnValue(of([
+      { id: 'tpl-2', code: 'monitoring_break_reminder', eventKey: 'monitoring_break_reminder', name: 'Break reminder', locale: 'en',
+        isProductDefault: true, activeVersion: 1, hasDraft: false, updatedAt: null },
+    ]));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Not used yet');
+  });
+
   it('hides the create action from read-only users', () => {
     const fixture = setup(['platform.templates.read']);
     fixture.detectChanges();

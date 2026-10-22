@@ -90,6 +90,10 @@
                   @if (template.isProductDefault) {
                     <span class="ml-1 inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">Default</span>
                   }
+                  @if (isNotUsed(template.eventKey)) {
+                    <span class="ml-1 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                      title="No feature sends this notification yet">Not used yet</span>
+                  }
                 </td>
                 <td class="table-secondary">{{ eventName(template.eventKey) }}</td>
                 <td class="table-secondary">{{ channels(template.eventKey) }}</td>
