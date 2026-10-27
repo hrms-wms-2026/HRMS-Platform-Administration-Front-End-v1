@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -81,6 +81,7 @@ export class GlobalAppCatalogList implements OnInit {
     this.editProductive = app.isProductiveDefault;
   }
 
+  @HostListener('document:keydown.escape')
   protected closeEditor(): void {
     if (!this.saving()) this.selected.set(null);
   }
