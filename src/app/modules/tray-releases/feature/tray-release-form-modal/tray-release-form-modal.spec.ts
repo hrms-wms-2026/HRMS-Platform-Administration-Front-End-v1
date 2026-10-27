@@ -1,8 +1,17 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormGroup } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TrayReleaseFormModal } from './tray-release-form-modal';
 import { TrayReleasesService } from '../../data/tray-releases.service';
+
+interface FormModalApi {
+  form: FormGroup;
+  submit(): void;
+}
+
+const modal = (fixture: ComponentFixture<TrayReleaseFormModal>) =>
+  fixture.componentInstance as unknown as FormModalApi;
 
 describe('TrayReleaseFormModal', () => {
   let service: { create: jest.Mock };
@@ -38,10 +47,10 @@ describe('TrayReleaseFormModal', () => {
 
   it('is invalid until every required field is valid', () => {
     const fixture = setup();
-    const form = (fixture.componentInstance as any).form;
+    const form = modal(fixture).form;
     expect(form.invalid).toBe(true);
 
-    const cases: Array<[string, unknown]> = [
+    const cases: [string, unknown][] = [
       ['version', '1.2'],
       ['downloadUrl', 'http://insecure.example.com/a.msix'],
       ['sha256', 'xyz'],
@@ -65,8 +74,8 @@ describe('TrayReleaseFormModal', () => {
     let created = false;
     fixture.componentInstance.created.subscribe(() => (created = true));
 
-    (fixture.componentInstance as any).form.reset({ ...validValues });
-    (fixture.componentInstance as any).submit();
+    modal(fixture).form.reset({ ...validValues });
+    modal(fixture).submit();
 
     expect(service.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -82,25 +91,25 @@ describe('TrayReleaseFormModal', () => {
   it('shows a friendly message on 409', () => {
     const fixture = setup();
     service.create.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
-    (fixture.componentInstance as any).form.reset({ ...validValues });
-    (fixture.componentInstance as any).submit();
+    modal(fixture).form.reset({ ...validValues });
+    modal(fixture).submit();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('That version already exists in this channel.');
   });
 
   it('falls back to the API detail, then a generic message, for other errors', () => {
     const fixture = setup();
-    (fixture.componentInstance as any).form.reset({ ...validValues });
+    modal(fixture).form.reset({ ...validValues });
 
     service.create.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 400, error: { detail: 'sha256 must be 64 hex characters.' } })),
     );
-    (fixture.componentInstance as any).submit();
+    modal(fixture).submit();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('sha256 must be 64 hex characters.');
 
     service.create.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
-    (fixture.componentInstance as any).submit();
+    modal(fixture).submit();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Could not create the release.');
   });

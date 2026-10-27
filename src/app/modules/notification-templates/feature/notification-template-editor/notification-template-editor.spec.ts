@@ -7,7 +7,7 @@ import { NotificationTemplatesService } from '../../data/notification-templates.
 import { NotificationTemplateDetail, NotificationTemplateVersion } from '../../data/notification-template.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 
-type EditorApi = {
+interface EditorApi {
   content(): Record<string, string | null>;
   activeTab(): string;
   setTab(tab: string): void;
@@ -23,7 +23,7 @@ type EditorApi = {
   validationErrors(): string[];
   setEventKey(key: string): void;
   setName(name: string): void;
-};
+}
 
 describe('NotificationTemplateEditor', () => {
   let service: Record<string, jest.Mock>;
