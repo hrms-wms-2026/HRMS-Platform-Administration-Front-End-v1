@@ -3,7 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": "2837442d-4412-4c51-ab1b-f204a6680439",
+    "analytics": false,
     "schematicCollections": ["angular-eslint"]
   },
   "newProjectRoot": "projects",
@@ -104,9 +104,6 @@
             }
           },
           "defaultConfiguration": "development"
-        },
-        "test": {
-          "builder": "@angular/build:unit-test"
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
