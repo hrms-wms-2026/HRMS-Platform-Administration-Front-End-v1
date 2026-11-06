@@ -8,7 +8,7 @@ import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { environment } from '../../../../../environments/environment';
 import { Button } from '../../../../shared/ui/button/button';
 
-const REMEMBERED_EMAIL_KEY = 'onevo_admin_remembered_email';
+const REMEMBERED_EMAIL_KEY = 'crownus_admin_remembered_email';
 
 @Component({
   selector: 'app-login',

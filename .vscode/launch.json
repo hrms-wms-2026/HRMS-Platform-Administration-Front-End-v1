@@ -7,7 +7,7 @@
       "type": "chrome",
       "request": "launch",
       "preLaunchTask": "npm: start",
-      "url": "https://admin.onexso.com:4300/"
+      "url": "https://admin.crownus.test:4300/"
     },
     {
       "name": "ng test",
