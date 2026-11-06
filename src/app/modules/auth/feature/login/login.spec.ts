@@ -8,7 +8,7 @@ import { SessionService } from '../../../../core/auth/session.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { AuthContext } from '../../../../core/auth/auth-context.model';
 
-const REMEMBERED_EMAIL_KEY = 'onevo_admin_remembered_email';
+const REMEMBERED_EMAIL_KEY = 'crownus_admin_remembered_email';
 
 function buildContext(overrides: Partial<AuthContext> = {}): AuthContext {
   return {

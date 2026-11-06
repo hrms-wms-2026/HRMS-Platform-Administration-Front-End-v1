@@ -82,10 +82,10 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": ["admin.onexso.com"],
+            "allowedHosts": ["admin.crownus.test"],
             "ssl": true,
-            "sslCert": ".certs/onexso-cert.pem",
-            "sslKey": ".certs/onexso-key.pem"
+            "sslCert": ".certs/crownus-cert.pem",
+            "sslKey": ".certs/crownus-key.pem"
           },
           "configurations": {
             "production": {
