@@ -21,7 +21,7 @@ describe('Navbar', () => {
     expect(fixture.nativeElement.querySelector('app-profile-menu')).toBeTruthy();
   });
 
-  it('renders the ONEXSO logo icon and wordmark', () => {
+  it('renders the CROWNUS logo icon and wordmark', () => {
     const fixture = TestBed.createComponent(Navbar);
     fixture.detectChanges();
 
