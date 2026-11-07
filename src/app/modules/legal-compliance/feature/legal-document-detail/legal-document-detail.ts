@@ -1,7 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe, TitleCasePipe } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
 import { LegalDocumentsService } from '../../data/legal-documents.service';
 import {
@@ -37,7 +36,6 @@ export class LegalDocumentDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly legalDocumentsService = inject(LegalDocumentsService);
   private readonly notificationService = inject(NotificationService);
-  private readonly sanitizer = inject(DomSanitizer);
   protected readonly permissionStore = inject(PermissionStore);
 
   private readonly documentId = this.route.snapshot.paramMap.get('id')!;
@@ -56,8 +54,9 @@ export class LegalDocumentDetail implements OnInit {
   protected readonly editing = signal(false);
   protected readonly pendingPublish = signal(false);
   protected readonly pendingArchive = signal(false);
-  protected readonly previewHtml = signal<SafeHtml | null>(null);
 
+  /** Rendered in a sandboxed iframe; Angular sanitizes the string on the way into srcdoc, so it is never trusted. */
+  protected readonly previewHtml = computed(() => this.document()?.contentHtml ?? '');
   protected readonly isDraft = computed(() => this.document()?.status === 'draft');
   protected readonly isPublished = computed(() => this.document()?.status === 'published');
   protected readonly readOnly = computed(() => !this.canManage() || !this.isDraft() || !this.editing());
@@ -74,7 +73,6 @@ export class LegalDocumentDetail implements OnInit {
     this.legalDocumentsService.getById(this.documentId).subscribe({
       next: (document) => {
         this.document.set(document);
-        this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(document.contentHtml));
         this.loading.set(false);
       },
       error: (error: HttpErrorResponse) => {
@@ -102,7 +100,6 @@ export class LegalDocumentDetail implements OnInit {
     this.legalDocumentsService.update(this.documentId, payload).subscribe({
       next: (updated) => {
         this.document.set(updated);
-        this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(updated.contentHtml));
         this.saving.set(false);
         this.editing.set(false);
         this.notificationService.success('Legal document draft updated.');
@@ -129,7 +126,6 @@ export class LegalDocumentDetail implements OnInit {
     this.legalDocumentsService.publish(this.documentId).subscribe({
       next: (updated) => {
         this.document.set(updated);
-        this.previewHtml.set(this.sanitizer.bypassSecurityTrustHtml(updated.contentHtml));
         this.publishing.set(false);
         this.editing.set(false);
         this.notificationService.success('Legal document published.');

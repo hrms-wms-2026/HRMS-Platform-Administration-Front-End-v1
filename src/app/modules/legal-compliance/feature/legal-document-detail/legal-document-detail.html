@@ -71,10 +71,13 @@
 
       <div>
         <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Preview</p>
-        <div
-          class="prose prose-sm mt-2 max-w-none rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800 dark:prose-invert"
-          [innerHTML]="previewHtml()"
-        ></div>
+        <iframe
+          title="Legal document preview"
+          sandbox=""
+          referrerpolicy="no-referrer"
+          [srcdoc]="previewHtml()"
+          class="mt-2 block h-[32rem] w-full rounded-xl border border-slate-200 bg-white dark:border-slate-700"
+        ></iframe>
       </div>
 
       @if (canManage()) {
