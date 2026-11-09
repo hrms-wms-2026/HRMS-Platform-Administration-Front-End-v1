@@ -14,6 +14,19 @@
  * produces https on the fixed local backend port.
  */
 
+/**
+ * Production: the API is reverse-proxied on the same origin the admin SPA is served from
+ * (e.g. https://admin.<root>/admin/v1), with no port, so the session cookie stays same-site.
+ */
+export function buildAdminApiUrl(pageProtocol: string, hostname: string): string {
+  return `${pageProtocol}//${hostname}/admin/v1`;
+}
+
+export function buildAdminWsUrl(pageProtocol: string, hostname: string): string {
+  const wsProtocol = pageProtocol === 'https:' ? 'wss:' : 'ws:';
+  return `${wsProtocol}//${hostname}/ws`;
+}
+
 const LOCAL_BACKEND_PORT = 7229;
 
 export function buildLocalApiUrl(hostname: string): string {

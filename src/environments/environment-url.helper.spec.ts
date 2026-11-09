@@ -1,4 +1,29 @@
-import { buildLocalApiUrl, buildLocalWsUrl } from './environment-url.helper';
+import {
+  buildAdminApiUrl,
+  buildAdminWsUrl,
+  buildLocalApiUrl,
+  buildLocalWsUrl,
+} from './environment-url.helper';
+
+describe('buildAdminApiUrl (production - same origin as the admin SPA)', () => {
+  it('targets /admin/v1 on the page hostname with no port', () => {
+    expect(buildAdminApiUrl('https:', 'admin.9-223-115-62.sslip.io')).toBe(
+      'https://admin.9-223-115-62.sslip.io/admin/v1',
+    );
+  });
+});
+
+describe('buildAdminWsUrl (production - same origin as the admin SPA)', () => {
+  it('uses wss on an https page', () => {
+    expect(buildAdminWsUrl('https:', 'admin.9-223-115-62.sslip.io')).toBe(
+      'wss://admin.9-223-115-62.sslip.io/ws',
+    );
+  });
+
+  it('uses ws on an http page', () => {
+    expect(buildAdminWsUrl('http:', 'localhost')).toBe('ws://localhost/ws');
+  });
+});
 
 describe('buildLocalApiUrl (local dev - HTTPS-only, fixed backend port 7229)', () => {
   it('preserves the admin subdomain hostname, so the request stays same-site as the SPA', () => {
