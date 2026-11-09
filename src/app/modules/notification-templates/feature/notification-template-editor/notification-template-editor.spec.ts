@@ -241,6 +241,8 @@ describe('NotificationTemplateEditor', () => {
     expect(html).toContain('{{actorName}}');
     expect(css).toContain('.card');
     expect(css).not.toMatch(/url\(|@import|<|>/);
+    expect(html).toContain('CROWNUS');
+    expect(html).not.toContain('ONEVO');
   });
 
   it('refreshes the preview automatically while editing once it has been opened', () => {
@@ -284,10 +286,12 @@ describe('NotificationTemplateEditor', () => {
     expect(bell.textContent).toContain('Just now');
 
     const toast = el.querySelector('[data-testid="preview-tray"]')!;
-    expect(toast.textContent).toContain('ONEVO');
+    expect(toast.textContent).toContain('CROWNUS');
     expect(toast.textContent).toContain('Approval needed');
 
     const email = el.querySelector('[data-testid="preview-email"]')!;
+    expect(email.textContent).toContain('CROWNUS <notifications>');
+    expect(el.textContent).not.toContain('ONEVO');
     expect(email.textContent).toContain('From');
     expect(email.textContent).toContain('Subject');
     expect(email.textContent).toContain('Approval needed');
