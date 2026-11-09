@@ -194,10 +194,10 @@ export class NotificationTemplateEditor implements OnInit {
     const c = this.content();
     const html =
       '<div class="wrapper"><div class="card">' +
-      '<p class="brand">ONEVO</p>' +
+      '<p class="brand">CROWNUS</p>' +
       `<h2>${escapeHtml(c.inAppTitle)}</h2>` +
       `<p>${escapeHtml(c.inAppBody)}</p>` +
-      '<p class="footer">You are receiving this because of your notification settings in ONEVO.</p>' +
+      '<p class="footer">You are receiving this because of your notification settings in CROWNUS.</p>' +
       '</div></div>';
     this.content.update((current) => ({ ...current, emailHtml: html, emailCss: STARTER_CSS }));
     this.setTab('email');
