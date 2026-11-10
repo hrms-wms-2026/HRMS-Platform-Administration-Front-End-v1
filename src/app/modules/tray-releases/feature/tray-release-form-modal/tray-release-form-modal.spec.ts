@@ -33,7 +33,7 @@ describe('TrayReleaseFormModal', () => {
     downloadUrl: 'https://dl.example.com/onevo-1.2.0.msix',
     sha256: 'A'.repeat(64),
     fileSizeBytes: 1024,
-    publisher: 'CN=ONEVO',
+    publisher: 'CN=Crownus',
     minimumWindowsVersion: '10.0.19041.0',
     minSupportedVersion: '',
     releaseNotes: '',

@@ -14,7 +14,7 @@ describe('IntegrationCatalogDetailDrawer', () => {
     displayName: 'GitHub',
     description: 'Connect GitHub',
     connectionScope: 'user' as const,
-    onevoAppProvider: 'github',
+    crownusAppProvider: 'github',
     logoUrl: null,
     isActive: true,
     createdAt: '2026-01-01T00:00:00Z',
@@ -133,7 +133,7 @@ describe('IntegrationCatalogDetailDrawer', () => {
 
     fixture.componentInstance['form'].patchValue({
       displayName: 'GitHub Updated',
-      onevoAppProvider: 'github',
+      crownusAppProvider: 'github',
       connectionScope: 'user',
     });
     fixture.componentInstance['save']();

@@ -30,7 +30,7 @@ export class AddIntegrationModal implements OnInit {
     displayName: ['', [Validators.required, Validators.maxLength(100)]],
     description: [''],
     connectionScope: ['tenant' as IntegrationConnectionScope, Validators.required],
-    onevoAppProvider: ['', Validators.required],
+    crownusAppProvider: ['', Validators.required],
     logoUrl: ['', Validators.maxLength(500)],
     isActive: [true],
   });
@@ -41,7 +41,7 @@ export class AddIntegrationModal implements OnInit {
         this.oauthProviders.set(apps.map((app) => app.provider));
         const first = apps[0]?.provider;
         if (first) {
-          this.form.patchValue({ onevoAppProvider: first });
+          this.form.patchValue({ crownusAppProvider: first });
         }
       },
       error: () => this.errorMessage.set('Could not load OAuth providers.'),
@@ -64,7 +64,7 @@ export class AddIntegrationModal implements OnInit {
         displayName: value.displayName.trim(),
         description: value.description.trim() || undefined,
         connectionScope: value.connectionScope,
-        onevoAppProvider: value.onevoAppProvider,
+        crownusAppProvider: value.crownusAppProvider,
         logoUrl: value.logoUrl.trim() || undefined,
         isActive: value.isActive,
       })

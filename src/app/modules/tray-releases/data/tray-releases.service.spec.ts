@@ -34,7 +34,7 @@ describe('TrayReleasesService', () => {
       downloadUrl: 'https://x/y.msix',
       sha256: 'a'.repeat(64),
       fileSizeBytes: 10,
-      publisher: 'CN=ONEVO',
+      publisher: 'CN=Crownus',
       minimumWindowsVersion: '10.0.19041.0',
       minSupportedVersion: null,
       releaseNotes: null,

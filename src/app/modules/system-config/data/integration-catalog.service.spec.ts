@@ -31,7 +31,7 @@ describe('IntegrationCatalogService', () => {
       displayName: 'GitHub',
       description: null,
       connectionScope: 'user',
-      onevoAppProvider: 'github',
+      crownusAppProvider: 'github',
       logoUrl: null,
       isActive: true,
       createdAt: '2026-01-01T00:00:00Z',

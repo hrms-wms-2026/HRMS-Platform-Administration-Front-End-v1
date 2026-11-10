@@ -5,7 +5,7 @@ export interface IntegrationCatalogEntry {
   displayName: string;
   description: string | null;
   connectionScope: IntegrationConnectionScope;
-  onevoAppProvider: string;
+  crownusAppProvider: string;
   logoUrl: string | null;
   isActive: boolean;
   createdAt: string;
@@ -17,7 +17,7 @@ export interface CreateIntegrationPayload {
   displayName: string;
   description?: string;
   connectionScope: IntegrationConnectionScope;
-  onevoAppProvider: string;
+  crownusAppProvider: string;
   logoUrl?: string;
   isActive: boolean;
 }
@@ -26,7 +26,7 @@ export interface UpdateIntegrationPayload {
   displayName: string;
   description?: string;
   connectionScope: IntegrationConnectionScope;
-  onevoAppProvider: string;
+  crownusAppProvider: string;
   logoUrl?: string;
   isActive: boolean;
 }

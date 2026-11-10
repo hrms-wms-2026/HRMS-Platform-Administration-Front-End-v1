@@ -12,7 +12,7 @@ describe('IntegrationCatalogList', () => {
     displayName: 'GitHub',
     description: 'Connect GitHub',
     connectionScope: 'user' as const,
-    onevoAppProvider: 'github',
+    crownusAppProvider: 'github',
     logoUrl: null,
     isActive: true,
     createdAt: '2026-01-01T00:00:00Z',

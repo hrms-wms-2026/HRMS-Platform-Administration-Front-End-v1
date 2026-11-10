@@ -6,6 +6,8 @@ import { join, relative } from 'node:path';
  * admin can see it in this console: templates, code strings, config, styles, asset file names.
  */
 const OLD_NAME = /onevo|onexso/i;
+// Backend code names (`ONEVO.Api`, ...) are renamed separately.
+const ALLOWED = /\bONEVO\.[A-Z][A-Za-z]*/g;
 const SOURCE = /\.(ts|html|json|scss|css)$/;
 
 const srcDir = join(__dirname, '..');
@@ -36,7 +38,7 @@ describe('visible product name guard', () => {
       readFileSync(file, 'utf8')
         .split('\n')
         .forEach((line, index) => {
-          if (OLD_NAME.test(line)) findings.push(`${rel}:${index + 1}: ${line.trim().slice(0, 140)}`);
+          if (OLD_NAME.test(line.replace(ALLOWED, ''))) findings.push(`${rel}:${index + 1}: ${line.trim().slice(0, 140)}`);
         });
     }
 

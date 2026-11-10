@@ -49,7 +49,7 @@ export class IntegrationCatalogDetailDrawer {
     displayName: ['', [Validators.required, Validators.maxLength(100)]],
     description: [''],
     connectionScope: ['tenant' as IntegrationConnectionScope, Validators.required],
-    onevoAppProvider: ['', Validators.required],
+    crownusAppProvider: ['', Validators.required],
     logoUrl: ['', Validators.maxLength(500)],
     isActive: [true],
   });
@@ -88,7 +88,7 @@ export class IntegrationCatalogDetailDrawer {
         displayName: value.displayName.trim(),
         description: value.description.trim() || undefined,
         connectionScope: value.connectionScope,
-        onevoAppProvider: value.onevoAppProvider,
+        crownusAppProvider: value.crownusAppProvider,
         logoUrl: value.logoUrl.trim() || undefined,
         isActive: value.isActive,
       })
@@ -179,7 +179,7 @@ export class IntegrationCatalogDetailDrawer {
           displayName: entry.displayName,
           description: entry.description ?? '',
           connectionScope: entry.connectionScope,
-          onevoAppProvider: entry.onevoAppProvider,
+          crownusAppProvider: entry.crownusAppProvider,
           logoUrl: entry.logoUrl ?? '',
           isActive: entry.isActive,
         });

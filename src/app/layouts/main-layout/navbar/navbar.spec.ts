@@ -28,8 +28,8 @@ describe('Navbar', () => {
     const images = fixture.debugElement.queryAll(By.css('img'));
     const srcs = images.map((img) => img.nativeElement.getAttribute('src'));
 
-    expect(srcs).toContain('onexso-logo-icon.svg');
-    expect(srcs).toContain('onexso-logo-text.svg');
+    expect(srcs).toContain('crownus-logo-icon.svg');
+    expect(srcs).toContain('crownus-logo-text.svg');
   });
 
   it('renders the breadcrumb', () => {

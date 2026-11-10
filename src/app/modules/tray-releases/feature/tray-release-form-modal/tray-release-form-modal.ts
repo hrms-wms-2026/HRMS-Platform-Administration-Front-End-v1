@@ -36,7 +36,7 @@ export class TrayReleaseFormModal {
     downloadUrl: ['', [Validators.required, Validators.pattern(HTTPS_URL)]],
     sha256: ['', [Validators.required, Validators.pattern(SHA256)]],
     fileSizeBytes: [0, [Validators.required, Validators.min(1)]],
-    publisher: ['CN=ONEVO', [Validators.required, Validators.maxLength(200)]],
+    publisher: ['CN=Crownus', [Validators.required, Validators.maxLength(200)]],
     minimumWindowsVersion: ['10.0.19041.0', Validators.required],
     minSupportedVersion: ['', optionalPattern(VERSION)],
     releaseNotes: [''],
