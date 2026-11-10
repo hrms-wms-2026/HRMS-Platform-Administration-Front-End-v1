@@ -51,7 +51,7 @@
 
         <div>
           <label class="audit-filter-label" for="addOAuthProvider">OAuth Provider</label>
-          <select id="addOAuthProvider" formControlName="onevoAppProvider" class="audit-filter-input">
+          <select id="addOAuthProvider" formControlName="crownusAppProvider" class="audit-filter-input">
             @for (provider of oauthProviders(); track provider) {
               <option [value]="provider">{{ provider }}</option>
             }

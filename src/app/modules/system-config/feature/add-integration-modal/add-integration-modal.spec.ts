@@ -42,7 +42,7 @@ describe('AddIntegrationModal', () => {
   it('loads oauth providers and preselects the first provider', () => {
     const fixture = setup();
     expect(oauthAppsService.list).toHaveBeenCalled();
-    expect(fixture.componentInstance['form'].controls.onevoAppProvider.value).toBe('github');
+    expect(fixture.componentInstance['form'].controls.crownusAppProvider.value).toBe('github');
   });
 
   it('creates an integration and emits created', () => {
@@ -55,7 +55,7 @@ describe('AddIntegrationModal', () => {
       displayName: 'GitHub Work',
       description: 'GitHub for work management',
       connectionScope: 'tenant',
-      onevoAppProvider: 'github',
+      crownusAppProvider: 'github',
       isActive: true,
     });
     fixture.componentInstance['submit']();
@@ -65,7 +65,7 @@ describe('AddIntegrationModal', () => {
       displayName: 'GitHub Work',
       description: 'GitHub for work management',
       connectionScope: 'tenant',
-      onevoAppProvider: 'github',
+      crownusAppProvider: 'github',
       logoUrl: undefined,
       isActive: true,
     });
@@ -81,7 +81,7 @@ describe('AddIntegrationModal', () => {
     fixture.componentInstance['form'].patchValue({
       integrationKey: 'github',
       displayName: 'GitHub',
-      onevoAppProvider: 'github',
+      crownusAppProvider: 'github',
     });
     fixture.componentInstance['submit']();
 
