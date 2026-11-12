@@ -5,6 +5,7 @@ import { UserProfileDrawer } from './user-profile-drawer';
 import { PlatformUsersService } from '../../data/platform-users.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SessionService } from '../../../../core/auth/session.service';
 
 describe('UserProfileDrawer', () => {
   let usersService: {
@@ -14,6 +15,7 @@ describe('UserProfileDrawer', () => {
     listSessions: jest.Mock;
     revokeSession: jest.Mock;
     revokeAllSessions: jest.Mock;
+    resetMfa: jest.Mock;
   };
   let notificationService: { success: jest.Mock; error: jest.Mock };
 
@@ -25,6 +27,7 @@ describe('UserProfileDrawer', () => {
     createdAt: '2026-08-01T00:00:00Z',
     lastLoginAt: null,
     roles: [{ id: 'role-1', name: 'Security Auditor' }],
+    mfaStatus: 'enrolled',
   };
 
   const allRoles = [
@@ -53,6 +56,7 @@ describe('UserProfileDrawer', () => {
       listSessions: jest.fn().mockReturnValue(of(sessions)),
       revokeSession: jest.fn().mockReturnValue(of(undefined)),
       revokeAllSessions: jest.fn().mockReturnValue(of(undefined)),
+      resetMfa: jest.fn().mockReturnValue(of(undefined)),
     };
     notificationService = { success: jest.fn(), error: jest.fn() };
 
@@ -192,5 +196,90 @@ describe('UserProfileDrawer', () => {
     expect(usersService.revokeSession).toHaveBeenCalledWith('user-1', 'session-1');
     expect(notificationService.success).toHaveBeenCalledWith('Session revoked.');
     expect(usersService.listSessions).toHaveBeenCalledTimes(2);
+  });
+
+  describe('MFA reset (F-02, D2)', () => {
+    const manage = ['platform.accounts.read', 'platform.accounts.manage'];
+
+    function resetButton(fixture: ReturnType<typeof setup>): HTMLButtonElement | null {
+      const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+      return buttons.find((b) => b.textContent?.includes('Reset MFA')) ?? null;
+    }
+
+    it('shows the enrollment state and a reset button for another enrolled admin', () => {
+      const fixture = setup('user-1', manage);
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain('Two-factor authentication');
+      expect(fixture.nativeElement.textContent).toContain('Enabled');
+      expect(resetButton(fixture)).toBeTruthy();
+    });
+
+    it('hides the reset button without platform.accounts.manage', () => {
+      const fixture = setup('user-1', ['platform.accounts.read']);
+      fixture.detectChanges();
+
+      expect(resetButton(fixture)).toBeNull();
+    });
+
+    it('hides the reset button on the signed-in admin own account', () => {
+      const fixture = setup('user-1', manage);
+      TestBed.inject(SessionService).setSession({
+        userId: 'user-1',
+        email: 'a@onevo.io',
+        platformRole: 'Platform Super Admin',
+        expiresAt: '',
+        mfaRequired: false,
+        mfaEnrollmentRequired: false,
+        permissions: manage,
+        scopes: {},
+        entitlements: [],
+      });
+      fixture.detectChanges();
+
+      expect(resetButton(fixture)).toBeNull();
+    });
+
+    it('hides the reset button and says "Not set up" when the admin has not enrolled', () => {
+      const fixture = setup('user-1', manage);
+      usersService.getUserById.mockReturnValue(of({ ...userDetail, mfaStatus: 'not_enrolled' }));
+      fixture.componentRef.setInput('userId', 'user-2');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain('Not set up');
+      expect(resetButton(fixture)).toBeNull();
+    });
+
+    it('resets only after confirmation, then reloads the user', () => {
+      const fixture = setup('user-1', manage);
+      fixture.detectChanges();
+      const component = fixture.componentInstance;
+
+      resetButton(fixture)!.click();
+      fixture.detectChanges();
+      expect(usersService.resetMfa).not.toHaveBeenCalled();
+      expect(component['confirmingMfaReset']()).toBe(true);
+
+      component['confirmMfaReset']();
+
+      expect(usersService.resetMfa).toHaveBeenCalledWith('user-1');
+      expect(notificationService.success).toHaveBeenCalled();
+      expect(usersService.getUserById).toHaveBeenCalledTimes(2);
+      expect(component['confirmingMfaReset']()).toBe(false);
+    });
+
+    it('shows the server message when the reset is refused', () => {
+      const fixture = setup('user-1', manage);
+      usersService.resetMfa.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 403, error: { detail: 'You cannot reset your own two-factor authentication.' } })),
+      );
+      const component = fixture.componentInstance;
+
+      component['askMfaReset']();
+      component['confirmMfaReset']();
+
+      expect(notificationService.error).toHaveBeenCalledWith('You cannot reset your own two-factor authentication.');
+      expect(component['resettingMfa']()).toBe(false);
+    });
   });
 });

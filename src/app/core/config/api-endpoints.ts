@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
     revokeInvite: (platformUserId: string) => `/platform-access/users/${platformUserId}/revoke-invite`,
     byId: (platformUserId: string) => `/platform-access/users/${platformUserId}`,
     updateRoles: (platformUserId: string) => `/platform-access/users/${platformUserId}/roles`,
+    resetMfa: (platformUserId: string) => `/platform-access/users/${platformUserId}/mfa/reset`,
     sessions: {
       list: (platformUserId: string) => `/platform-access/users/${platformUserId}/sessions`,
       revoke: (platformUserId: string, sessionId: string) =>

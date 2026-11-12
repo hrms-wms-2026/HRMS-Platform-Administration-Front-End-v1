@@ -18,4 +18,6 @@ export interface PlatformUserDetail {
   createdAt: string;
   lastLoginAt: string | null;
   roles: PlatformRoleSummary[];
+  /** "enrolled" | "not_enrolled" | "locked". The TOTP secret is never sent. */
+  mfaStatus: string;
 }
