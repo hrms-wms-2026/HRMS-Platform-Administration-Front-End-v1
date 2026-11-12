@@ -193,14 +193,20 @@ export const API_ENDPOINTS = {
       create: '/support/announcements',
       publish: (announcementId: string) => `/support/announcements/${announcementId}/publish`,
       unpublish: (announcementId: string) => `/support/announcements/${announcementId}/unpublish`,
+      active: '/announcements/active',
     },
     tickets: {
       list: '/support/tickets',
       byId: (ticketId: string) => `/support/tickets/${ticketId}`,
       create: '/support/tickets',
       updateStatus: (ticketId: string) => `/support/tickets/${ticketId}/status`,
+      assign: (ticketId: string) => `/support/tickets/${ticketId}/assignee`,
       addComment: (ticketId: string) => `/support/tickets/${ticketId}/comments`,
+      uploadAttachment: (ticketId: string) => `/support/tickets/${ticketId}/attachments`,
+      attachmentDownloadUrl: (ticketId: string, attachmentId: string) =>
+        `/support/tickets/${ticketId}/attachments/${attachmentId}/download-url`,
     },
+    assignees: '/support/assignees',
   },
   logs: {
     create: '/logs',

@@ -5,10 +5,15 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SupportTicketsService } from '../../data/support-tickets.service';
 import {
+  SUPPORT_ATTACHMENT_ACCEPT,
+  SUPPORT_ATTACHMENT_MAX_BYTES,
   SUPPORT_TICKET_STATUS_OPTIONS,
+  SupportAssignee,
+  SupportTicketAttachment,
   SupportTicketComment,
   SupportTicketDetail as SupportTicketDetailModel,
-  shortTicketId,
+  SupportTicketSummary,
+  formatFileSize,
   supportTicketPriorityTone,
   supportTicketStatusTone,
 } from '../../data/support-ticket.model';
@@ -38,21 +43,33 @@ export class SupportTicketDetail implements OnInit {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly detail = signal<SupportTicketDetailModel | null>(null);
+  protected readonly assignees = signal<SupportAssignee[]>([]);
   protected readonly updatingStatus = signal(false);
+  protected readonly updatingAssignee = signal(false);
   protected readonly postingComment = signal(false);
+  protected readonly uploading = signal(false);
+  protected readonly downloadingId = signal<string | null>(null);
+  protected readonly uploadInternal = signal(false);
 
   protected readonly statusOptions = SUPPORT_TICKET_STATUS_OPTIONS;
   protected readonly statusTone = supportTicketStatusTone;
   protected readonly priorityTone = supportTicketPriorityTone;
-  protected readonly shortId = shortTicketId;
+  protected readonly fileSize = formatFileSize;
+  protected readonly attachmentAccept = SUPPORT_ATTACHMENT_ACCEPT;
 
   protected readonly commentForm = this.formBuilder.nonNullable.group({
-    body: ['', [Validators.required]],
+    body: ['', [Validators.required, Validators.maxLength(10000)]],
     isInternal: [false],
   });
 
   ngOnInit(): void {
     this.loadTicket();
+    if (this.canManage()) {
+      this.ticketsService.listAssignees().subscribe({
+        next: (assignees) => this.assignees.set(assignees),
+        error: () => this.assignees.set([]),
+      });
+    }
   }
 
   protected loadTicket(): void {
@@ -78,14 +95,27 @@ export class SupportTicketDetail implements OnInit {
       next: (ticket) => {
         this.updatingStatus.set(false);
         this.notificationService.success('Ticket status updated.');
-        const current = this.detail();
-        if (current) {
-          this.detail.set({ ...current, ticket });
-        }
+        this.replaceTicket(ticket);
       },
       error: (error: HttpErrorResponse) => {
         this.updatingStatus.set(false);
         this.notificationService.error(error.error?.detail ?? 'Could not update the ticket status.');
+      },
+    });
+  }
+
+  protected changeAssignee(platformUserId: string): void {
+    this.updatingAssignee.set(true);
+
+    this.ticketsService.assign(this.ticketId, platformUserId || null).subscribe({
+      next: (ticket) => {
+        this.updatingAssignee.set(false);
+        this.notificationService.success(ticket.assignedToName ? `Assigned to ${ticket.assignedToName}.` : 'Ticket unassigned.');
+        this.replaceTicket(ticket);
+      },
+      error: (error: HttpErrorResponse) => {
+        this.updatingAssignee.set(false);
+        this.notificationService.error(error.error?.detail ?? 'Could not change the assignee.');
       },
     });
   }
@@ -113,5 +143,56 @@ export class SupportTicketDetail implements OnInit {
         this.notificationService.error(error.error?.detail ?? 'Could not add the comment.');
       },
     });
+  }
+
+  protected onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    if (file.size > SUPPORT_ATTACHMENT_MAX_BYTES) {
+      this.notificationService.error('Files must be 25 MB or smaller.');
+      return;
+    }
+
+    this.uploading.set(true);
+    this.ticketsService.uploadAttachment(this.ticketId, file, this.uploadInternal()).subscribe({
+      next: (attachment: SupportTicketAttachment) => {
+        this.uploading.set(false);
+        this.notificationService.success('File attached.');
+        const current = this.detail();
+        if (current) {
+          this.detail.set({ ...current, attachments: [...current.attachments, attachment] });
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.uploading.set(false);
+        this.notificationService.error(error.error?.detail ?? 'Could not attach the file.');
+      },
+    });
+  }
+
+  protected download(attachment: SupportTicketAttachment): void {
+    this.downloadingId.set(attachment.id);
+    this.ticketsService.getAttachmentDownloadUrl(this.ticketId, attachment.id).subscribe({
+      next: (download) => {
+        this.downloadingId.set(null);
+        window.open(download.url, '_blank', 'noopener');
+      },
+      error: (error: HttpErrorResponse) => {
+        this.downloadingId.set(null);
+        this.notificationService.error(error.error?.detail ?? 'Could not download the file.');
+      },
+    });
+  }
+
+  private replaceTicket(ticket: SupportTicketSummary): void {
+    const current = this.detail();
+    if (current) {
+      this.detail.set({ ...current, ticket });
+    }
   }
 }

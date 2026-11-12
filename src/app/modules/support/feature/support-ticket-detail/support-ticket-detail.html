@@ -5,11 +5,11 @@
 } @else if (detail(); as d) {
   <div class="flex flex-col gap-4">
     <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
-      <div class="flex items-start justify-between gap-4">
-        <div>
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
           <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ d.ticket.subject }}</h1>
           <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {{ d.ticket.tenantId ? 'Tenant ' + shortId(d.ticket.tenantId) : 'Platform-wide' }}
+            {{ d.ticket.tenantName }}
             @if (d.ticket.category) {
               &middot; {{ d.ticket.category }}
             }
@@ -23,7 +23,16 @@
 
       <p class="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{{ d.ticket.description }}</p>
 
-      <div class="grid grid-cols-3 gap-4 border-t border-slate-100 dark:border-slate-800 pt-4 text-sm">
+      <div class="grid grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-4 text-sm lg:grid-cols-5">
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Raised by</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ d.ticket.createdByName }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ d.ticket.createdByUserId ? 'Tenant' : 'Support team' }}</p>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Assignee</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ d.ticket.assignedToName ?? 'Unassigned' }}</p>
+        </div>
         <div>
           <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Created</p>
           <p class="text-slate-900 dark:text-slate-100">{{ d.ticket.createdAt | date: 'medium' }}</p>
@@ -39,20 +48,96 @@
       </div>
 
       @if (canManage()) {
-        <div class="flex items-center gap-3 border-t border-slate-100 dark:border-slate-800 pt-4">
-          <label for="status" class="text-sm font-medium text-slate-700 dark:text-slate-300">Status</label>
-          <select
-            id="status"
-            [value]="d.ticket.status"
-            [disabled]="updatingStatus()"
-            (change)="changeStatus($any($event.target).value)"
-            class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
-          >
-            @for (option of statusOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+        <div class="flex flex-col gap-3 border-t border-slate-100 dark:border-slate-800 pt-4 sm:flex-row sm:items-center sm:gap-6">
+          <div class="flex items-center gap-3">
+            <label for="status" class="text-sm font-medium text-slate-700 dark:text-slate-300">Status</label>
+            <select
+              id="status"
+              [value]="d.ticket.status"
+              [disabled]="updatingStatus()"
+              (change)="changeStatus($any($event.target).value)"
+              class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+            >
+              @for (option of statusOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="flex items-center gap-3">
+            <label for="assignee" class="text-sm font-medium text-slate-700 dark:text-slate-300">Assignee</label>
+            <select
+              id="assignee"
+              [value]="d.ticket.assignedToPlatformUserId ?? ''"
+              [disabled]="updatingAssignee()"
+              (change)="changeAssignee($any($event.target).value)"
+              class="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+            >
+              <option value="">Unassigned</option>
+              @for (assignee of assignees(); track assignee.id) {
+                <option [value]="assignee.id">{{ assignee.fullName }}</option>
+              }
+            </select>
+          </div>
         </div>
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">
+          Attachments ({{ d.attachments.length }})
+        </h2>
+        @if (canManage()) {
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <input
+                type="checkbox"
+                [checked]="uploadInternal()"
+                (change)="uploadInternal.set($any($event.target).checked)"
+                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+              />
+              Internal only
+            </label>
+            <label
+              class="cursor-pointer rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              [class.pointer-events-none]="uploading()"
+              [class.opacity-60]="uploading()"
+            >
+              {{ uploading() ? 'Uploading…' : 'Attach file' }}
+              <input type="file" class="sr-only" [accept]="attachmentAccept" (change)="onFileSelected($event)" />
+            </label>
+          </div>
+        }
+      </div>
+
+      @if (d.attachments.length === 0) {
+        <p class="text-sm text-slate-500 dark:text-slate-400">No files attached.</p>
+      } @else {
+        <ul class="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+          @for (attachment of d.attachments; track attachment.id) {
+            <li class="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="min-w-0">
+                <p class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{{ attachment.fileName }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ fileSize(attachment.sizeBytes) }} &middot; {{ attachment.uploadedByName }}
+                  ({{ attachment.uploadedByUserId ? 'Tenant' : 'Support team' }}) &middot;
+                  {{ attachment.createdAt | date: 'medium' }}
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                @if (attachment.isInternal) {
+                  <app-status-badge label="Internal" tone="warning" />
+                }
+                <app-button
+                  label="Download"
+                  variant="secondary"
+                  [loading]="downloadingId() === attachment.id"
+                  (clicked)="download(attachment)"
+                />
+              </div>
+            </li>
+          }
+        </ul>
       }
     </div>
 
@@ -70,13 +155,18 @@
               class="rounded-xl border p-4"
               [class]="comment.isInternal
                 ? 'border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40'
-                : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50'"
+                : comment.authorUserId
+                  ? 'border-sky-200 bg-sky-50 dark:border-sky-900 dark:bg-sky-950/40'
+                  : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50'"
             >
-              <div class="flex items-center justify-between">
-                <app-status-badge
-                  [label]="comment.isInternal ? 'Internal note' : 'Reply to tenant'"
-                  [tone]="comment.isInternal ? 'warning' : 'indigo'"
-                />
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ comment.authorName }}</span>
+                  <app-status-badge
+                    [label]="comment.isInternal ? 'Internal note' : comment.authorUserId ? 'From tenant' : 'Reply to tenant'"
+                    [tone]="comment.isInternal ? 'warning' : comment.authorUserId ? 'success' : 'indigo'"
+                  />
+                </div>
                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ comment.createdAt | date: 'medium' }}</span>
               </div>
               <p class="mt-2 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{{ comment.body }}</p>
@@ -95,8 +185,11 @@
               formControlName="body"
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             ></textarea>
-            @if (commentForm.controls.body.invalid && commentForm.controls.body.touched) {
+            @if (commentForm.controls.body.errors?.['required'] && commentForm.controls.body.touched) {
               <p class="mt-1 text-xs text-red-700">A comment body is required.</p>
+            }
+            @if (commentForm.controls.body.errors?.['maxlength']) {
+              <p class="mt-1 text-xs text-red-700">Comments must be at most 10,000 characters.</p>
             }
           </div>
           <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">

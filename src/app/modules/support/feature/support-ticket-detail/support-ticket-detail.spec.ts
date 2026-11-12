@@ -8,29 +8,69 @@ import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 describe('SupportTicketDetail', () => {
-  let ticketsService: { getById: jest.Mock; updateStatus: jest.Mock; addComment: jest.Mock };
+  let ticketsService: {
+    getById: jest.Mock;
+    updateStatus: jest.Mock;
+    assign: jest.Mock;
+    addComment: jest.Mock;
+    uploadAttachment: jest.Mock;
+    getAttachmentDownloadUrl: jest.Mock;
+    listAssignees: jest.Mock;
+  };
   let notificationService: { success: jest.Mock; error: jest.Mock };
 
   const ticket = {
     id: 'ticket-1',
     tenantId: 'tenant-1',
+    tenantName: 'Acme Corp',
     subject: 'Cannot access dashboard',
     description: 'Getting a 500 error.',
     status: 'open',
     priority: 'high',
     category: 'bug',
-    createdByPlatformUserId: 'user-1',
+    createdByPlatformUserId: null,
+    createdByUserId: 'tenant-user-1',
+    createdByName: 'Anu Owner',
     assignedToPlatformUserId: null,
+    assignedToName: null,
     createdAt: '2026-08-14T10:00:00Z',
     updatedAt: null,
     resolvedAt: null,
   };
 
+  const tenantComment = {
+    id: 'comment-0',
+    ticketId: 'ticket-1',
+    authorPlatformUserId: null,
+    authorUserId: 'tenant-user-1',
+    authorName: 'Anu Owner',
+    body: 'Any update?',
+    isInternal: false,
+    createdAt: '2026-08-14T10:30:00Z',
+  };
+
+  const attachment = {
+    id: 'file-1',
+    ticketId: 'ticket-1',
+    fileName: 'error.png',
+    contentType: 'image/png',
+    sizeBytes: 2048,
+    isInternal: false,
+    uploadedByPlatformUserId: null,
+    uploadedByUserId: 'tenant-user-1',
+    uploadedByName: 'Anu Owner',
+    createdAt: '2026-08-14T10:05:00Z',
+  };
+
   function setup(permissions: string[] = ['platform.support.read', 'platform.support.manage']) {
     ticketsService = {
-      getById: jest.fn().mockReturnValue(of({ ticket, comments: [] })),
+      getById: jest.fn().mockReturnValue(of({ ticket, comments: [tenantComment], attachments: [attachment] })),
       updateStatus: jest.fn(),
+      assign: jest.fn(),
       addComment: jest.fn(),
+      uploadAttachment: jest.fn(),
+      getAttachmentDownloadUrl: jest.fn(),
+      listAssignees: jest.fn().mockReturnValue(of([{ id: 'staff-1', fullName: 'Priya Support', email: 'p@x.test' }])),
     };
     notificationService = { success: jest.fn(), error: jest.fn() };
 
@@ -62,15 +102,32 @@ describe('SupportTicketDetail', () => {
     return fixture;
   }
 
-  it('loads and displays the ticket', () => {
+  function fileChangeEvent(file: File): Event {
+    const input = document.createElement('input');
+    input.type = 'file';
+    Object.defineProperty(input, 'files', { value: [file] });
+    return { target: input } as unknown as Event;
+  }
+
+  it('loads and displays the ticket with tenant name, raiser, comments and files', () => {
     const fixture = setup();
     expect(ticketsService.getById).toHaveBeenCalledWith('ticket-1');
-    expect(fixture.nativeElement.textContent).toContain('Cannot access dashboard');
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Cannot access dashboard');
+    expect(text).toContain('Acme Corp');
+    expect(text).toContain('Anu Owner');
+    expect(text).toContain('From tenant');
+    expect(text).toContain('error.png');
+    expect(text).toContain('2.0 KB');
   });
 
-  it('hides the status control and reply form without manage permission', () => {
+  it('hides management controls without manage permission and skips the assignee lookup', () => {
     const fixture = setup(['platform.support.read']);
-    expect(fixture.nativeElement.textContent).not.toContain('Post Comment');
+    const text = fixture.nativeElement.textContent;
+    expect(text).not.toContain('Post Comment');
+    expect(text).not.toContain('Attach file');
+    expect(fixture.nativeElement.querySelector('#assignee')).toBeNull();
+    expect(ticketsService.listAssignees).not.toHaveBeenCalled();
   });
 
   it('updates the status and merges the returned ticket into the view', () => {
@@ -95,6 +152,23 @@ describe('SupportTicketDetail', () => {
     expect(notificationService.error).toHaveBeenCalledWith('Cannot reopen a closed ticket.');
   });
 
+  it('assigns the ticket and clears it again with the empty option', () => {
+    const fixture = setup();
+    ticketsService.assign.mockReturnValueOnce(
+      of({ ...ticket, assignedToPlatformUserId: 'staff-1', assignedToName: 'Priya Support' }),
+    );
+
+    fixture.componentInstance['changeAssignee']('staff-1');
+    expect(ticketsService.assign).toHaveBeenCalledWith('ticket-1', 'staff-1');
+    expect(notificationService.success).toHaveBeenCalledWith('Assigned to Priya Support.');
+    expect(fixture.componentInstance['detail']()!.ticket.assignedToName).toBe('Priya Support');
+
+    ticketsService.assign.mockReturnValueOnce(of(ticket));
+    fixture.componentInstance['changeAssignee']('');
+    expect(ticketsService.assign).toHaveBeenLastCalledWith('ticket-1', null);
+    expect(notificationService.success).toHaveBeenLastCalledWith('Ticket unassigned.');
+  });
+
   it('does not post a comment when the form is invalid', () => {
     const fixture = setup();
 
@@ -108,7 +182,9 @@ describe('SupportTicketDetail', () => {
     const newComment = {
       id: 'comment-1',
       ticketId: 'ticket-1',
-      authorPlatformUserId: 'user-1',
+      authorPlatformUserId: 'staff-1',
+      authorUserId: null,
+      authorName: 'Priya Support',
       body: 'Looking into this.',
       isInternal: true,
       createdAt: '2026-08-14T11:00:00Z',
@@ -120,6 +196,45 @@ describe('SupportTicketDetail', () => {
     component['submitComment']();
 
     expect(ticketsService.addComment).toHaveBeenCalledWith('ticket-1', 'Looking into this.', true);
-    expect(component['detail']()!.comments).toEqual([newComment]);
+    expect(component['detail']()!.comments).toEqual([tenantComment, newComment]);
+  });
+
+  it('uploads a selected file with the internal flag and appends it', () => {
+    const fixture = setup();
+    const uploaded = { ...attachment, id: 'file-2', fileName: 'notes.pdf', isInternal: true };
+    ticketsService.uploadAttachment.mockReturnValue(of(uploaded));
+    const file = new File(['x'], 'notes.pdf', { type: 'application/pdf' });
+
+    fixture.componentInstance['uploadInternal'].set(true);
+    fixture.componentInstance['onFileSelected'](fileChangeEvent(file));
+
+    expect(ticketsService.uploadAttachment).toHaveBeenCalledWith('ticket-1', file, true);
+    expect(fixture.componentInstance['detail']()!.attachments).toEqual([attachment, uploaded]);
+    expect(fixture.componentInstance['uploading']()).toBe(false);
+  });
+
+  it('rejects files over 25 MB before uploading', () => {
+    const fixture = setup();
+    const big = new File(['x'], 'huge.zip');
+    Object.defineProperty(big, 'size', { value: 25 * 1024 * 1024 + 1 });
+
+    fixture.componentInstance['onFileSelected'](fileChangeEvent(big));
+
+    expect(ticketsService.uploadAttachment).not.toHaveBeenCalled();
+    expect(notificationService.error).toHaveBeenCalledWith('Files must be 25 MB or smaller.');
+  });
+
+  it('opens the signed download url in a new tab', () => {
+    const fixture = setup();
+    const open = jest.spyOn(window, 'open').mockImplementation(() => null);
+    ticketsService.getAttachmentDownloadUrl.mockReturnValue(
+      of({ url: 'https://files.example/signed', expiresAt: '2026-08-14T12:05:00Z' }),
+    );
+
+    fixture.componentInstance['download'](attachment);
+
+    expect(ticketsService.getAttachmentDownloadUrl).toHaveBeenCalledWith('ticket-1', 'file-1');
+    expect(open).toHaveBeenCalledWith('https://files.example/signed', '_blank', 'noopener');
+    open.mockRestore();
   });
 });
