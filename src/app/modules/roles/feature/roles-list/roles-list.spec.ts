@@ -24,6 +24,7 @@ describe('RolesList', () => {
       platformRole: 'Platform Super Admin',
       expiresAt: '',
       mfaRequired: false,
+      mfaEnrollmentRequired: false,
       permissions,
       scopes: {},
       entitlements: [],

@@ -17,6 +17,7 @@ function buildContext(overrides: Partial<AuthContext> = {}): AuthContext {
     platformRole: 'Platform Super Admin',
     expiresAt: '2026-01-01T00:00:00Z',
     mfaRequired: false,
+    mfaEnrollmentRequired: false,
     permissions: [],
     scopes: {},
     entitlements: [],
@@ -112,6 +113,25 @@ describe('Login', () => {
     component.submit();
 
     expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/mfa-verify');
+  });
+
+  it('establishes the session and sends a not-yet-enrolled admin to MFA setup', () => {
+    authService.login.mockReturnValue(of(buildContext({ mfaEnrollmentRequired: true })));
+    const sessionService = TestBed.inject(SessionService);
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component['loginForm'].setValue({
+      email: 'dev@onevo.io',
+      password: 'dapiyshanth@19',
+      rememberEmail: false,
+    });
+
+    component.submit();
+
+    expect(sessionService.isAuthenticated()).toBe(true);
+    expect(sessionService.mfaEnrollmentRequired()).toBe(true);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/settings/mfa');
+    expect(router.navigateByUrl).not.toHaveBeenCalledWith('/');
   });
 
   it('establishes the session and navigates home when MFA is not required', () => {

@@ -54,6 +54,7 @@ describe('TrayReleasesList', () => {
       platformRole: 'Platform Super Admin',
       expiresAt: '',
       mfaRequired: false,
+      mfaEnrollmentRequired: false,
       permissions,
       scopes: {},
       entitlements: [],
@@ -103,7 +104,7 @@ describe('TrayReleasesList', () => {
     const fixture = TestBed.createComponent(TrayReleasesList);
     TestBed.inject(PermissionStore).setAuthorizationContext({
       userId: 'u1', email: 'a@b.c', platformRole: 'Platform Super Admin', expiresAt: '',
-      mfaRequired: false, permissions: ['platform.system_config.read'], scopes: {}, entitlements: [],
+      mfaRequired: false, mfaEnrollmentRequired: false, permissions: ['platform.system_config.read'], scopes: {}, entitlements: [],
     });
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Could not load tray releases.');

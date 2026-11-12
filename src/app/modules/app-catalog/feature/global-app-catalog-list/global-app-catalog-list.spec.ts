@@ -41,6 +41,7 @@ describe('GlobalAppCatalogList editor drawer', () => {
       platformRole: 'Platform Super Admin',
       expiresAt: '',
       mfaRequired: false,
+      mfaEnrollmentRequired: false,
       permissions: ['platform.app_catalog.read', 'platform.app_catalog.manage'],
       scopes: {},
       entitlements: [],

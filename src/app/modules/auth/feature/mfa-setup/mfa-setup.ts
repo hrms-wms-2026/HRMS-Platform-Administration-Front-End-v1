@@ -1,9 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { toDataURL } from 'qrcode';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { MfaSetupResponse } from '../../../../core/auth/mfa-setup-response.model';
+import { SessionService } from '../../../../core/auth/session.service';
+import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { Button } from '../../../../shared/ui/button/button';
 
 @Component({
@@ -14,6 +17,12 @@ import { Button } from '../../../../shared/ui/button/button';
 export class MfaSetup {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly sessionService = inject(SessionService);
+  private readonly permissionStore = inject(PermissionStore);
+  private readonly router = inject(Router);
+
+  /** F-02: true when the admin was sent here because MFA is mandatory and not yet enrolled. */
+  protected readonly enrollmentRequired = this.sessionService.mfaEnrollmentRequired;
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -72,12 +81,33 @@ export class MfaSetup {
 
     this.authService.confirmMfaSetup(code).subscribe({
       next: () => {
-        this.loading.set(false);
         this.confirmed.set(true);
+        this.refreshSessionAndContinue();
       },
       error: (error: HttpErrorResponse) => {
         this.loading.set(false);
         this.errorMessage.set(this.messageForError(error));
+      },
+    });
+  }
+
+  /**
+   * The backend lifts the enrollment restriction on the same session as soon as setup is
+   * confirmed. Reload the context so the session flag and permissions match, then open the console.
+   */
+  private refreshSessionAndContinue(): void {
+    this.authService.loadContext().subscribe({
+      next: (context) => {
+        this.sessionService.setSession(context);
+        this.permissionStore.setAuthorizationContext(context);
+        this.loading.set(false);
+        this.router.navigateByUrl('/');
+      },
+      error: () => {
+        this.loading.set(false);
+        this.errorMessage.set(
+          'Two-factor authentication is enabled, but your session could not be refreshed. Please sign in again.',
+        );
       },
     });
   }

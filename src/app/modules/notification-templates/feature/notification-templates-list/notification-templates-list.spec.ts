@@ -30,7 +30,7 @@ describe('NotificationTemplatesList', () => {
     const fixture = TestBed.createComponent(NotificationTemplatesList);
     TestBed.inject(PermissionStore).setAuthorizationContext({
       userId: 'u1', email: 'admin@example.com', platformRole: 'Platform Super Admin', expiresAt: '',
-      mfaRequired: false, permissions, scopes: {}, entitlements: [],
+      mfaRequired: false, mfaEnrollmentRequired: false, permissions, scopes: {}, entitlements: [],
     });
     return fixture;
   }

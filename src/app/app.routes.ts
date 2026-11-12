@@ -1,11 +1,14 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permissionGuard } from './core/guards/permission.guard';
+import { mfaEnrollmentGuard } from './core/guards/mfa-enrollment.guard';
 
 export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
+    // F-02: until MFA is enrolled, every child route redirects to settings/mfa.
+    canActivateChild: [mfaEnrollmentGuard],
     loadComponent: () =>
       import('./layouts/main-layout/main-layout').then((m) => m.MainLayout),
     children: [

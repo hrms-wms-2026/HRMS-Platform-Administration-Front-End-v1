@@ -54,6 +54,7 @@ describe('SupportTicketDetail', () => {
       platformRole: 'Platform Super Admin',
       expiresAt: '',
       mfaRequired: false,
+      mfaEnrollmentRequired: false,
       permissions,
       scopes: {},
       entitlements: [],
