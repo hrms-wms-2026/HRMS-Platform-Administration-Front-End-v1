@@ -39,7 +39,14 @@ describe('Dashboard', () => {
     return of({ items: [], total: 10, page: 1, pageSize: params.pageSize ?? 1 });
   }
 
-  function setup(permissions: string[] = []) {
+  const ALL_DASHBOARD_PERMISSIONS = [
+    'platform.tenants.read',
+    'platform.subscriptions.read',
+    'platform.system_config.read',
+    'platform.audit.read',
+  ];
+
+  function setup(permissions: string[] = ALL_DASHBOARD_PERMISSIONS) {
     tenantsService = { list: jest.fn().mockImplementation(defaultTenantsResponse) };
     invoicesService = { list: jest.fn().mockImplementation(defaultInvoicesResponse) };
     serviceKeysService = { list: jest.fn().mockReturnValue(of([])) };

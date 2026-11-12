@@ -36,10 +36,11 @@ describe('permissionGuard', () => {
     expect(runGuard(undefined)).toBe(true);
   });
 
-  it('fails open when no permissions have loaded yet', () => {
-    setup();
+  it('redirects to /access-denied when the user holds no permissions', () => {
+    const store = setup();
+    loadPermissions(store, []);
 
-    expect(runGuard('platform.tenants.read')).toBe(true);
+    expect(String(runGuard('platform.tenants.read'))).toBe('/access-denied');
   });
 
   it('allows navigation when the user has the required permission', () => {
