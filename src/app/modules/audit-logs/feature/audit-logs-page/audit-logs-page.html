@@ -1,0 +1,37 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div>
+      <h1 class="page-title">Audit Logs</h1>
+      <p class="page-subtitle">Who changed what on the platform, and every sign-in</p>
+    </div>
+
+    <div role="tablist" aria-label="Audit log type" class="flex gap-1 border-b border-slate-200 dark:border-slate-700">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          [id]="'audit-tab-' + tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
+          [attr.aria-controls]="'audit-panel-' + tab.id"
+          class="-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors"
+          [class]="tabClass(tab.id)"
+          (click)="selectTab(tab.id)"
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <div role="tabpanel" [id]="'audit-panel-' + activeTab()" [attr.aria-labelledby]="'audit-tab-' + activeTab()">
+      @if (activeTab() === 'admin-actions') {
+        <app-admin-actions-log />
+      } @else {
+        <app-audit-logs-list [embedded]="true" />
+      }
+    </div>
+  </div>
+}

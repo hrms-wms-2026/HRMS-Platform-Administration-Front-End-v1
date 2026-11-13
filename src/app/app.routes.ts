@@ -339,8 +339,8 @@ export const routes: Routes = [
           permission: 'platform.audit.read',
         },
         loadComponent: () =>
-          import('./modules/audit-logs/feature/audit-logs-list/audit-logs-list').then(
-            (m) => m.AuditLogsList,
+          import('./modules/audit-logs/feature/audit-logs-page/audit-logs-page').then(
+            (m) => m.AuditLogsPage,
           ),
       },
       {
