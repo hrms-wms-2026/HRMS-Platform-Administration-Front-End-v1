@@ -1,9 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { SupportTicketsList } from './support-tickets-list';
 import { SupportTicketsService } from '../../data/support-tickets.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
+import { SessionService } from '../../../../core/auth/session.service';
 
 describe('SupportTicketsList', () => {
   let ticketsService: { list: jest.Mock; listAssignees: jest.Mock };
@@ -22,6 +23,7 @@ describe('SupportTicketsList', () => {
     createdByName: 'Anu Owner',
     assignedToPlatformUserId: null,
     assignedToName: null,
+    awaitingSupport: true,
     createdAt: '2026-08-14T10:00:00Z',
     updatedAt: null,
     resolvedAt: null,
@@ -29,7 +31,7 @@ describe('SupportTicketsList', () => {
 
   const emptyPage = { items: [], total: 0, page: 1, pageSize: 25 };
 
-  function setup(permissions: string[] = ['platform.support.read']) {
+  function setup(permissions: string[] = ['platform.support.read'], queryParams: Record<string, string> = {}) {
     ticketsService = {
       list: jest.fn().mockReturnValue(of(emptyPage)),
       listAssignees: jest.fn().mockReturnValue(of([{ id: 'staff-1', fullName: 'Priya Support', email: 'p@x.test' }])),
@@ -37,7 +39,11 @@ describe('SupportTicketsList', () => {
 
     TestBed.configureTestingModule({
       imports: [SupportTicketsList],
-      providers: [provideRouter([]), { provide: SupportTicketsService, useValue: ticketsService }],
+      providers: [
+        provideRouter([]),
+        { provide: SupportTicketsService, useValue: ticketsService },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(queryParams) } } },
+      ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(SupportTicketsList);
@@ -55,7 +61,15 @@ describe('SupportTicketsList', () => {
     return fixture;
   }
 
-  const baseQuery = { status: '', priority: '', assignee: '', search: '', page: 1, pageSize: 25 };
+  const baseQuery = {
+    status: '',
+    priority: '',
+    assignee: '',
+    search: '',
+    awaitingSupport: false,
+    page: 1,
+    pageSize: 25,
+  };
 
   it('does not call the API and shows the no-permission message when unauthorized', () => {
     const fixture = setup([]);
@@ -149,5 +163,51 @@ describe('SupportTicketsList', () => {
     const fixture = setup(['platform.support.read', 'platform.support.manage']);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Create Ticket');
+  });
+
+  it('filters to tickets awaiting support from the checkbox', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+
+    fixture.componentInstance['onAwaitingOnlyChange'](true);
+
+    expect(ticketsService.list).toHaveBeenLastCalledWith({ ...baseQuery, awaitingSupport: true });
+  });
+
+  it('shows the awaiting-support badge on a waiting ticket', () => {
+    const fixture = setup();
+    ticketsService.list.mockReturnValue(of({ items: [ticket], total: 1, page: 1, pageSize: 25 }));
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Awaiting support');
+  });
+
+  it('pre-sets filters from the bell query params, resolving assignee=me to the signed-in user', () => {
+    const fixture = setup(['platform.support.read'], { awaiting: '1', assignee: 'me', status: 'open' });
+    TestBed.inject(SessionService).setSession({
+      userId: 'staff-7',
+      email: 'staff@example.com',
+      platformRole: 'Support',
+      expiresAt: '',
+      mfaRequired: false,
+      permissions: ['platform.support.read'],
+      scopes: {},
+      entitlements: [],
+    });
+    fixture.detectChanges();
+
+    expect(ticketsService.list).toHaveBeenCalledWith({
+      ...baseQuery,
+      status: 'open',
+      assignee: 'staff-7',
+      awaitingSupport: true,
+    });
+  });
+
+  it('ignores an unknown status in the query params', () => {
+    const fixture = setup(['platform.support.read'], { status: 'bogus', assignee: 'unassigned' });
+    fixture.detectChanges();
+
+    expect(ticketsService.list).toHaveBeenCalledWith({ ...baseQuery, assignee: 'unassigned' });
   });
 });

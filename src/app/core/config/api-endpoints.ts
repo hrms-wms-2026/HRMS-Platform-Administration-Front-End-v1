@@ -191,6 +191,7 @@ export const API_ENDPOINTS = {
     announcements: {
       list: '/support/announcements',
       create: '/support/announcements',
+      byId: (announcementId: string) => `/support/announcements/${announcementId}`,
       publish: (announcementId: string) => `/support/announcements/${announcementId}/publish`,
       unpublish: (announcementId: string) => `/support/announcements/${announcementId}/unpublish`,
       active: '/announcements/active',
@@ -198,6 +199,7 @@ export const API_ENDPOINTS = {
     tickets: {
       list: '/support/tickets',
       byId: (ticketId: string) => `/support/tickets/${ticketId}`,
+      update: (ticketId: string) => `/support/tickets/${ticketId}`,
       create: '/support/tickets',
       updateStatus: (ticketId: string) => `/support/tickets/${ticketId}/status`,
       assign: (ticketId: string) => `/support/tickets/${ticketId}/assignee`,
@@ -207,6 +209,7 @@ export const API_ENDPOINTS = {
         `/support/tickets/${ticketId}/attachments/${attachmentId}/download-url`,
     },
     assignees: '/support/assignees',
+    summary: '/support/summary',
   },
   logs: {
     create: '/logs',

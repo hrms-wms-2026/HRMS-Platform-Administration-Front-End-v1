@@ -11,7 +11,9 @@ import {
   SupportTicketComment,
   SupportTicketDetail,
   SupportTicketListResponse,
+  SupportSummary,
   SupportTicketSummary,
+  UpdateSupportTicketRequest,
 } from './support-ticket.model';
 
 interface SupportTicketApi {
@@ -28,6 +30,7 @@ interface SupportTicketApi {
   created_by_name: string;
   assigned_to_platform_user_id: string | null;
   assigned_to_name: string | null;
+  awaiting_support: boolean;
   created_at: string;
   updated_at: string | null;
   resolved_at: string | null;
@@ -81,6 +84,12 @@ interface AttachmentDownloadApi {
   expires_at: string;
 }
 
+interface SupportSummaryApi {
+  awaiting_support: number;
+  awaiting_support_assigned_to_me: number;
+  open_unassigned: number;
+}
+
 export interface ListSupportTicketsParams {
   status?: string;
   priority?: string;
@@ -88,6 +97,8 @@ export interface ListSupportTicketsParams {
   /** A platform user id, or SUPPORT_ASSIGNEE_UNASSIGNED. */
   assignee?: string;
   search?: string;
+  /** Only tickets waiting on the support team. */
+  awaitingSupport?: boolean;
   page?: number;
   pageSize?: number;
 }
@@ -113,6 +124,9 @@ export class SupportTicketsService {
     }
     if (params.search?.trim()) {
       httpParams = httpParams.set('search', params.search.trim());
+    }
+    if (params.awaitingSupport) {
+      httpParams = httpParams.set('awaiting_support', 'true');
     }
     if (params.page) {
       httpParams = httpParams.set('page', params.page.toString());
@@ -151,6 +165,33 @@ export class SupportTicketsService {
         { withCredentials: true },
       )
       .pipe(map((ticket) => this.mapTicket(ticket)));
+  }
+
+  update(id: string, request: UpdateSupportTicketRequest): Observable<SupportTicketSummary> {
+    return this.http
+      .put<SupportTicketApi>(
+        `${this.baseUrl}${API_ENDPOINTS.support.tickets.update(id)}`,
+        {
+          subject: request.subject,
+          description: request.description,
+          priority: request.priority,
+          category: request.category,
+        },
+        { withCredentials: true },
+      )
+      .pipe(map((ticket) => this.mapTicket(ticket)));
+  }
+
+  getSummary(): Observable<SupportSummary> {
+    return this.http
+      .get<SupportSummaryApi>(`${this.baseUrl}${API_ENDPOINTS.support.summary}`, { withCredentials: true })
+      .pipe(
+        map((summary) => ({
+          awaitingSupport: summary.awaiting_support,
+          awaitingSupportAssignedToMe: summary.awaiting_support_assigned_to_me,
+          openUnassigned: summary.open_unassigned,
+        })),
+      );
   }
 
   updateStatus(id: string, status: string): Observable<SupportTicketSummary> {
@@ -237,6 +278,7 @@ export class SupportTicketsService {
       createdByName: item.created_by_name,
       assignedToPlatformUserId: item.assigned_to_platform_user_id,
       assignedToName: item.assigned_to_name,
+      awaitingSupport: item.awaiting_support ?? false,
       createdAt: item.created_at,
       updatedAt: item.updated_at,
       resolvedAt: item.resolved_at,

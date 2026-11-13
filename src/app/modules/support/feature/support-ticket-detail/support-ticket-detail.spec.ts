@@ -10,6 +10,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 describe('SupportTicketDetail', () => {
   let ticketsService: {
     getById: jest.Mock;
+    update: jest.Mock;
     updateStatus: jest.Mock;
     assign: jest.Mock;
     addComment: jest.Mock;
@@ -33,6 +34,7 @@ describe('SupportTicketDetail', () => {
     createdByName: 'Anu Owner',
     assignedToPlatformUserId: null,
     assignedToName: null,
+    awaitingSupport: true,
     createdAt: '2026-08-14T10:00:00Z',
     updatedAt: null,
     resolvedAt: null,
@@ -65,6 +67,7 @@ describe('SupportTicketDetail', () => {
   function setup(permissions: string[] = ['platform.support.read', 'platform.support.manage']) {
     ticketsService = {
       getById: jest.fn().mockReturnValue(of({ ticket, comments: [tenantComment], attachments: [attachment] })),
+      update: jest.fn(),
       updateStatus: jest.fn(),
       assign: jest.fn(),
       addComment: jest.fn(),
@@ -236,5 +239,66 @@ describe('SupportTicketDetail', () => {
     expect(ticketsService.getAttachmentDownloadUrl).toHaveBeenCalledWith('ticket-1', 'file-1');
     expect(open).toHaveBeenCalledWith('https://files.example/signed', '_blank', 'noopener');
     open.mockRestore();
+  });
+
+  it('shows the awaiting-support badge while the ticket waits on support', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Awaiting support');
+  });
+
+  it('edits the ticket inline and merges the saved ticket into the view', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    ticketsService.update.mockReturnValue(
+      of({ ...ticket, subject: 'Dashboard returns 500', priority: 'urgent', category: null }),
+    );
+
+    component['startEdit']();
+    expect(component['editing']()).toBe(true);
+    expect(component['editForm'].getRawValue()).toEqual({
+      subject: 'Cannot access dashboard',
+      description: 'Getting a 500 error.',
+      priority: 'high',
+      category: 'bug',
+    });
+
+    component['editForm'].patchValue({ subject: '  Dashboard returns 500 ', priority: 'urgent', category: ' ' });
+    component['saveEdit']();
+
+    expect(ticketsService.update).toHaveBeenCalledWith('ticket-1', {
+      subject: 'Dashboard returns 500',
+      description: 'Getting a 500 error.',
+      priority: 'urgent',
+      category: null,
+    });
+    expect(component['editing']()).toBe(false);
+    expect(component['detail']()!.ticket.subject).toBe('Dashboard returns 500');
+    expect(notificationService.success).toHaveBeenCalledWith('Ticket updated.');
+  });
+
+  it('keeps the edit form open and shows the backend error when saving fails', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    ticketsService.update.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 400, error: { detail: 'subject is required.' } })),
+    );
+
+    component['startEdit']();
+    component['saveEdit']();
+
+    expect(component['editing']()).toBe(true);
+    expect(notificationService.error).toHaveBeenCalledWith('subject is required.');
+  });
+
+  it('does not offer Edit without manage permission', () => {
+    const fixture = setup(['platform.support.read']);
+    fixture.detectChanges();
+
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    expect(buttons.some((button) => button.textContent?.trim() === 'Edit')).toBe(false);
   });
 });

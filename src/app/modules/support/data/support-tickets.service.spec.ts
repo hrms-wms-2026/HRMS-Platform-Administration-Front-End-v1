@@ -22,6 +22,7 @@ describe('SupportTicketsService', () => {
     created_by_name: 'Anu Owner',
     assigned_to_platform_user_id: 'staff-1',
     assigned_to_name: 'Priya Support',
+    awaiting_support: true,
     created_at: '2026-08-14T10:00:00Z',
     updated_at: null,
     resolved_at: null,
@@ -41,6 +42,7 @@ describe('SupportTicketsService', () => {
     createdByName: 'Anu Owner',
     assignedToPlatformUserId: 'staff-1',
     assignedToName: 'Priya Support',
+    awaitingSupport: true,
     createdAt: '2026-08-14T10:00:00Z',
     updatedAt: null,
     resolvedAt: null,
@@ -78,6 +80,7 @@ describe('SupportTicketsService', () => {
         tenantId: 'tenant-1',
         assignee: 'unassigned',
         search: '  dashboard ',
+        awaitingSupport: true,
         page: 2,
         pageSize: 10,
       })
@@ -90,6 +93,7 @@ describe('SupportTicketsService', () => {
     expect(req.request.params.get('tenant_id')).toBe('tenant-1');
     expect(req.request.params.get('assignee')).toBe('unassigned');
     expect(req.request.params.get('search')).toBe('dashboard');
+    expect(req.request.params.get('awaiting_support')).toBe('true');
     expect(req.request.params.get('page')).toBe('2');
     expect(req.request.params.get('page_size')).toBe('10');
     expect(req.request.withCredentials).toBe(true);
@@ -185,6 +189,37 @@ describe('SupportTicketsService', () => {
     });
     expect(req.request.withCredentials).toBe(true);
     req.flush(ticketApi);
+  });
+
+  it('edits a ticket with PUT and a snake_case body', () => {
+    let result: { subject: string } | undefined;
+    service
+      .update('ticket-1', { subject: 'New subject', description: 'More detail', priority: 'urgent', category: null })
+      .subscribe((ticket) => (result = ticket));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/support/tickets/ticket-1`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({
+      subject: 'New subject',
+      description: 'More detail',
+      priority: 'urgent',
+      category: null,
+    });
+    expect(req.request.withCredentials).toBe(true);
+    req.flush({ ...ticketApi, subject: 'New subject' });
+    expect(result?.subject).toBe('New subject');
+  });
+
+  it('gets the support summary for the bell', () => {
+    let result: unknown;
+    service.getSummary().subscribe((summary) => (result = summary));
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/support/summary`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush({ awaiting_support: 4, awaiting_support_assigned_to_me: 1, open_unassigned: 2 });
+
+    expect(result).toEqual({ awaitingSupport: 4, awaitingSupportAssignedToMe: 1, openUnassigned: 2 });
   });
 
   it('updates ticket status', () => {

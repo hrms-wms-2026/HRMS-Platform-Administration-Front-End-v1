@@ -19,6 +19,8 @@ export interface SupportTicketSummary {
   createdByName: string;
   assignedToPlatformUserId: string | null;
   assignedToName: string | null;
+  /** True while the ticket waits on the support team (a tenant raised it or replied last). */
+  awaitingSupport: boolean;
   createdAt: string;
   updatedAt: string | null;
   resolvedAt: string | null;
@@ -67,6 +69,21 @@ export interface CreateSupportTicketRequest {
   description: string;
   priority: SupportTicketPriority;
   category: string | null;
+}
+
+/** Edits the ticket's own fields. Status and assignee have their own actions. */
+export interface UpdateSupportTicketRequest {
+  subject: string;
+  description: string;
+  priority: SupportTicketPriority;
+  category: string | null;
+}
+
+/** Counts behind the support bell in the top bar. */
+export interface SupportSummary {
+  awaitingSupport: number;
+  awaitingSupportAssignedToMe: number;
+  openUnassigned: number;
 }
 
 export interface SupportAssignee {

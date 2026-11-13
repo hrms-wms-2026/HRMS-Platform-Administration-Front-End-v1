@@ -5,12 +5,25 @@ import { Navbar } from './navbar';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SessionService } from '../../../core/auth/session.service';
 import { MobileNavService } from '../mobile-nav.service';
+import { PermissionStore } from '../../../core/permissions/permission.store';
+import { SupportTicketsService } from '../../../modules/support/data/support-tickets.service';
+import { of } from 'rxjs';
 
 describe('Navbar', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Navbar],
-      providers: [{ provide: AuthService, useValue: { logout: jest.fn() } }, provideRouter([]), SessionService],
+      providers: [
+        { provide: AuthService, useValue: { logout: jest.fn() } },
+        provideRouter([]),
+        SessionService,
+        {
+          provide: SupportTicketsService,
+          useValue: {
+            getSummary: jest.fn().mockReturnValue(of({ awaitingSupport: 2, awaitingSupportAssignedToMe: 0, openUnassigned: 1 })),
+          },
+        },
+      ],
     }).compileComponents();
   });
 
@@ -77,5 +90,24 @@ describe('Navbar', () => {
     button.nativeElement.click();
 
     expect(mobileNav.open()).toBe(true);
+  });
+
+  it('replaces the placeholder with the live support bell for support staff', () => {
+    TestBed.inject(PermissionStore).setAuthorizationContext({
+      userId: 'u1',
+      email: 'staff@example.com',
+      platformRole: 'Support',
+      expiresAt: '',
+      mfaRequired: false,
+      permissions: ['platform.support.read'],
+      scopes: {},
+      entitlements: [],
+    });
+    const fixture = TestBed.createComponent(Navbar);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('app-support-bell')).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('button[aria-label="Notifications"]'))).toBeNull();
+    fixture.destroy();
   });
 });

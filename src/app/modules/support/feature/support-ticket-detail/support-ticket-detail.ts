@@ -7,11 +7,13 @@ import { SupportTicketsService } from '../../data/support-tickets.service';
 import {
   SUPPORT_ATTACHMENT_ACCEPT,
   SUPPORT_ATTACHMENT_MAX_BYTES,
+  SUPPORT_TICKET_PRIORITY_OPTIONS,
   SUPPORT_TICKET_STATUS_OPTIONS,
   SupportAssignee,
   SupportTicketAttachment,
   SupportTicketComment,
   SupportTicketDetail as SupportTicketDetailModel,
+  SupportTicketPriority,
   SupportTicketSummary,
   formatFileSize,
   supportTicketPriorityTone,
@@ -50,8 +52,11 @@ export class SupportTicketDetail implements OnInit {
   protected readonly uploading = signal(false);
   protected readonly downloadingId = signal<string | null>(null);
   protected readonly uploadInternal = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly savingEdit = signal(false);
 
   protected readonly statusOptions = SUPPORT_TICKET_STATUS_OPTIONS;
+  protected readonly priorityOptions = SUPPORT_TICKET_PRIORITY_OPTIONS;
   protected readonly statusTone = supportTicketStatusTone;
   protected readonly priorityTone = supportTicketPriorityTone;
   protected readonly fileSize = formatFileSize;
@@ -60,6 +65,13 @@ export class SupportTicketDetail implements OnInit {
   protected readonly commentForm = this.formBuilder.nonNullable.group({
     body: ['', [Validators.required, Validators.maxLength(10000)]],
     isInternal: [false],
+  });
+
+  protected readonly editForm = this.formBuilder.nonNullable.group({
+    subject: ['', [Validators.required, Validators.maxLength(200)]],
+    description: ['', [Validators.required, Validators.maxLength(10000)]],
+    priority: ['medium' as SupportTicketPriority, [Validators.required]],
+    category: ['', [Validators.maxLength(80)]],
   });
 
   ngOnInit(): void {
@@ -86,6 +98,54 @@ export class SupportTicketDetail implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  protected startEdit(): void {
+    const ticket = this.detail()?.ticket;
+    if (!ticket) {
+      return;
+    }
+    this.editForm.setValue({
+      subject: ticket.subject,
+      description: ticket.description,
+      priority: ticket.priority,
+      category: ticket.category ?? '',
+    });
+    this.editing.set(true);
+  }
+
+  protected cancelEdit(): void {
+    this.editing.set(false);
+  }
+
+  protected saveEdit(): void {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.editForm.getRawValue();
+    this.savingEdit.set(true);
+
+    this.ticketsService
+      .update(this.ticketId, {
+        subject: value.subject.trim(),
+        description: value.description.trim(),
+        priority: value.priority,
+        category: value.category.trim() || null,
+      })
+      .subscribe({
+        next: (ticket) => {
+          this.savingEdit.set(false);
+          this.editing.set(false);
+          this.notificationService.success('Ticket updated.');
+          this.replaceTicket(ticket);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.savingEdit.set(false);
+          this.notificationService.error(error.error?.detail ?? 'Could not update the ticket.');
+        },
+      });
   }
 
   protected changeStatus(status: string): void {

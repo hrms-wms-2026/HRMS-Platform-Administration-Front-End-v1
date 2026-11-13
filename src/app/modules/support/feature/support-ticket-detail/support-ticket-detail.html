@@ -5,6 +5,61 @@
 } @else if (detail(); as d) {
   <div class="flex flex-col gap-4">
     <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+      @if (editing()) {
+        <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="flex flex-col gap-4">
+          <div>
+            <label for="editSubject" class="text-sm font-medium text-slate-700 dark:text-slate-300">Subject</label>
+            <input
+              id="editSubject"
+              type="text"
+              formControlName="subject"
+              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+            @if (editForm.controls.subject.invalid && editForm.controls.subject.touched) {
+              <p class="mt-1 text-xs text-red-700">Subject is required (200 characters at most).</p>
+            }
+          </div>
+          <div>
+            <label for="editDescription" class="text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
+            <textarea
+              id="editDescription"
+              rows="5"
+              formControlName="description"
+              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            ></textarea>
+            @if (editForm.controls.description.invalid && editForm.controls.description.touched) {
+              <p class="mt-1 text-xs text-red-700">Description is required.</p>
+            }
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="editPriority" class="text-sm font-medium text-slate-700 dark:text-slate-300">Priority</label>
+              <select
+                id="editPriority"
+                formControlName="priority"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              >
+                @for (option of priorityOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label for="editCategory" class="text-sm font-medium text-slate-700 dark:text-slate-300">Category</label>
+              <input
+                id="editCategory"
+                type="text"
+                formControlName="category"
+                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+          <div class="flex justify-end gap-2">
+            <app-button label="Cancel" variant="secondary" (clicked)="cancelEdit()" />
+            <app-button type="submit" label="Save Changes" variant="indigo" [loading]="savingEdit()" />
+          </div>
+        </form>
+      } @else {
       <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0">
           <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">{{ d.ticket.subject }}</h1>
@@ -16,12 +71,19 @@
           </p>
         </div>
         <div class="flex items-center gap-2">
+          @if (d.ticket.awaitingSupport) {
+            <app-status-badge label="Awaiting support" tone="danger" />
+          }
           <app-status-badge [label]="d.ticket.priority" [tone]="priorityTone(d.ticket.priority)" />
           <app-status-badge [label]="d.ticket.status" [tone]="statusTone(d.ticket.status)" />
+          @if (canManage()) {
+            <app-button label="Edit" variant="secondary" (clicked)="startEdit()" />
+          }
         </div>
       </div>
 
       <p class="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{{ d.ticket.description }}</p>
+      }
 
       <div class="grid grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-4 text-sm lg:grid-cols-5">
         <div>
