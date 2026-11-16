@@ -1,4 +1,4 @@
-// Copied from Hrms--Web-application---front-end---v1 src/app/shared/ui/rich-text-editor/rich-text-editor.basic.spec.ts at 726d4c81. Change it there first, then copy.
+// Copied from Hrms--Web-application---front-end---v1 src/app/shared/ui/rich-text-editor/rich-text-editor.basic.spec.ts at da0dc1f7. Change it there first, then copy.
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { RichTextEditorComponent } from './rich-text-editor.component';
@@ -33,6 +33,8 @@ describe('RichTextEditorComponent basic toolset', () => {
     expect(shown.some((t) => t.startsWith('Highlight'))).toBe(false);
     expect(shown.some((t) => t.startsWith('Checklist'))).toBe(false);
     expect(shown.some((t) => t.startsWith('Insert image'))).toBe(false);
+    // Review finding I1: toolbar headings make <span class="tfm-inline-h1">, which the allowlist drops.
+    expect(shown.some((t) => t.startsWith('Apply Heading'))).toBe(false);
     expect(shown.some((t) => t.startsWith('Bold'))).toBe(true);
     expect(shown.some((t) => t.startsWith('Link'))).toBe(true);
   });
@@ -58,6 +60,18 @@ describe('RichTextEditorComponent basic toolset', () => {
     fixture.componentInstance.onEditorInput();
 
     expect(emitted.at(-1)).toBe('<p>Hi <a>there</a></p>');
+  });
+
+  it('emits typed lines as paragraphs', async () => {
+    const fixture = await setup('basic');
+    const emitted: string[] = [];
+    fixture.componentInstance.htmlChange.subscribe((html) => emitted.push(html));
+    const editor = fixture.componentInstance.contentEditor()!.nativeElement;
+
+    editor.innerHTML = 'a<div>b</div>';
+    fixture.componentInstance.onEditorInput();
+
+    expect(emitted.at(-1)).toBe('<p>a</p><p>b</p>');
   });
 
   it('keeps the full toolset unchanged by default', async () => {

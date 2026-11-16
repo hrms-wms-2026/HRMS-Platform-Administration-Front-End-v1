@@ -1,4 +1,4 @@
-// Copied from Hrms--Web-application---front-end---v1 src/app/shared/ui/rich-text-editor/rich-text-editor.component.ts at 726d4c81. Change it there first, then copy.
+// Copied from Hrms--Web-application---front-end---v1 src/app/shared/ui/rich-text-editor/rich-text-editor.component.ts at da0dc1f7. Change it there first, then copy.
 import { Component, DestroyRef, ElementRef, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { ColorSwatchPopoverComponent } from '../color-swatch-popover/color-swatch-popover.component';
@@ -89,6 +89,7 @@ export interface SlashMenuCoords {
               <div class="tfm-editor">
                 <div class="tfm-editor__toolbar" appStopClickPropagation>
                   <div class="tfm-editor__tools-left">
+                    @if (!isBasic()) {
                     <button
                       type="button"
                       class="tfm-editor__tool tfm-editor__tool--text"
@@ -110,6 +111,7 @@ export interface SlashMenuCoords {
                       <span class="tfm-tool-h-label">H2</span>
                     </button>
                     <span class="tfm-editor__divider"></span>
+                    }
                     <button
                       type="button"
                       class="tfm-editor__tool"
