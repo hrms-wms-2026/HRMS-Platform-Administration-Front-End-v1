@@ -93,6 +93,8 @@ export class Login {
         return 'Access restricted. Contact platform support.';
       case 423:
         return 'Account locked. Try again in 15 minutes.';
+      case 429:
+        return 'Too many sign-in attempts. Try again in a few minutes.';
       case 0:
         return 'Connection failed. Please retry.';
       default:

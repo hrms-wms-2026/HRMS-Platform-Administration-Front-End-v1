@@ -75,7 +75,7 @@ describe('Login', () => {
 
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'test-password-123',
       rememberEmail: true,
     });
     component.submit();
@@ -91,7 +91,7 @@ describe('Login', () => {
 
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'test-password-123',
       rememberEmail: false,
     });
     component.submit();
@@ -105,7 +105,7 @@ describe('Login', () => {
     const component = fixture.componentInstance;
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'test-password-123',
       rememberEmail: false,
     });
 
@@ -121,7 +121,7 @@ describe('Login', () => {
     const component = fixture.componentInstance;
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'test-password-123',
       rememberEmail: false,
     });
 
@@ -148,6 +148,23 @@ describe('Login', () => {
 
     expect(component['errorMessage']()).toBe('Invalid email or password.');
     expect(localStorage.getItem(REMEMBERED_EMAIL_KEY)).toBe('old@onevo.io');
+  });
+
+  it('says too many attempts, not a wrong password, when sign-in is rate limited', () => {
+    authService.login.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 429 })),
+    );
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+    component['loginForm'].setValue({
+      email: 'dev@onevo.io',
+      password: 'test-password-123',
+      rememberEmail: false,
+    });
+
+    component.submit();
+
+    expect(component['errorMessage']()).toBe('Too many sign-in attempts. Try again in a few minutes.');
   });
 
   it('navigates to forgot-password when Forgot password is clicked', () => {
