@@ -1,0 +1,82 @@
+<div class="relative">
+  <button
+    type="button"
+    class="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+    [attr.aria-label]="
+      count() > 0 ? count() + ' support tickets awaiting support' : 'Support tickets'
+    "
+    [attr.aria-expanded]="open()"
+    aria-haspopup="menu"
+    (click)="toggle()"
+  >
+    <svg
+      class="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+      ></path>
+    </svg>
+    @if (count() > 0) {
+      <span
+        data-testid="support-bell-count"
+        class="absolute -right-0.5 -top-0.5 min-w-[1.125rem] rounded-full bg-red-600 px-1 text-center text-[10px] font-semibold leading-[1.125rem] text-white"
+      >
+        {{ countLabel() }}
+      </span>
+    }
+  </button>
+
+  @if (open()) {
+    <div
+      role="menu"
+      class="absolute right-0 z-30 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+    >
+      <p class="px-2 pb-2 pt-1 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+        Support
+      </p>
+      @if (summary(); as s) {
+        <a
+          role="menuitem"
+          [routerLink]="['/support/tickets']"
+          [queryParams]="{ awaiting: 1 }"
+          (click)="close()"
+          class="flex items-center justify-between rounded-lg px-2 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          <span>Awaiting support</span>
+          <span class="font-semibold">{{ s.awaitingSupport }}</span>
+        </a>
+        <a
+          role="menuitem"
+          [routerLink]="['/support/tickets']"
+          [queryParams]="{ awaiting: 1, assignee: 'me' }"
+          (click)="close()"
+          class="flex items-center justify-between rounded-lg px-2 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          <span>Awaiting, assigned to me</span>
+          <span class="font-semibold">{{ s.awaitingSupportAssignedToMe }}</span>
+        </a>
+        <a
+          role="menuitem"
+          [routerLink]="['/support/tickets']"
+          [queryParams]="{ status: 'open', assignee: unassigned }"
+          (click)="close()"
+          class="flex items-center justify-between rounded-lg px-2 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+        >
+          <span>Open and unassigned</span>
+          <span class="font-semibold">{{ s.openUnassigned }}</span>
+        </a>
+      } @else {
+        <p class="px-2 py-2 text-sm text-slate-500 dark:text-slate-400">
+          Support counts are not available right now.
+        </p>
+      }
+    </div>
+  }
+</div>

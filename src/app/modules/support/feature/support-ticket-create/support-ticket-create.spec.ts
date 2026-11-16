@@ -86,7 +86,7 @@ describe('SupportTicketCreate', () => {
 
     const component = fixture.componentInstance;
     component['form'].setValue({
-      tenantId: '',
+      tenantId: 'tenant-1',
       subject: 'Cannot access dashboard',
       description: 'Getting a 500 error.',
       priority: 'medium',
@@ -96,5 +96,25 @@ describe('SupportTicketCreate', () => {
 
     expect(notificationService.error).toHaveBeenCalledWith('Subject is required.');
     expect(component['saving']()).toBe(false);
+  });
+
+  it('requires a tenant: there is no platform-wide ticket', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      tenantId: '',
+      subject: 'Cannot access dashboard',
+      description: 'Getting a 500 error.',
+      priority: 'medium',
+      category: '',
+    });
+    component['submit']();
+
+    expect(ticketsService.create).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).not.toContain('Platform-wide');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Tenant is required.');
   });
 });

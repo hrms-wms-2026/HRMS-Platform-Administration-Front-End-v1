@@ -1,0 +1,24 @@
+@if (visible().length > 0) {
+  <div class="mb-4 flex flex-col gap-2" aria-label="Platform announcements">
+    @for (announcement of visible(); track announcement.id) {
+      <div
+        class="flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm"
+        [class]="toneClasses(announcement.severity)"
+        [attr.role]="announcement.severity === 'critical' ? 'alert' : 'status'"
+      >
+        <div class="min-w-0">
+          <p class="font-semibold">{{ announcement.title }}</p>
+          <p class="mt-0.5 whitespace-pre-wrap">{{ announcement.body }}</p>
+        </div>
+        <button
+          type="button"
+          class="shrink-0 rounded-md px-2 py-1 text-xs font-medium opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-600/30"
+          [attr.aria-label]="'Dismiss announcement: ' + announcement.title"
+          (click)="dismiss(announcement.id)"
+        >
+          Dismiss
+        </button>
+      </div>
+    }
+  </div>
+}
