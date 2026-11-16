@@ -8,4 +8,6 @@ export const environment = {
   wsUrl: buildAdminWsUrl(protocol, hostname),
   enableDebugLogs: false,
   appName: 'Platform Administration',
+  /** The admin SPA is only served on the admin host here; no redirect. */
+  adminHostRedirectUrl: null as string | null,
 };

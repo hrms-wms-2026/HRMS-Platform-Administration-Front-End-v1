@@ -144,6 +144,11 @@ a real permission is confirmed.
   dedicated port (see `PORTS.md`). This app's CORS/cookie config on the backend
   (`AllowedOrigins`, `Urls:AdminConsoleBaseUrl`) only allows `onexso.com`/`admin.onexso.com`
   origins, matching the tenant frontend's onexso.com dev-domain setup.
+- **The admin SPA only runs on an admin host** (`admin.*` or `console.*`). The dev server answers on
+  every `*.<root>` name over HTTPS (Vite skips `allowedHosts` there), so in dev `main.ts` redirects
+  e.g. `dapi.crownus.test:4300` to `admin.crownus.test:4300` before bootstrap, via
+  `buildAdminHostRedirectUrl` in `environments/environment-url.helper.ts`. On a tenant host every admin
+  call would get 403 "Tenant host cannot access admin routes". Prod and staging set no redirect.
 - **This app talks to the Admin API (`/admin/v1/...`), not the Tenant API (`/api/v1/...`).** They
   are separate controllers on the same backend. Hitting `/api/v1/*` from this app returns
   `400 Tenant context is not resolved` — that error means the request went to the wrong API

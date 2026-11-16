@@ -1,4 +1,6 @@
 import {
+  AdminHostLocation,
+  buildAdminHostRedirectUrl,
   buildAdminApiUrl,
   buildAdminWsUrl,
   buildLocalApiUrl,
@@ -46,5 +48,42 @@ describe('buildLocalWsUrl (local dev - HTTPS-only, fixed backend port 7229)', ()
 
   it('always produces a wss url, never plain ws', () => {
     expect(buildLocalWsUrl('admin.localhost')).toMatch(/^wss:\/\//);
+  });
+});
+
+describe('buildAdminHostRedirectUrl (local dev - keep the SPA on an admin host)', () => {
+  const at = (hostname: string, port = '4300', pathname = '/auth/login', search = '', hash = ''): AdminHostLocation => ({
+    protocol: 'https:', hostname, port, pathname, search, hash,
+  });
+
+  it('sends a tenant subdomain to the admin subdomain of the same root, keeping port, path, query and hash', () => {
+    expect(buildAdminHostRedirectUrl(at('dapi.crownus.test', '4300', '/tenants', '?page=2', '#top'))).toBe(
+      'https://admin.crownus.test:4300/tenants?page=2#top',
+    );
+  });
+
+  it('sends the bare root domain to its admin subdomain', () => {
+    expect(buildAdminHostRedirectUrl(at('crownus.test'))).toBe('https://admin.crownus.test:4300/auth/login');
+  });
+
+  it('sends a tenant subdomain of localhost to admin.localhost', () => {
+    expect(buildAdminHostRedirectUrl(at('acme.localhost'))).toBe('https://admin.localhost:4300/auth/login');
+  });
+
+  it('leaves admin and console hosts alone, in any letter case', () => {
+    expect(buildAdminHostRedirectUrl(at('admin.crownus.test'))).toBeNull();
+    expect(buildAdminHostRedirectUrl(at('Admin.Crownus.test'))).toBeNull();
+    expect(buildAdminHostRedirectUrl(at('console.crownus.test'))).toBeNull();
+    expect(buildAdminHostRedirectUrl(at('admin.localhost'))).toBeNull();
+  });
+
+  it('leaves loopback names and IP addresses alone (e2e serves on plain localhost)', () => {
+    expect(buildAdminHostRedirectUrl(at('localhost'))).toBeNull();
+    expect(buildAdminHostRedirectUrl(at('127.0.0.1'))).toBeNull();
+    expect(buildAdminHostRedirectUrl(at('192.168.1.20'))).toBeNull();
+  });
+
+  it('omits the port when the page has none', () => {
+    expect(buildAdminHostRedirectUrl(at('dapi.crownus.test', ''))).toBe('https://admin.crownus.test/auth/login');
   });
 });
