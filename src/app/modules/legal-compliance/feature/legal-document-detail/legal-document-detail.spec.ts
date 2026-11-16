@@ -88,6 +88,17 @@ describe('LegalDocumentDetail preview', () => {
     expect(srcdoc).not.toContain('<script');
   });
 
+  it('wraps the sanitized document in the preview stylesheet, keeping the sandbox closed', () => {
+    const frame = previewFrame()!;
+    const srcdoc = frame.getAttribute('srcdoc')!;
+
+    expect(srcdoc).toContain('<style>');
+    expect(srcdoc).toContain('Roboto');
+    expect(srcdoc).toContain('<h1>Terms</h1>');
+    expect(srcdoc).not.toContain('onerror');
+    expect(frame.getAttribute('sandbox')).toBe('');
+  });
+
   it('shows the saved content after an edit', () => {
     const payload = {} as UpdateLegalDocumentPayload;
     service.update.mockReturnValue(of(documentWith('<h1>Edited terms</h1>')));

@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, SecurityContext, computed, inject, signal } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -17,6 +18,8 @@ import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { Button } from '../../../../shared/ui/button/button';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
 import { LegalDocumentForm } from '../legal-document-form/legal-document-form';
+import { ThemeService } from '../../../../core/theme/theme.service';
+import { buildLegalPreviewDocument } from './legal-preview-document';
 
 @Component({
   selector: 'app-legal-document-detail',
@@ -36,6 +39,8 @@ export class LegalDocumentDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly legalDocumentsService = inject(LegalDocumentsService);
   private readonly notificationService = inject(NotificationService);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly themeService = inject(ThemeService);
   protected readonly permissionStore = inject(PermissionStore);
 
   private readonly documentId = this.route.snapshot.paramMap.get('id')!;
@@ -55,8 +60,15 @@ export class LegalDocumentDetail implements OnInit {
   protected readonly pendingPublish = signal(false);
   protected readonly pendingArchive = signal(false);
 
-  /** Rendered in a sandboxed iframe; Angular sanitizes the string on the way into srcdoc, so it is never trusted. */
-  protected readonly previewHtml = computed(() => this.document()?.contentHtml ?? '');
+  /**
+   * Rendered in an iframe with an empty sandbox (no scripts, no same-origin). The document HTML is
+   * sanitized on its own first; only then is it wrapped in the fixed preview stylesheet, and that
+   * wrapper is what gets trusted. Follows the console theme, which the iframe cannot see.
+   */
+  protected readonly previewHtml = computed<SafeHtml>(() => {
+    const body = this.sanitizer.sanitize(SecurityContext.HTML, this.document()?.contentHtml ?? '') ?? '';
+    return this.sanitizer.bypassSecurityTrustHtml(buildLegalPreviewDocument(body, this.themeService.theme()));
+  });
   protected readonly isDraft = computed(() => this.document()?.status === 'draft');
   protected readonly isPublished = computed(() => this.document()?.status === 'published');
   protected readonly readOnly = computed(() => !this.canManage() || !this.isDraft() || !this.editing());
