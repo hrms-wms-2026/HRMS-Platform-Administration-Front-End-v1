@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MainLayout } from './main-layout';
 import { AuthService } from '../../core/auth/auth.service';
 import { SessionService } from '../../core/auth/session.service';
@@ -23,7 +25,7 @@ describe('MainLayout', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MainLayout],
-      providers: [{ provide: AuthService, useValue: { logout: jest.fn() } }, provideRouter([]), SessionService],
+      providers: [{ provide: AuthService, useValue: { logout: jest.fn() } }, provideRouter([]), provideHttpClient(), provideHttpClientTesting(), SessionService],
     }).compileComponents();
   });
 
@@ -40,6 +42,7 @@ describe('MainLayout', () => {
     expect(element.querySelector('app-sidebar')).toBeTruthy();
     expect(element.querySelector('button[aria-label="Open navigation menu"]')).toBeTruthy();
     expect(element.querySelector('app-profile-menu')).toBeTruthy();
+    expect(element.querySelector('app-announcement-banner')).toBeTruthy();
   });
 
   it('hides navigation while MFA enrollment is required but keeps sign-out reachable', () => {
@@ -49,6 +52,8 @@ describe('MainLayout', () => {
     expect(element.querySelector('button[aria-label="Open navigation menu"]')).toBeNull();
     expect(element.querySelector('app-breadcrumb')).toBeNull();
     expect(element.querySelector('input[type="text"]')).toBeNull();
+    expect(element.querySelector('app-announcement-banner')).toBeNull();
+    expect(element.querySelector('app-support-bell')).toBeNull();
     expect(element.querySelector('app-profile-menu')).toBeTruthy();
   });
 });

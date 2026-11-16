@@ -27,9 +27,9 @@ export class SupportTicketCreate implements OnInit {
   protected readonly saving = signal(false);
 
   protected readonly form = this.formBuilder.nonNullable.group({
-    tenantId: [''],
+    tenantId: ['', [Validators.required]],
     subject: ['', [Validators.required, Validators.maxLength(200)]],
-    description: ['', [Validators.required]],
+    description: ['', [Validators.required, Validators.maxLength(10000)]],
     priority: ['medium' as SupportTicketPriority, [Validators.required]],
     category: [''],
   });
@@ -58,7 +58,7 @@ export class SupportTicketCreate implements OnInit {
 
     this.ticketsService
       .create({
-        tenantId: value.tenantId || null,
+        tenantId: value.tenantId,
         subject: value.subject,
         description: value.description,
         priority: value.priority,

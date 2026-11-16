@@ -6,9 +6,12 @@ import { AnnouncementsService } from '../../data/announcements.service';
 import {
   ANNOUNCEMENT_SEVERITY_OPTIONS,
   AnnouncementSummary,
+  AnnouncementWindowState,
   announcementPublishedTone,
   announcementSeverityTone,
+  announcementWindowState,
 } from '../../data/announcement.model';
+import { StatusTone } from '../../../../shared/ui/status-badge/status-badge';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
@@ -46,9 +49,26 @@ export class AnnouncementsList implements OnInit {
   protected readonly currentPage = signal(1);
   protected readonly pendingToggle = signal<AnnouncementSummary | null>(null);
   protected readonly togglingId = signal<string | null>(null);
+  protected readonly pendingDelete = signal<AnnouncementSummary | null>(null);
+  protected readonly deletingId = signal<string | null>(null);
 
   protected readonly severityTone = announcementSeverityTone;
   protected readonly publishedTone = announcementPublishedTone;
+
+  /** Label and tone for a published announcement's display window; null when it is always shown. */
+  protected windowBadge(announcement: AnnouncementSummary): { label: string; tone: StatusTone } | null {
+    const state: AnnouncementWindowState = announcementWindowState(announcement);
+    switch (state) {
+      case 'scheduled':
+        return { label: 'Scheduled', tone: 'indigo' };
+      case 'ended':
+        return { label: 'Ended', tone: 'neutral' };
+      case 'live':
+        return { label: 'Live', tone: 'success' };
+      default:
+        return null;
+    }
+  }
 
   ngOnInit(): void {
     if (!this.canView()) {
@@ -106,6 +126,36 @@ export class AnnouncementsList implements OnInit {
 
   protected cancelToggle(): void {
     this.pendingToggle.set(null);
+  }
+
+  protected startDelete(announcement: AnnouncementSummary): void {
+    this.pendingDelete.set(announcement);
+  }
+
+  protected cancelDelete(): void {
+    this.pendingDelete.set(null);
+  }
+
+  protected confirmDelete(): void {
+    const announcement = this.pendingDelete();
+    if (!announcement) {
+      return;
+    }
+    this.pendingDelete.set(null);
+    this.deletingId.set(announcement.id);
+
+    this.announcementsService.remove(announcement.id).subscribe({
+      next: () => {
+        this.deletingId.set(null);
+        this.notificationService.success('Announcement deleted.');
+        this.announcements.update((items) => items.filter((item) => item.id !== announcement.id));
+        this.total.update((total) => Math.max(0, total - 1));
+      },
+      error: (error: HttpErrorResponse) => {
+        this.deletingId.set(null);
+        this.notificationService.error(error.error?.detail ?? 'Could not delete the announcement.');
+      },
+    });
   }
 
   protected confirmToggle(): void {

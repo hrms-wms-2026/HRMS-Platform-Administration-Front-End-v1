@@ -76,7 +76,7 @@ describe('Login', () => {
 
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'Test-Passw0rd!',
       rememberEmail: true,
     });
     component.submit();
@@ -92,7 +92,7 @@ describe('Login', () => {
 
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'Test-Passw0rd!',
       rememberEmail: false,
     });
     component.submit();
@@ -106,7 +106,7 @@ describe('Login', () => {
     const component = fixture.componentInstance;
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'Test-Passw0rd!',
       rememberEmail: false,
     });
 
@@ -122,7 +122,7 @@ describe('Login', () => {
     const component = fixture.componentInstance;
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'Test-Passw0rd!',
       rememberEmail: false,
     });
 
@@ -141,7 +141,7 @@ describe('Login', () => {
     const component = fixture.componentInstance;
     component['loginForm'].setValue({
       email: 'dev@onevo.io',
-      password: 'dapiyshanth@19',
+      password: 'Test-Passw0rd!',
       rememberEmail: false,
     });
 

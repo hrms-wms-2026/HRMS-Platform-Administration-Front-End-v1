@@ -515,6 +515,22 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'support/announcements/:id/edit',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Support',
+            parent: { label: 'Announcements', route: '/support/announcements' },
+            page: 'Edit Announcement',
+          },
+          permission: 'platform.support.manage',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/announcement-create/announcement-create').then(
+            (m) => m.AnnouncementCreate,
+          ),
+      },
+      {
         path: 'support/tickets',
         canActivate: [permissionGuard],
         data: {

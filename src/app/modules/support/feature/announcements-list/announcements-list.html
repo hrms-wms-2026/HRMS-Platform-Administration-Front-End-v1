@@ -54,6 +54,7 @@
             <th class="py-2 pr-4">Severity</th>
             <th class="py-2 pr-4">Audience</th>
             <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Shown</th>
             <th class="py-2 pr-4">Created</th>
             <th class="py-2 pr-4"></th>
           </tr>
@@ -72,15 +73,42 @@
                   [tone]="publishedTone(announcement.isPublished)"
                 />
               </td>
+              <td class="py-3 pr-4 text-xs text-slate-600 dark:text-slate-300">
+                @if (announcement.startsAt || announcement.endsAt) {
+                  <div class="flex flex-col gap-1">
+                    @if (announcement.isPublished && windowBadge(announcement); as badge) {
+                      <app-status-badge [label]="badge.label" [tone]="badge.tone" />
+                    }
+                    <span>
+                      {{ announcement.startsAt ? (announcement.startsAt | date: 'medium') : 'Now' }}
+                      –
+                      {{ announcement.endsAt ? (announcement.endsAt | date: 'medium') : 'No end' }}
+                    </span>
+                  </div>
+                } @else {
+                  While published
+                }
+              </td>
               <td class="py-3 pr-4 text-slate-600 dark:text-slate-300">{{ announcement.createdAt | date: 'mediumDate' }}</td>
               <td class="py-3 pr-4 text-right">
                 @if (canManage()) {
-                  <app-button
-                    [label]="announcement.isPublished ? 'Unpublish' : 'Publish'"
-                    variant="secondary"
-                    [loading]="togglingId() === announcement.id"
-                    (clicked)="startToggle(announcement)"
-                  />
+                  <div class="flex justify-end gap-2">
+                    <a [routerLink]="['/support/announcements', announcement.id, 'edit']">
+                      <app-button label="Edit" variant="secondary" />
+                    </a>
+                    <app-button
+                      [label]="announcement.isPublished ? 'Unpublish' : 'Publish'"
+                      variant="secondary"
+                      [loading]="togglingId() === announcement.id"
+                      (clicked)="startToggle(announcement)"
+                    />
+                    <app-button
+                      label="Delete"
+                      variant="danger"
+                      [loading]="deletingId() === announcement.id"
+                      (clicked)="startDelete(announcement)"
+                    />
+                  </div>
                 }
               </td>
             </tr>
@@ -105,6 +133,18 @@
       confirmVariant="indigo"
       (confirm)="confirmToggle()"
       (cancelled)="cancelToggle()"
+    />
+  }
+
+  @if (pendingDelete(); as announcement) {
+    <app-confirmation-dialog
+      [open]="true"
+      title="Delete announcement?"
+      [message]="announcement.title + ' will be removed for good. This cannot be undone.'"
+      confirmLabel="Delete"
+      confirmVariant="danger"
+      (confirm)="confirmDelete()"
+      (cancelled)="cancelDelete()"
     />
   }
 }
