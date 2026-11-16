@@ -9,10 +9,11 @@ import {
   htmlToPlainText,
 } from '../../data/legal-document.model';
 import { Button } from '../../../../shared/ui/button/button';
+import { RichTextEditorComponent } from '../../../../shared/ui/rich-text-editor/rich-text-editor.component';
 
 @Component({
   selector: 'app-legal-document-form',
-  imports: [ReactiveFormsModule, Button],
+  imports: [ReactiveFormsModule, Button, RichTextEditorComponent],
   templateUrl: './legal-document-form.html',
 })
 export class LegalDocumentForm implements OnInit {
@@ -41,6 +42,8 @@ export class LegalDocumentForm implements OnInit {
   });
 
   protected readonly contentJson = signal<Record<string, unknown>>(defaultContentJson());
+  /** Seeds the rich text editor once; after that the editor's htmlChange keeps contentHtml up to date. */
+  protected readonly initialContentHtml = signal('');
 
   ngOnInit(): void {
     const initial = this.initialValue();
@@ -54,11 +57,19 @@ export class LegalDocumentForm implements OnInit {
         blockScope: initial.blockScope,
       });
       this.contentJson.set(initial.contentJson);
+      this.initialContentHtml.set(initial.contentHtml);
     }
 
     if (this.readOnly()) {
       this.form.disable();
     }
+  }
+
+  protected onContentChange(html: string): void {
+    const control = this.form.controls.contentHtml;
+    control.setValue(html);
+    control.markAsDirty();
+    control.markAsTouched();
   }
 
   protected canSubmit(): boolean {

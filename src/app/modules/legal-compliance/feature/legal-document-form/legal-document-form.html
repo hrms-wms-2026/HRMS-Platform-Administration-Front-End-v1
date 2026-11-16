@@ -56,17 +56,23 @@
   </div>
 
   <div>
-    <label for="contentHtml" class="audit-filter-label">Content (HTML)</label>
-    <p class="mb-2 text-xs text-slate-500">
-      Allowed tags: headings, paragraphs, lists, links, tables, emphasis. Scripts and iframes are rejected.
+    <span class="audit-filter-label">Content</span>
+    <p class="mb-2 text-xs text-slate-500 dark:text-slate-400">
+      Headings, paragraphs, lists, links, quotes and code. Use "/" for commands.
     </p>
-    <textarea
-      id="contentHtml"
-      formControlName="contentHtml"
-      rows="14"
-      class="audit-filter-input !h-auto min-h-[280px] py-2 font-mono text-xs"
-      placeholder="<h1>Document title</h1><p>Your legal text here...</p>"
-    ></textarea>
+    <div class="min-h-[280px] rounded-lg border border-slate-200 dark:border-slate-700">
+      <app-rich-text-editor
+        toolset="basic"
+        ariaLabel="Legal document content"
+        placeholder="Write the legal text, or press '/' for commands..."
+        [allowImages]="false"
+        [allowAttachments]="false"
+        [activateOnClick]="false"
+        [readOnly]="readOnly()"
+        [initialHtml]="initialContentHtml()"
+        (htmlChange)="onContentChange($event)"
+      />
+    </div>
     @if (form.controls.contentHtml.invalid && form.controls.contentHtml.touched) {
       <p class="mt-1 text-xs text-red-700">Content is required.</p>
     }
