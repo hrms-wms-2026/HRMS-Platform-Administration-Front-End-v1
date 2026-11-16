@@ -1,3 +1,5 @@
+import { RichTextEditorComponent } from '../../../../shared/ui/rich-text-editor/rich-text-editor.component';
+import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -116,5 +118,24 @@ describe('SupportTicketCreate', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Platform-wide');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Tenant is required.');
+  });
+
+  // DEC-035: the description uses the shared editor's basic toolset.
+  it('writes the description with the basic rich text editor', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const editor = fixture.debugElement.query(By.directive(RichTextEditorComponent)).componentInstance as RichTextEditorComponent;
+
+    expect(fixture.nativeElement.querySelector('textarea#description')).toBeNull();
+    expect(editor.toolset()).toBe('basic');
+    expect(editor.maxLength()).toBe(10000);
+
+    ticketsService.create.mockReturnValue(of({ id: 'ticket-1' }));
+    const component = fixture.componentInstance;
+    component['form'].patchValue({ tenantId: 'tenant-1', subject: 'Export fails', priority: 'high' });
+    editor.htmlChange.emit('<p>Steps</p><ol><li>Open</li></ol>');
+    component['submit']();
+
+    expect(ticketsService.create).toHaveBeenCalledWith(expect.objectContaining({ description: '<p>Steps</p><ol><li>Open</li></ol>' }));
   });
 });

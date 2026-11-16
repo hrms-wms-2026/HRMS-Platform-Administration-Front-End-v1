@@ -1,6 +1,6 @@
-// Copied from Hrms--Web-application---front-end---v1 src/app/shared/ui/rich-text-view/rich-text-view.component.spec.ts at 726d4c81. Change it there first, then copy.
+// Copied from Hrms--Web-application---front-end---v1 src/app/shared/ui/rich-text-view/rich-text-view.component.spec.ts at d7438dd4. Change it there first, then copy.
 import { TestBed } from '@angular/core/testing';
-import { RichTextViewComponent } from './rich-text-view.component';
+import { RICH_TEXT_VIEW_STYLES, RichTextViewComponent } from './rich-text-view.component';
 
 describe('RichTextViewComponent', () => {
   function render(value: string | null): HTMLElement {
@@ -14,6 +14,13 @@ describe('RichTextViewComponent', () => {
     const host = render('<ul><li>One</li><li>Two</li></ul>');
 
     expect(host.querySelectorAll('li').length).toBe(2);
+  });
+
+  // Review finding M3: neither app has the typography plugin, so the view styles its own content.
+  it('styles lists and headings itself', () => {
+    expect(RICH_TEXT_VIEW_STYLES).toMatch(/ul\s*\{[^}]*list-style-type:\s*disc[^}]*padding-left:\s*1\.25rem/);
+    expect(RICH_TEXT_VIEW_STYLES).toMatch(/ol\s*\{[^}]*list-style-type:\s*decimal/);
+    expect(RICH_TEXT_VIEW_STYLES).toMatch(/h2\s*\{[^}]*font-weight:\s*600/);
   });
 
   it('shows old plain text as text and keeps its line breaks', () => {

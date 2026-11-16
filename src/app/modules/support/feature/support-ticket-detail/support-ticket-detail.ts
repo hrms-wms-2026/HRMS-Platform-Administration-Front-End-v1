@@ -2,6 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RichTextEditorComponent } from '../../../../shared/ui/rich-text-editor/rich-text-editor.component';
+import { RichTextViewComponent } from '../../../../shared/ui/rich-text-view/rich-text-view.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SupportTicketsService } from '../../data/support-tickets.service';
 import {
@@ -28,7 +30,7 @@ import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 
 @Component({
   selector: 'app-support-ticket-detail',
-  imports: [ReactiveFormsModule, Button, StatusBadge, Loader, ErrorBanner, DatePipe],
+  imports: [ReactiveFormsModule, Button, StatusBadge, Loader, ErrorBanner, DatePipe, RichTextEditorComponent, RichTextViewComponent],
   templateUrl: './support-ticket-detail.html',
 })
 export class SupportTicketDetail implements OnInit {
@@ -63,13 +65,14 @@ export class SupportTicketDetail implements OnInit {
   protected readonly attachmentAccept = SUPPORT_ATTACHMENT_ACCEPT;
 
   protected readonly commentForm = this.formBuilder.nonNullable.group({
-    body: ['', [Validators.required, Validators.maxLength(10000)]],
+    // Rich text (DEC-035): the editor limits visible text to 10,000 characters; the backend checks the rest.
+    body: ['', [Validators.required]],
     isInternal: [false],
   });
 
   protected readonly editForm = this.formBuilder.nonNullable.group({
     subject: ['', [Validators.required, Validators.maxLength(200)]],
-    description: ['', [Validators.required, Validators.maxLength(10000)]],
+    description: ['', [Validators.required]],
     priority: ['medium' as SupportTicketPriority, [Validators.required]],
     category: ['', [Validators.maxLength(80)]],
   });
@@ -100,6 +103,20 @@ export class SupportTicketDetail implements OnInit {
     });
   }
 
+  /** Bumped after a comment is posted, which recreates (and so clears) the comment editor. */
+  protected readonly commentEditorVersion = signal(0);
+  /** Seeds the description editor when editing starts. */
+  protected readonly editDescriptionSeed = signal('');
+
+  protected onCommentChange(html: string): void {
+    this.commentForm.controls.body.setValue(html);
+  }
+
+  protected onEditDescriptionChange(html: string): void {
+    this.editForm.controls.description.setValue(html);
+    this.editForm.controls.description.markAsTouched();
+  }
+
   protected startEdit(): void {
     const ticket = this.detail()?.ticket;
     if (!ticket) {
@@ -111,6 +128,7 @@ export class SupportTicketDetail implements OnInit {
       priority: ticket.priority,
       category: ticket.category ?? '',
     });
+    this.editDescriptionSeed.set(ticket.description);
     this.editing.set(true);
   }
 
@@ -193,6 +211,7 @@ export class SupportTicketDetail implements OnInit {
       next: (comment: SupportTicketComment) => {
         this.postingComment.set(false);
         this.commentForm.reset({ body: '', isInternal: false });
+        this.commentEditorVersion.update((v) => v + 1);
         const current = this.detail();
         if (current) {
           this.detail.set({ ...current, comments: [...current.comments, comment] });

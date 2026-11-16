@@ -1,3 +1,5 @@
+import { RichTextEditorComponent } from '../../../../shared/ui/rich-text-editor/rich-text-editor.component';
+import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -64,9 +66,13 @@ describe('SupportTicketDetail', () => {
     createdAt: '2026-08-14T10:05:00Z',
   };
 
+  let ticketDescriptionOverride: string | null = null;
+
   function setup(permissions: string[] = ['platform.support.read', 'platform.support.manage']) {
     ticketsService = {
-      getById: jest.fn().mockReturnValue(of({ ticket, comments: [tenantComment], attachments: [attachment] })),
+      getById: jest.fn().mockReturnValue(
+        of({ ticket: ticketDescriptionOverride ? { ...ticket, description: ticketDescriptionOverride } : ticket, comments: [tenantComment], attachments: [attachment] }),
+      ),
       update: jest.fn(),
       updateStatus: jest.fn(),
       assign: jest.fn(),
@@ -300,5 +306,46 @@ describe('SupportTicketDetail', () => {
 
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
     expect(buttons.some((button) => button.textContent?.trim() === 'Edit')).toBe(false);
+  });
+
+  // DEC-035: descriptions and comments are rich text; older plain text keeps its line breaks.
+  it('renders a rich description and old plain-text comments through the rich text view', () => {
+    ticketDescriptionOverride = '<ul><li>First</li><li>Second</li></ul>';
+    const fixture = setup();
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelectorAll('[data-testid="rich-text-html"] li').length).toBe(2);
+    expect(host.querySelector('[data-testid="rich-text-plain"]')!.textContent).toContain('Any update?');
+    ticketDescriptionOverride = null;
+  });
+
+  it('posts the comment editor HTML and clears the editor afterwards', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    ticketsService.addComment.mockReturnValue(of({ ...tenantComment, id: 'c2', body: '<p>Fixed</p>' }));
+    const component = fixture.componentInstance;
+    const before = component['commentEditorVersion']();
+
+    component['onCommentChange']('<p>Fixed</p>');
+    component['submitComment']();
+
+    expect(ticketsService.addComment).toHaveBeenCalledWith('ticket-1', '<p>Fixed</p>', false);
+    expect(component['commentEditorVersion']()).toBe(before + 1);
+  });
+
+  it('edits the description in the editor seeded with the saved text', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+
+    component['startEdit']();
+    fixture.detectChanges();
+    const editors = fixture.debugElement.queryAll(By.directive(RichTextEditorComponent))
+      .map((d) => d.componentInstance as RichTextEditorComponent);
+
+    expect(editors.some((e) => e.initialHtml() === 'Getting a 500 error.')).toBe(true);
+    component['onEditDescriptionChange']('<p>New text</p>');
+    expect(component['editForm'].controls.description.value).toBe('<p>New text</p>');
   });
 });

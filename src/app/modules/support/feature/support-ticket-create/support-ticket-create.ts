@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RichTextEditorComponent } from '../../../../shared/ui/rich-text-editor/rich-text-editor.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SupportTicketsService } from '../../data/support-tickets.service';
 import { SUPPORT_TICKET_PRIORITY_OPTIONS, SupportTicketPriority } from '../../data/support-ticket.model';
@@ -11,7 +12,7 @@ import { Button } from '../../../../shared/ui/button/button';
 
 @Component({
   selector: 'app-support-ticket-create',
-  imports: [ReactiveFormsModule, Button],
+  imports: [ReactiveFormsModule, Button, RichTextEditorComponent],
   templateUrl: './support-ticket-create.html',
 })
 export class SupportTicketCreate implements OnInit {
@@ -29,7 +30,8 @@ export class SupportTicketCreate implements OnInit {
   protected readonly form = this.formBuilder.nonNullable.group({
     tenantId: ['', [Validators.required]],
     subject: ['', [Validators.required, Validators.maxLength(200)]],
-    description: ['', [Validators.required, Validators.maxLength(10000)]],
+    // Rich text (DEC-035): the editor limits visible text to 10,000 characters; the backend checks the rest.
+    description: ['', [Validators.required]],
     priority: ['medium' as SupportTicketPriority, [Validators.required]],
     category: [''],
   });
@@ -45,6 +47,11 @@ export class SupportTicketCreate implements OnInit {
         this.loadingTenants.set(false);
       },
     });
+  }
+
+  protected onDescriptionChange(html: string): void {
+    this.form.controls.description.setValue(html);
+    this.form.controls.description.markAsTouched();
   }
 
   protected submit(): void {
