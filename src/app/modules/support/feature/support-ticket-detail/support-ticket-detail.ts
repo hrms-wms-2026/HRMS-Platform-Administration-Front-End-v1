@@ -195,7 +195,9 @@ export class SupportTicketDetail implements OnInit {
         this.commentForm.reset({ body: '', isInternal: false });
         const current = this.detail();
         if (current) {
-          this.detail.set({ ...current, comments: [...current.comments, comment] });
+          // Same rule as the backend: a reply the tenant can see answers them, an internal note does not.
+          const ticket = comment.isInternal ? current.ticket : { ...current.ticket, awaitingSupport: false };
+          this.detail.set({ ...current, ticket, comments: [...current.comments, comment] });
         }
       },
       error: (error: HttpErrorResponse) => {

@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, ParamMap, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SupportTicketsService } from '../../data/support-tickets.service';
 import {
   SUPPORT_ASSIGNEE_UNASSIGNED,
@@ -32,6 +33,7 @@ export class SupportTicketsList implements OnInit, OnDestroy {
   private readonly ticketsService = inject(SupportTicketsService);
   private readonly route = inject(ActivatedRoute);
   private readonly sessionService = inject(SessionService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly permissionStore = inject(PermissionStore);
 
   protected readonly pageSize = PAGE_SIZE;
@@ -75,8 +77,12 @@ export class SupportTicketsList implements OnInit, OnDestroy {
     if (!this.canView()) {
       return;
     }
-    this.applyQueryParams();
-    this.loadTickets();
+    // queryParamMap emits now and again whenever the URL's query changes while this page stays open, e.g. when
+    // the top-bar support bell opens a filtered list from the ticket list itself.
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      this.applyQueryParams(params);
+      this.reload();
+    });
     this.ticketsService.listAssignees().subscribe({
       next: (assignees) => this.assignees.set(assignees),
       // The assignee filter is optional: the list still works without it.
@@ -151,24 +157,21 @@ export class SupportTicketsList implements OnInit, OnDestroy {
   }
 
   /**
-   * Pre-sets filters from the URL, so the top-bar support bell can open a filtered list:
-   * ?awaiting=1, ?status=open, ?assignee=unassigned | me | {platform user id}.
+   * Sets the filters from the URL, so the top-bar support bell can open a filtered list:
+   * ?awaiting=1, ?status=open, ?assignee=unassigned | me | {platform user id}. A URL change replaces every
+   * filter, so a bell link always shows exactly the list it counted.
    */
-  private applyQueryParams(): void {
-    const params = this.route.snapshot.queryParamMap;
+  private applyQueryParams(params: ParamMap): void {
     this.awaitingOnly.set(params.get('awaiting') === '1');
 
     const status = params.get('status') ?? '';
-    if (this.statusOptions.some((option) => option.value === status)) {
-      this.statusFilter.set(status);
-    }
+    this.statusFilter.set(this.statusOptions.some((option) => option.value === status) ? status : '');
 
     const assignee = params.get('assignee') ?? '';
-    if (assignee === 'me') {
-      this.assigneeFilter.set(this.sessionService.currentUser()?.id ?? '');
-    } else if (assignee) {
-      this.assigneeFilter.set(assignee);
-    }
+    this.assigneeFilter.set(assignee === 'me' ? (this.sessionService.currentUser()?.id ?? '') : assignee);
+
+    this.priorityFilter.set('');
+    this.searchTerm.set('');
   }
 
   private reload(): void {

@@ -200,6 +200,33 @@ describe('SupportTicketDetail', () => {
 
     expect(ticketsService.addComment).toHaveBeenCalledWith('ticket-1', 'Looking into this.', true);
     expect(component['detail']()!.comments).toEqual([tenantComment, newComment]);
+    // An internal note does not answer the tenant, so the ticket still waits on support.
+    expect(component['detail']()!.ticket.awaitingSupport).toBe(true);
+  });
+
+  it('clears the awaiting-support badge after a reply the tenant can see', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    ticketsService.addComment.mockReturnValue(
+      of({
+        id: 'comment-2',
+        ticketId: 'ticket-1',
+        authorPlatformUserId: 'staff-1',
+        authorUserId: null,
+        authorName: 'Priya Support',
+        body: 'Fixed on our side.',
+        isInternal: false,
+        createdAt: '2026-08-14T11:05:00Z',
+      }),
+    );
+
+    const component = fixture.componentInstance;
+    component['commentForm'].setValue({ body: 'Fixed on our side.', isInternal: false });
+    component['submitComment']();
+    fixture.detectChanges();
+
+    expect(component['detail']()!.ticket.awaitingSupport).toBe(false);
+    expect(fixture.nativeElement.textContent).not.toContain('Awaiting support');
   });
 
   it('uploads a selected file with the internal flag and appends it', () => {

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { ActivatedRoute, ParamMap, convertToParamMap, provideRouter } from '@angular/router';
+import { ReplaySubject, of, throwError } from 'rxjs';
 import { SupportTicketsList } from './support-tickets-list';
 import { SupportTicketsService } from '../../data/support-tickets.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
@@ -8,6 +8,7 @@ import { SessionService } from '../../../../core/auth/session.service';
 
 describe('SupportTicketsList', () => {
   let ticketsService: { list: jest.Mock; listAssignees: jest.Mock };
+  let queryParams$: ReplaySubject<ParamMap>;
 
   const ticket = {
     id: 'ticket-1',
@@ -32,6 +33,8 @@ describe('SupportTicketsList', () => {
   const emptyPage = { items: [], total: 0, page: 1, pageSize: 25 };
 
   function setup(permissions: string[] = ['platform.support.read'], queryParams: Record<string, string> = {}) {
+    queryParams$ = new ReplaySubject<ParamMap>(1);
+    queryParams$.next(convertToParamMap(queryParams));
     ticketsService = {
       list: jest.fn().mockReturnValue(of(emptyPage)),
       listAssignees: jest.fn().mockReturnValue(of([{ id: 'staff-1', fullName: 'Priya Support', email: 'p@x.test' }])),
@@ -42,7 +45,7 @@ describe('SupportTicketsList', () => {
       providers: [
         provideRouter([]),
         { provide: SupportTicketsService, useValue: ticketsService },
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(queryParams) } } },
+        { provide: ActivatedRoute, useValue: { queryParamMap: queryParams$ } },
       ],
     }).compileComponents();
 
@@ -209,5 +212,22 @@ describe('SupportTicketsList', () => {
     fixture.detectChanges();
 
     expect(ticketsService.list).toHaveBeenCalledWith({ ...baseQuery, assignee: 'unassigned' });
+  });
+
+  it('re-filters when the query changes while the list stays open (bell link from the list itself)', () => {
+    const fixture = setup();
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component['onPriorityFilterChange']('high');
+
+    queryParams$.next(convertToParamMap({ awaiting: '1' }));
+
+    expect(ticketsService.list).toHaveBeenLastCalledWith({ ...baseQuery, awaitingSupport: true });
+    expect(component['priorityFilter']()).toBe('');
+    expect(component['currentPage']()).toBe(1);
+
+    queryParams$.next(convertToParamMap({ status: 'open', assignee: 'unassigned' }));
+
+    expect(ticketsService.list).toHaveBeenLastCalledWith({ ...baseQuery, status: 'open', assignee: 'unassigned' });
   });
 });
