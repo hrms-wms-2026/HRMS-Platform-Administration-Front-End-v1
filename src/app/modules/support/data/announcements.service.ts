@@ -5,8 +5,8 @@ import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 import { environment } from '../../../../environments/environment';
 import {
   AnnouncementListResponse,
+  AnnouncementRequest,
   AnnouncementSummary,
-  CreateAnnouncementRequest,
 } from './announcement.model';
 
 interface AnnouncementApi {
@@ -15,6 +15,8 @@ interface AnnouncementApi {
   body: string;
   severity: string;
   audience: string;
+  starts_at: string | null;
+  ends_at: string | null;
   is_published: boolean;
   published_at: string | null;
   created_at: string;
@@ -63,19 +65,38 @@ export class AnnouncementsService {
       .pipe(map((response) => this.mapListResponse(response)));
   }
 
-  create(request: CreateAnnouncementRequest): Observable<AnnouncementSummary> {
+  getById(id: string): Observable<AnnouncementSummary> {
+    return this.http
+      .get<AnnouncementApi>(`${this.baseUrl}${API_ENDPOINTS.support.announcements.byId(id)}`, {
+        withCredentials: true,
+      })
+      .pipe(map((item) => this.mapAnnouncement(item)));
+  }
+
+  create(request: AnnouncementRequest): Observable<AnnouncementSummary> {
     return this.http
       .post<AnnouncementApi>(
         `${this.baseUrl}${API_ENDPOINTS.support.announcements.create}`,
-        {
-          title: request.title,
-          body: request.body,
-          severity: request.severity,
-          audience: request.audience,
-        },
+        this.toBody(request),
         { withCredentials: true },
       )
       .pipe(map((item) => this.mapAnnouncement(item)));
+  }
+
+  update(id: string, request: AnnouncementRequest): Observable<AnnouncementSummary> {
+    return this.http
+      .put<AnnouncementApi>(
+        `${this.baseUrl}${API_ENDPOINTS.support.announcements.byId(id)}`,
+        this.toBody(request),
+        { withCredentials: true },
+      )
+      .pipe(map((item) => this.mapAnnouncement(item)));
+  }
+
+  remove(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}${API_ENDPOINTS.support.announcements.byId(id)}`, {
+      withCredentials: true,
+    });
   }
 
   publish(id: string): Observable<AnnouncementSummary> {
@@ -98,6 +119,17 @@ export class AnnouncementsService {
       .pipe(map((item) => this.mapAnnouncement(item)));
   }
 
+  private toBody(request: AnnouncementRequest) {
+    return {
+      title: request.title,
+      body: request.body,
+      severity: request.severity,
+      audience: request.audience,
+      starts_at: request.startsAt,
+      ends_at: request.endsAt,
+    };
+  }
+
   private mapListResponse(response: AnnouncementListResponseApi): AnnouncementListResponse {
     return {
       items: response.items.map((item) => this.mapAnnouncement(item)),
@@ -114,6 +146,8 @@ export class AnnouncementsService {
       body: item.body,
       severity: item.severity as AnnouncementSummary['severity'],
       audience: item.audience as AnnouncementSummary['audience'],
+      startsAt: item.starts_at ?? null,
+      endsAt: item.ends_at ?? null,
       isPublished: item.is_published,
       publishedAt: item.published_at,
       createdAt: item.created_at,

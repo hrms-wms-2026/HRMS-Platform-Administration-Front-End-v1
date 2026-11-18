@@ -1,11 +1,14 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permissionGuard } from './core/guards/permission.guard';
+import { mfaEnrollmentGuard } from './core/guards/mfa-enrollment.guard';
 
 export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
+    // F-02: until MFA is enrolled, every child route redirects to settings/mfa.
+    canActivateChild: [mfaEnrollmentGuard],
     loadComponent: () =>
       import('./layouts/main-layout/main-layout').then((m) => m.MainLayout),
     children: [
@@ -503,6 +506,22 @@ export const routes: Routes = [
             section: 'Support',
             parent: { label: 'Announcements', route: '/support/announcements' },
             page: 'New Announcement',
+          },
+          permission: 'platform.support.manage',
+        },
+        loadComponent: () =>
+          import('./modules/support/feature/announcement-create/announcement-create').then(
+            (m) => m.AnnouncementCreate,
+          ),
+      },
+      {
+        path: 'support/announcements/:id/edit',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: {
+            section: 'Support',
+            parent: { label: 'Announcements', route: '/support/announcements' },
+            page: 'Edit Announcement',
           },
           permission: 'platform.support.manage',
         },

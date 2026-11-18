@@ -26,6 +26,7 @@ function buildAuthContext(permissions: string[]): AuthContext {
     platformRole: 'Platform Super Admin',
     expiresAt: '2026-12-31T00:00:00Z',
     mfaRequired: false,
+    mfaEnrollmentRequired: false,
     permissions,
     scopes: {},
     entitlements: [],

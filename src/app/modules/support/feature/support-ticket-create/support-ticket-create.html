@@ -7,16 +7,20 @@
   <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
     <div>
       <label for="tenantId" class="text-sm font-medium text-slate-700 dark:text-slate-300">Tenant</label>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Every ticket belongs to one tenant, and its owners see your replies.</p>
       <select
         id="tenantId"
         formControlName="tenantId"
         class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
       >
-        <option value="">Platform-wide (no tenant)</option>
+        <option value="" disabled>{{ loadingTenants() ? 'Loading tenants…' : 'Select a tenant' }}</option>
         @for (tenant of tenants(); track tenant.id) {
           <option [value]="tenant.id">{{ tenant.name }}</option>
         }
       </select>
+      @if (form.controls.tenantId.invalid && form.controls.tenantId.touched) {
+        <p class="mt-1 text-xs text-red-700">Tenant is required.</p>
+      }
     </div>
 
     <div>
@@ -40,8 +44,11 @@
         formControlName="description"
         class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
       ></textarea>
-      @if (form.controls.description.invalid && form.controls.description.touched) {
+      @if (form.controls.description.errors?.['required'] && form.controls.description.touched) {
         <p class="mt-1 text-xs text-red-700">Description is required.</p>
+      }
+      @if (form.controls.description.errors?.['maxlength']) {
+        <p class="mt-1 text-xs text-red-700">Description must be at most 10,000 characters.</p>
       }
     </div>
 

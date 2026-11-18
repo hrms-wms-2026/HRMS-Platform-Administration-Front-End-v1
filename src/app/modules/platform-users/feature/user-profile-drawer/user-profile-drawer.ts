@@ -16,6 +16,20 @@ import { Button } from '../../../../shared/ui/button/button';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { DrawerContentSkeleton } from '../../../../shared/ui/drawer-content-skeleton/drawer-content-skeleton';
 import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
+import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
+import { SessionService } from '../../../../core/auth/session.service';
+
+const MFA_LABEL: Record<string, string> = {
+  enrolled: 'Enabled',
+  not_enrolled: 'Not set up',
+  locked: 'Locked',
+};
+
+const MFA_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> = {
+  enrolled: 'success',
+  not_enrolled: 'warning',
+  locked: 'danger',
+};
 
 const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> = {
   active: 'success',
@@ -31,13 +45,14 @@ const STATUS_LABEL: Record<string, string> = {
 
 @Component({
   selector: 'app-user-profile-drawer',
-  imports: [Button, StatusBadge, DrawerContentSkeleton, ErrorBanner, DatePipe],
+  imports: [Button, StatusBadge, DrawerContentSkeleton, ErrorBanner, ConfirmationDialog, DatePipe],
   templateUrl: './user-profile-drawer.html',
 })
 export class UserProfileDrawer {
   private readonly usersService = inject(PlatformUsersService);
   private readonly notificationService = inject(NotificationService);
   protected readonly permissionStore = inject(PermissionStore);
+  private readonly sessionService = inject(SessionService);
 
   readonly userId = input.required<string>();
   readonly closed = output<void>();
@@ -46,6 +61,29 @@ export class UserProfileDrawer {
   protected readonly canManageRoles = computed(() => this.permissionStore.hasPermission('platform.roles.manage'));
   protected readonly canViewSessions = computed(() => this.permissionStore.hasPermission('platform.security.read'));
   protected readonly canManageSessions = computed(() => this.permissionStore.hasPermission('platform.security.manage'));
+  protected readonly canManageAccounts = computed(() => this.permissionStore.hasPermission('platform.accounts.manage'));
+
+  /**
+   * F-02 recovery (D2): another admin with account management can reset a lost authenticator.
+   * Never offered on the signed-in admin's own account (the backend refuses it too), and only
+   * when there is an enrollment to clear.
+   */
+  protected readonly canResetMfa = computed(() => {
+    const user = this.user();
+    return (
+      !!user &&
+      this.canManageAccounts() &&
+      user.id !== this.sessionService.currentUser()?.id &&
+      user.mfaStatus !== 'not_enrolled'
+    );
+  });
+  protected readonly mfaResetMessage = computed(
+    () =>
+      `This removes ${this.user()?.fullName ?? 'this admin'}'s authenticator, signs them out of every session, ` +
+      'and makes them set up two-factor authentication again at their next sign-in.',
+  );
+  protected readonly confirmingMfaReset = signal(false);
+  protected readonly resettingMfa = signal(false);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -94,6 +132,42 @@ export class UserProfileDrawer {
 
   protected labelFor(status: string): string {
     return STATUS_LABEL[status] ?? status;
+  }
+
+  protected mfaLabel(status: string): string {
+    return MFA_LABEL[status] ?? status;
+  }
+
+  protected mfaTone(status: string): 'success' | 'warning' | 'danger' | 'neutral' {
+    return MFA_TONE[status] ?? 'neutral';
+  }
+
+  protected askMfaReset(): void {
+    this.confirmingMfaReset.set(true);
+  }
+
+  protected cancelMfaReset(): void {
+    this.confirmingMfaReset.set(false);
+  }
+
+  protected confirmMfaReset(): void {
+    this.confirmingMfaReset.set(false);
+    this.resettingMfa.set(true);
+
+    this.usersService.resetMfa(this.userId()).subscribe({
+      next: () => {
+        this.resettingMfa.set(false);
+        this.notificationService.success(
+          'Two-factor authentication reset. They will set it up again at their next sign-in.',
+        );
+        this.loadUser(this.userId());
+        this.updated.emit();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.resettingMfa.set(false);
+        this.notificationService.error(error.error?.detail ?? 'Could not reset two-factor authentication.');
+      },
+    });
   }
 
   protected initials(fullName: string): string {

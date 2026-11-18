@@ -4,6 +4,16 @@
     Add an extra layer of security to your account using an authenticator app.
   </p>
 
+  @if (enrollmentRequired() && !confirmed()) {
+    <div
+      data-testid="mfa-enrollment-required"
+      class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800"
+      role="status"
+    >
+      Two-factor authentication is required for all platform admins. Set it up to continue.
+    </div>
+  }
+
   @if (errorMessage()) {
     <div
       class="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"

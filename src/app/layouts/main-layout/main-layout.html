@@ -1,12 +1,17 @@
 <div class="application-shell scrollbar-hidden flex h-screen flex-col overflow-hidden dark:bg-slate-950">
   <a class="skip-to-main" href="#main-content">Skip to main content</a>
 
-  <app-navbar />
+  <app-navbar [restricted]="mfaEnrollmentRequired()" />
 
   <section class="flex min-w-0 flex-1 overflow-hidden">
-    <app-sidebar />
+    @if (!mfaEnrollmentRequired()) {
+      <app-sidebar />
+    }
 
     <main id="main-content" tabindex="-1" class="scrollbar-hidden min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 lg:p-6 dark:bg-slate-950">
+      @if (!mfaEnrollmentRequired()) {
+        <app-announcement-banner />
+      }
       <router-outlet />
     </main>
   </section>

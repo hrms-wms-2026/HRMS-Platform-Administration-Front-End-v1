@@ -84,6 +84,43 @@
           </div>
         }
 
+        @if (user(); as mfaUser) {
+          <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4" data-testid="mfa-section">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Two-factor authentication</p>
+                <div class="mt-2">
+                  <app-status-badge [label]="mfaLabel(mfaUser.mfaStatus)" [tone]="mfaTone(mfaUser.mfaStatus)" />
+                </div>
+              </div>
+              @if (canResetMfa()) {
+                <app-button
+                  label="Reset MFA"
+                  variant="secondary"
+                  loadingText="Resetting…"
+                  [loading]="resettingMfa()"
+                  (clicked)="askMfaReset()"
+                />
+              }
+            </div>
+            @if (canResetMfa()) {
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Use this when they lost their authenticator. They are signed out and must set up two-factor
+                authentication again at their next sign-in.
+              </p>
+            }
+          </div>
+
+          <app-confirmation-dialog
+            [open]="confirmingMfaReset()"
+            title="Reset two-factor authentication?"
+            [message]="mfaResetMessage()"
+            confirmLabel="Reset MFA"
+            (confirm)="confirmMfaReset()"
+            (cancelled)="cancelMfaReset()"
+          />
+        }
+
         @if (canViewSessions()) {
           <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
             <div class="flex items-center justify-between gap-3">

@@ -41,7 +41,7 @@ src/app/
 │   ├── configuration-templates, role-templates, system-config, audit-logs,
 │   ├── legal-compliance, module-catalog, dashboard, auth
 ├── shared/
-│   ├── directives/            PermissionDirective (*appPermission — NOT fail-open, see below)
+│   ├── directives/            PermissionDirective (*appPermission, strict hasPermission())
 │   └── ui/                     Button, Modal, ConfirmationDialog, Table, Pagination, StatusBadge,
 │                                EmptyState, ErrorBanner, TableSkeleton + domain skeleton variants,
 │                                DateRangePicker, SearchableSelect, Loader, ToastContainer
@@ -120,18 +120,17 @@ Permission codes used in `route.data['permission']` and the sidebar nav config m
 `PlatformPermissionCatalog.cs` in the backend **exactly** (e.g. `platform.tenants.read`,
 `platform.system_config.manage`) — don't invent new codes on the frontend.
 
-**`PermissionStore.canAccess(permission?)` fails open**, unlike `hasPermission()`:
+`GET admin/v1/auth/me` (and login / MFA verify) return the caller's permission codes, and the app
+loads them before the first route guard runs. **`PermissionStore.canAccess(permission?)` is what
+`permissionGuard` and the sidebar's visibility filter use, and it is strict:**
 - no `permission` passed → always allowed (used for `Dashboard` and `/settings/mfa`, which stay
   reachable regardless of granular permissions)
-- `permissions` array is empty (nothing loaded yet) → allowed
-- `permissions` array is non-empty and lacks the code → denied → `/access-denied`
+- otherwise the caller must hold that exact code, or the route redirects to `/access-denied` and
+  the link is hidden
 
-This is deliberate, not a bug: `canAccess` is what `permissionGuard` and the sidebar's visibility
-filter both use, so a user whose role legitimately has zero platform permissions loaded isn't
-locked out of the whole app. **`*appPermission` (the structural directive, for hiding in-page
-manage buttons) still uses strict `hasPermission()` — no fail-open there.** That asymmetry is
-intentional: route/nav-level gating protects navigation, in-page action buttons stay hidden until
-a real permission is confirmed.
+There is no fail-open: a user whose role has zero platform permissions sees only the ungated
+pages. Grant permissions to a platform role on the Roles screen before inviting people into it
+(only Platform Super Admin is seeded with permissions).
 
 ## Backend integration conventions
 

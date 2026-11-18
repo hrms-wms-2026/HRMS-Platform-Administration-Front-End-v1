@@ -6,7 +6,21 @@ import { PermissionStore } from '../../../core/permissions/permission.store';
 import { MobileNavService } from '../mobile-nav.service';
 
 describe('Sidebar', () => {
-  function setup(permissions: string[] = []) {
+  const ALL_NAV_PERMISSIONS = [
+    'platform.tenants.read',
+    'platform.accounts.read',
+    'platform.roles.read',
+    'platform.subscriptions.read',
+    'platform.module_catalog.read',
+    'platform.templates.read',
+    'platform.app_catalog.read',
+    'platform.system_config.read',
+    'platform.audit.read',
+    'platform.compliance.read',
+    'platform.support.read',
+  ];
+
+  function setup(permissions: string[] = ALL_NAV_PERMISSIONS) {
     TestBed.configureTestingModule({
       imports: [Sidebar],
       providers: [provideRouter([])],
@@ -20,6 +34,7 @@ describe('Sidebar', () => {
       platformRole: 'Platform Super Admin',
       expiresAt: '',
       mfaRequired: false,
+      mfaEnrollmentRequired: false,
       permissions,
       scopes: {},
       entitlements: [],
@@ -71,10 +86,10 @@ describe('Sidebar', () => {
     expect(links).toContain('/support/tickets');
   });
 
-  it('dashboard remains accessible even when no permissions are loaded', () => {
+  it('shows only the dashboard to a user with no permissions', () => {
     const fixture = setup([]);
 
-    expect(hrefs(fixture)).toContain('/');
+    expect(hrefs(fixture)).toEqual(['/']);
   });
 
   it('hides sidebar links the user lacks permission for once permissions are loaded', () => {

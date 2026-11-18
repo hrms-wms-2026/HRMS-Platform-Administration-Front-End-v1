@@ -20,6 +20,8 @@ interface AdminSessionResponse {
   platform_role: string;
   expires_at: string;
   mfa_required: boolean;
+  /** Absent on older backends; treated as false. */
+  mfa_enrollment_required?: boolean;
   permissions?: string[];
 }
 
@@ -30,6 +32,7 @@ function toAuthContext(response: AdminSessionResponse): AuthContext {
     platformRole: response.platform_role,
     expiresAt: response.expires_at,
     mfaRequired: response.mfa_required,
+    mfaEnrollmentRequired: response.mfa_enrollment_required ?? false,
     permissions: response.permissions ?? [],
     scopes: {},
     entitlements: [],
