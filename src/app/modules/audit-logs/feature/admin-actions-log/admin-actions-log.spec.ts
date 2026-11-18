@@ -94,6 +94,18 @@ describe('AdminActionsLog', () => {
     expect(text).toContain('Failed');
   });
 
+  it('keeps the table scroll area positioned so its screen-reader labels cannot widen the page', () => {
+    const fixture = setup();
+    service.listAdminActions.mockReturnValue(of(page([rotated])));
+    fixture.detectChanges();
+
+    // An absolutely positioned .sr-only label escapes an overflow container that is not itself positioned,
+    // which gave the whole page a horizontal scrollbar in a narrow window.
+    const scrollArea = (fixture.nativeElement as HTMLElement).querySelector('table')!.parentElement!;
+    expect(scrollArea.classList).toContain('overflow-x-auto');
+    expect(scrollArea.classList).toContain('relative');
+  });
+
   it('shows the recorded before and after values when a row is expanded', () => {
     const fixture = setup();
     service.listAdminActions.mockReturnValue(of(page([failedRoleChange])));
