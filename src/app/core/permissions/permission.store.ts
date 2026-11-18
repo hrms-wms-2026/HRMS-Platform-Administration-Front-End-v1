@@ -27,21 +27,12 @@ export const PermissionStore = signalStore(
     },
 
     /**
-     * Route/sidebar-gating check. TODO(permissions-rollout): admin/v1/auth/me
-     * does not return the caller's permissions yet, so `permissions` is
-     * always empty for real users today. Fail open (allow) whenever no
-     * permissions have loaded at all, rather than locking every admin out of
-     * every gated route/link; once real permissions load, enforce normally.
-     * Remove the empty-permissions branch once /me returns permissions.
+     * Route/sidebar-gating check. No permission requirement → allowed;
+     * otherwise the caller must hold that exact code. admin/v1/auth/me returns
+     * the caller's permissions, so a user with none sees only ungated pages.
      */
     canAccess(permission?: string): boolean {
-      if (!permission) {
-        return true;
-      }
-      if (store.permissions().length === 0) {
-        return true;
-      }
-      return store.permissions().includes(permission);
+      return !permission || store.permissions().includes(permission);
     },
 
     hasAnyPermission(permissions: string[]): boolean {
