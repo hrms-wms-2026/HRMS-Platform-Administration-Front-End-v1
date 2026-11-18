@@ -138,4 +138,13 @@ describe('PlatformUsersService', () => {
     expect(req.request.method).toBe('POST');
     req.flush(null);
   });
+
+  it('resetMfa posts to the MFA reset path', () => {
+    service.resetMfa('user-1').subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/platform-access/users/user-1/mfa/reset`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush(null);
+  });
 });

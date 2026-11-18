@@ -54,6 +54,18 @@ export class PlatformUsersService {
     );
   }
 
+  /**
+   * F-02 recovery (D2): clears another admin's MFA so they enroll a new authenticator at next
+   * sign-in, and revokes their sessions. The backend refuses the caller's own account.
+   */
+  resetMfa(platformUserId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.platformUsers.resetMfa(platformUserId)}`,
+      {},
+      { withCredentials: true },
+    );
+  }
+
   listSessions(platformUserId: string): Observable<PlatformUserSession[]> {
     return this.http.get<PlatformUserSession[]>(
       `${this.baseUrl}${API_ENDPOINTS.platformUsers.sessions.list(platformUserId)}`,
