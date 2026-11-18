@@ -1,4 +1,5 @@
 import {
+  ADMIN_ACTION_AREA_OPTIONS,
   adminActionActorPrimary,
   adminActionActorSecondary,
   adminActionAreaLabel,
@@ -33,7 +34,15 @@ function entry(overrides: Partial<AdminActionLogEntry> = {}): AdminActionLogEntr
 describe('admin action log options', () => {
   it('labels known areas and humanizes unknown ones', () => {
     expect(adminActionAreaLabel('oauth_app')).toBe('OAuth App');
-    expect(adminActionAreaLabel('support_ticket')).toBe('Support ticket');
+    expect(adminActionAreaLabel('billing_export')).toBe('Billing export');
+  });
+
+  it('offers the support and announcement areas the backend audits', () => {
+    const areas = ADMIN_ACTION_AREA_OPTIONS.map((o) => o.value);
+    expect(areas).toContain('support_ticket');
+    expect(areas).toContain('announcement');
+    expect(adminActionAreaLabel('support_ticket')).toBe('Support Ticket');
+    expect(adminActionAreaLabel('announcement')).toBe('Announcement');
   });
 
   it('labels the verb part of an action code', () => {

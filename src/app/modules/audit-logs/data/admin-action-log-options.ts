@@ -28,6 +28,8 @@ export const ADMIN_ACTION_AREA_OPTIONS: AdminActionAreaOption[] = [
   { value: 'legal_document_version', label: 'Legal Document' },
   { value: 'tray_release', label: 'Tray Release' },
   { value: 'global_application', label: 'App Catalog' },
+  { value: 'support_ticket', label: 'Support Ticket' },
+  { value: 'announcement', label: 'Announcement' },
 ];
 
 export const ADMIN_ACTION_OUTCOME_OPTIONS: { value: AdminActionOutcomeFilter; label: string }[] = [
