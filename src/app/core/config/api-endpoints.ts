@@ -127,6 +127,7 @@ export const API_ENDPOINTS = {
   },
   auditLogs: {
     list: '/platform-access/auth-events',
+    adminActions: '/audit-logs',
   },
   trayReleases: {
     list: '/tray-releases',
