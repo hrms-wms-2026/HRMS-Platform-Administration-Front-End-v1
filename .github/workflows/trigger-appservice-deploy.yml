@@ -1,0 +1,32 @@
+# Asks HRMS-Backend-v1's "Deploy to App Service" workflow to rebuild and deploy when main changes here.
+# Needs secret BACKEND_DISPATCH_TOKEN: a fine-grained token with Contents: read and write on HRMS-Backend-v1 only.
+# Setup guide: ops/appservice/deploy-pipeline-setup.md in HRMS-Backend-v1.
+name: Trigger App Service deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send deploy-appservice to HRMS-Backend-v1
+        env:
+          GH_TOKEN: ${{ secrets.BACKEND_DISPATCH_TOKEN }}
+          SOURCE: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Missing secret BACKEND_DISPATCH_TOKEN (see ops/appservice/deploy-pipeline-setup.md in HRMS-Backend-v1)"
+            exit 1
+          fi
+          gh api repos/hrms-wms-2026/HRMS-Backend-v1/dispatches \
+            -f event_type=deploy-appservice \
+            -f "client_payload[source]=$SOURCE" \
+            -f "client_payload[sha]=$SHA"
+          echo "Deploy requested for $SOURCE@$SHA"
