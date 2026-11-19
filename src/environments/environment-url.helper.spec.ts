@@ -13,6 +13,14 @@ describe('buildAdminApiUrl (production - same origin as the admin SPA)', () => {
   });
 });
 
+describe('buildAdminApiUrl (single-host - azurewebsites origin)', () => {
+  it('targets same-origin /admin/v1 on an azurewebsites hostname', () => {
+    expect(buildAdminApiUrl('https:', 'app.azurewebsites.net')).toBe(
+      'https://app.azurewebsites.net/admin/v1',
+    );
+  });
+});
+
 describe('buildAdminWsUrl (production - same origin as the admin SPA)', () => {
   it('uses wss on an https page', () => {
     expect(buildAdminWsUrl('https:', 'admin.9-223-115-62.sslip.io')).toBe(
