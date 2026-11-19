@@ -1,7 +1,11 @@
+import { buildLocalApiUrl, buildLocalWsUrl } from './environment-url.helper';
+
+const { hostname } = window.location;
+
 export const environment = {
   production: false,
-  apiUrl: 'http://admin.localhost:5139/admin/v1',
-  wsUrl: 'ws://localhost:5139/ws',
+  apiUrl: buildLocalApiUrl(hostname),
+  wsUrl: buildLocalWsUrl(hostname),
   enableDebugLogs: true,
   appName: 'Platform Administration',
 };

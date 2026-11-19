@@ -1,0 +1,169 @@
+<div class="flex flex-col gap-4">
+  <div class="audit-filter-card">
+    <div class="flex flex-col gap-4 xl:flex-row xl:items-end">
+      <div class="min-w-0 flex-1">
+        <label for="adminActionArea" class="audit-filter-label">Area</label>
+        <select
+          id="adminActionArea"
+          [value]="areaDraft()"
+          (change)="onAreaDraftChange($any($event.target).value)"
+          class="audit-filter-input"
+        >
+          @for (option of areaOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <label for="adminActionOutcome" class="audit-filter-label">Outcome</label>
+        <select
+          id="adminActionOutcome"
+          [value]="outcomeDraft()"
+          (change)="onOutcomeDraftChange($any($event.target).value)"
+          class="audit-filter-input"
+        >
+          @for (option of outcomeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <label for="adminActionDateRange" class="audit-filter-label">Date Range</label>
+        <select
+          id="adminActionDateRange"
+          [value]="dateRangeDraft()"
+          (change)="onDateRangeDraftChange($any($event.target).value)"
+          class="audit-filter-input"
+        >
+          @for (option of dateRangeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex shrink-0 gap-2">
+        <app-button label="Apply" variant="indigo" (clicked)="applyFilters()" />
+        <app-button label="Reset" variant="secondary" (clicked)="resetFilters()" />
+      </div>
+    </div>
+
+    <p class="audit-results-summary">
+      {{ totalCount() }} action{{ totalCount() === 1 ? '' : 's' }}
+    </p>
+  </div>
+
+  @if (loading()) {
+    <app-table-skeleton [rows]="8" />
+  } @else if (errorMessage(); as message) {
+    <app-error-banner [message]="message" (retry)="load()" />
+  } @else if (entries().length === 0) {
+    <app-empty-state
+      [title]="hasActiveFilters() ? 'No admin actions match your filters' : 'No admin actions recorded yet'"
+    />
+  } @else {
+    <div class="relative overflow-x-auto scrollbar-hidden">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Admin</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Outcome</th>
+            <th>Source IP</th>
+            <th><span class="sr-only">Details</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of entries(); track entry.id) {
+            <tr>
+              <td class="table-meta whitespace-nowrap">{{ entry.createdAt | date: 'medium' }}</td>
+              <td>
+                <div class="table-primary">{{ actorPrimary(entry) }}</div>
+                @if (actorSecondary(entry); as email) {
+                  <div class="table-secondary">{{ email }}</div>
+                }
+              </td>
+              <td>
+                <div class="table-primary">{{ verbLabel(entry.action) }}</div>
+                <div class="table-secondary">{{ areaLabel(entry.targetType) }}</div>
+              </td>
+              <td class="max-w-[14rem]">
+                <div class="truncate font-mono text-xs text-slate-700 dark:text-slate-300" [title]="entry.targetId || ''">
+                  {{ entry.targetId || '—' }}
+                </div>
+                @if (entry.targetTenantId) {
+                  <div class="table-secondary truncate" [title]="entry.targetTenantId">
+                    Tenant {{ entry.targetTenantId }}
+                  </div>
+                }
+              </td>
+              <td>
+                <app-status-badge [label]="outcomeLabel(entry)" [tone]="outcomeTone(entry)" />
+              </td>
+              <td class="table-secondary">{{ entry.ipAddress || '—' }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950"
+                  [attr.aria-expanded]="expandedId() === entry.id"
+                  [attr.aria-controls]="'admin-action-details-' + entry.id"
+                  (click)="toggleDetails(entry)"
+                >
+                  {{ expandedId() === entry.id ? 'Hide' : 'Details' }}
+                </button>
+              </td>
+            </tr>
+            @if (expandedId() === entry.id) {
+              <tr [id]="'admin-action-details-' + entry.id">
+                <td colspan="7" class="bg-slate-50 dark:bg-slate-800/60">
+                  <dl class="grid gap-3 text-xs sm:grid-cols-2">
+                    <div>
+                      <dt class="font-semibold text-slate-600 dark:text-slate-300">Action code</dt>
+                      <dd class="font-mono text-slate-800 dark:text-slate-100">{{ entry.action }}</dd>
+                    </div>
+                    @if (entry.failureReason) {
+                      <div>
+                        <dt class="font-semibold text-slate-600 dark:text-slate-300">Failure reason</dt>
+                        <dd class="font-mono text-red-700 dark:text-red-300">{{ entry.failureReason }}</dd>
+                      </div>
+                    }
+                    <div>
+                      <dt class="font-semibold text-slate-600 dark:text-slate-300">Before</dt>
+                      <dd>
+                        <pre class="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-white p-2 font-mono text-slate-800 dark:bg-slate-900 dark:text-slate-100">{{ formatState(entry.before) ?? 'Not recorded' }}</pre>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt class="font-semibold text-slate-600 dark:text-slate-300">After</dt>
+                      <dd>
+                        <pre class="mt-1 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-white p-2 font-mono text-slate-800 dark:bg-slate-900 dark:text-slate-100">{{ formatState(entry.after) ?? 'Not recorded' }}</pre>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt class="font-semibold text-slate-600 dark:text-slate-300">User agent</dt>
+                      <dd class="break-all text-slate-700 dark:text-slate-200">{{ entry.userAgent || '—' }}</dd>
+                    </div>
+                    <div>
+                      <dt class="font-semibold text-slate-600 dark:text-slate-300">Correlation ID</dt>
+                      <dd class="break-all font-mono text-slate-700 dark:text-slate-200">{{ entry.correlationId || '—' }}</dd>
+                    </div>
+                  </dl>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      [page]="currentPage()"
+      [pageSize]="pageSize"
+      [total]="totalCount()"
+      (pageChange)="goToPage($event)"
+    />
+  }
+</div>

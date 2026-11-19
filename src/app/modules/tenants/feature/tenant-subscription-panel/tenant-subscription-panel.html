@@ -1,0 +1,99 @@
+<div class="flex h-full flex-col gap-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+  <div>
+    <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Billing &amp; Renewal</h2>
+    <p class="text-xs text-slate-500 dark:text-slate-400">Current subscription plan, billing cycle, and renewal timing</p>
+  </div>
+
+  @if (loading()) {
+    <app-page-detail-skeleton
+      [fieldCount]="4"
+      [columns]="2"
+      [showSubtitle]="false"
+      [showBadge]="false"
+      [showContentBlock]="false"
+    />
+  } @else if (errorMessage(); as message) {
+    <app-error-banner [message]="message" (retry)="loadSubscription(tenantId())" />
+  } @else if (subscription(); as sub) {
+    <div class="flex flex-wrap items-center gap-2">
+      <div>
+        <p class="text-base font-semibold text-slate-900 dark:text-slate-100">
+          {{ sub.planName ?? 'Subscription plan' }}
+        </p>
+        @if (sub.planCode) {
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ sub.planCode }}</p>
+        }
+      </div>
+      <app-status-badge
+        [label]="sub.status | titlecase"
+        [tone]="tenantSubscriptionStatusTone(sub.status, sub)"
+      />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Billing Cycle</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ sub.billingCycle | titlecase }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Amount</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ formatSubscriptionAmount(sub.currency, sub.amount) }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Current Period</p>
+        <p class="text-slate-900 dark:text-slate-100">{{ sub.currentPeriodStart }} – {{ sub.currentPeriodEnd }}</p>
+      </div>
+      <div>
+        <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Renewal</p>
+        <p class="text-slate-900 dark:text-slate-100">
+          {{ renewalCountdownLabel(sub.daysUntilRenewal, sub.isPastDue) }}
+        </p>
+      </div>
+      @if (sub.trialEndsAt) {
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Trial Ends</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ sub.trialEndsAt | date: 'medium' }}</p>
+        </div>
+      }
+      @if (sub.graceEndsAt) {
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Grace Ends</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ sub.graceEndsAt | date: 'medium' }}</p>
+        </div>
+      }
+      @if (sub.accessEndsAt) {
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Access Ends</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ sub.accessEndsAt | date: 'medium' }}</p>
+        </div>
+      }
+      @if (sub.daysUntilAccessEnds !== null) {
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Access Ends In</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ sub.daysUntilAccessEnds }} days</p>
+        </div>
+      }
+      @if (sub.maintenanceRenewalAt) {
+        <div>
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Maintenance Renewal</p>
+          <p class="text-slate-900 dark:text-slate-100">{{ sub.maintenanceRenewalAt }}</p>
+        </div>
+      }
+    </div>
+
+    @if (sub.gatewayProvider || sub.gatewayCustomerRef || sub.gatewaySubscriptionRef) {
+      <div class="rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+        <p class="font-medium uppercase tracking-wide">Gateway</p>
+        <p class="mt-1">Provider: {{ sub.gatewayProvider ?? '—' }}</p>
+        @if (sub.gatewayCustomerRef) {
+          <p class="truncate font-mono" [title]="sub.gatewayCustomerRef">Customer: {{ sub.gatewayCustomerRef }}</p>
+        }
+        @if (sub.gatewaySubscriptionRef) {
+          <p class="truncate font-mono" [title]="sub.gatewaySubscriptionRef">
+            Subscription: {{ sub.gatewaySubscriptionRef }}
+          </p>
+        }
+      </div>
+    }
+  }
+</div>

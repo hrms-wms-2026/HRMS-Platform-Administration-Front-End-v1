@@ -1,0 +1,48 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div>
+      <h1 class="page-title">Roles & Permissions</h1>
+      <p class="page-subtitle">Manage platform roles and what each one can access</p>
+    </div>
+
+    @if (loading()) {
+      <app-table-skeleton [rows]="8" [columns]="['7rem', '100%', '5rem', '7rem']" [showPagination]="false" />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadRoles()" />
+    } @else if (roles().length === 0) {
+      <app-empty-state title="No roles yet" />
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (role of roles(); track role.id) {
+            <tr
+              [routerLink]="['/roles', role.id]"
+              class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <td class="table-primary">{{ role.name }}</td>
+              <td class="table-secondary">{{ role.description || '—' }}</td>
+              <td class="py-3 pr-4">
+                @if (role.isSystemRole) {
+                  <app-status-badge label="System" tone="neutral" />
+                }
+              </td>
+              <td class="table-secondary">{{ role.createdAt | date: 'mediumDate' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}

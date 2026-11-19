@@ -1,0 +1,210 @@
+import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { ServiceKeysList } from './service-keys-list';
+import { ServiceKeysService } from '../../data/service-keys.service';
+import { PermissionStore } from '../../../../core/permissions/permission.store';
+import { NotificationService } from '../../../../core/services/notification.service';
+
+describe('ServiceKeysList', () => {
+  let serviceKeysService: {
+    list: jest.Mock;
+    listProviders: jest.Mock;
+    verify: jest.Mock;
+    setActive: jest.Mock;
+    updateDisplayName: jest.Mock;
+  };
+  let notificationService: { success: jest.Mock; error: jest.Mock };
+
+  const sampleKey = {
+    id: 'k1',
+    serviceKey: 'resend',
+    displayName: 'Resend',
+    isActive: true,
+    lastVerifiedAt: null,
+    updatedById: 'u1',
+    updatedAt: '2026-01-01T00:00:00Z',
+  };
+
+  const providerOptions = [
+    { providerKey: 'resend', displayName: 'Resend', configured: true, isActive: true, verificationMode: 'live', fields: [] },
+    { providerKey: 'sendgrid', displayName: 'SendGrid', configured: true, isActive: true, verificationMode: 'live', fields: [] },
+    { providerKey: 'cloudflare', displayName: 'Cloudflare', configured: true, isActive: true, verificationMode: 'format-only', fields: [] },
+  ];
+
+  function setup(
+    permissions: string[] = ['platform.system_config.read', 'platform.system_config.manage'],
+    keys = [sampleKey],
+  ) {
+    serviceKeysService = {
+      list: jest.fn().mockReturnValue(of(keys)),
+      listProviders: jest.fn().mockReturnValue(of(providerOptions)),
+      verify: jest.fn(),
+      setActive: jest.fn(),
+      updateDisplayName: jest.fn(),
+    };
+    notificationService = { success: jest.fn(), error: jest.fn() };
+
+    TestBed.configureTestingModule({
+      imports: [ServiceKeysList],
+      providers: [
+        { provide: ServiceKeysService, useValue: serviceKeysService },
+        { provide: NotificationService, useValue: notificationService },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ServiceKeysList);
+    const store = TestBed.inject(PermissionStore);
+    store.setAuthorizationContext({
+      userId: 'u1',
+      email: 'admin@example.com',
+      platformRole: 'Platform Super Admin',
+      expiresAt: '',
+      mfaRequired: false,
+      mfaEnrollmentRequired: false,
+      permissions,
+      scopes: {},
+      entitlements: [],
+    });
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('does not call the API and shows the no-permission message when unauthorized', () => {
+    const fixture = setup([]);
+    expect(serviceKeysService.list).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('No permission to view page');
+  });
+
+  it('loads and displays service keys when authorized', () => {
+    const fixture = setup();
+    expect(serviceKeysService.list).toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('resend');
+    expect(fixture.nativeElement.textContent).toContain('Active');
+    expect(fixture.nativeElement.textContent).toContain('Live provider');
+    expect(fixture.nativeElement.textContent).toContain('checked against the provider itself');
+  });
+
+  it('shows format-only verification badge for non-email providers', () => {
+    const fixture = setup(['platform.system_config.read', 'platform.system_config.manage'], [
+      {
+        ...sampleKey,
+        serviceKey: 'cloudflare',
+        displayName: 'Cloudflare',
+      },
+    ]);
+
+    expect(fixture.nativeElement.textContent).toContain('Format only');
+    expect(fixture.nativeElement.textContent).toContain('only its shape is checked locally');
+  });
+
+  it('hides row actions without manage permission', () => {
+    const fixture = setup(['platform.system_config.read']);
+    expect(fixture.nativeElement.textContent).not.toContain('Verify');
+    expect(fixture.nativeElement.textContent).not.toContain('Add Service Key');
+  });
+
+  it('shows a live-provider success toast when Resend verify succeeds', () => {
+    const fixture = setup();
+    serviceKeysService.verify.mockReturnValue(
+      of({
+        success: true,
+        checkedAt: '2026-01-01T00:00:00Z',
+        message: 'Resend API key verified successfully.',
+      }),
+    );
+    const component = fixture.componentInstance;
+
+    component['verifyKey']('resend');
+
+    expect(notificationService.success).toHaveBeenCalledWith(
+      'Live provider check: Resend API key verified successfully.',
+    );
+  });
+
+  it('shows a live-provider error toast when SendGrid verify fails', () => {
+    const fixture = setup();
+    serviceKeysService.verify.mockReturnValue(
+      of({
+        success: false,
+        checkedAt: '2026-01-01T00:00:00Z',
+        message: 'SendGrid API rejected the key (401 Unauthorized).',
+      }),
+    );
+    const component = fixture.componentInstance;
+
+    component['verifyKey']('sendgrid');
+
+    expect(notificationService.error).toHaveBeenCalledWith(
+      'Live provider check: SendGrid API rejected the key (401 Unauthorized).',
+    );
+  });
+
+  it('shows a local-format success toast when Cloudflare verify succeeds', () => {
+    const fixture = setup();
+    serviceKeysService.verify.mockReturnValue(
+      of({
+        success: true,
+        checkedAt: '2026-01-01T00:00:00Z',
+        message:
+          'Local format-only verification passed. Live provider check is not wired for this service.',
+      }),
+    );
+    const component = fixture.componentInstance;
+
+    component['verifyKey']('cloudflare');
+
+    expect(notificationService.success).toHaveBeenCalledWith(
+      'Local format check: Local format-only verification passed. Live provider check is not wired for this service.',
+    );
+  });
+
+  it('toggles active state', () => {
+    const fixture = setup();
+    serviceKeysService.setActive.mockReturnValue(of({ ...sampleKey, isActive: false }));
+    const component = fixture.componentInstance;
+
+    component['toggleActive'](sampleKey);
+
+    expect(serviceKeysService.setActive).toHaveBeenCalledWith('resend', false);
+  });
+
+  it('saves an edited display name', () => {
+    const fixture = setup();
+    serviceKeysService.updateDisplayName.mockReturnValue(of({ ...sampleKey, displayName: 'Resend Prod' }));
+    const component = fixture.componentInstance;
+    component['startEditName'](sampleKey);
+    component['editingName'].set('Resend Prod');
+
+    component['saveEditName']('resend');
+
+    expect(serviceKeysService.updateDisplayName).toHaveBeenCalledWith('resend', 'Resend Prod');
+  });
+
+  it('shows the empty state when there are no keys', () => {
+    serviceKeysService = { list: jest.fn().mockReturnValue(of([])), listProviders: jest.fn().mockReturnValue(of([])), verify: jest.fn(), setActive: jest.fn(), updateDisplayName: jest.fn() };
+    notificationService = { success: jest.fn(), error: jest.fn() };
+    TestBed.configureTestingModule({
+      imports: [ServiceKeysList],
+      providers: [
+        { provide: ServiceKeysService, useValue: serviceKeysService },
+        { provide: NotificationService, useValue: notificationService },
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ServiceKeysList);
+    const store = TestBed.inject(PermissionStore);
+    store.setAuthorizationContext({
+      userId: 'u1',
+      email: 'admin@example.com',
+      platformRole: 'Platform Super Admin',
+      expiresAt: '',
+      mfaRequired: false,
+      mfaEnrollmentRequired: false,
+      permissions: ['platform.system_config.read'],
+      scopes: {},
+      entitlements: [],
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('No service keys configured yet');
+  });
+});

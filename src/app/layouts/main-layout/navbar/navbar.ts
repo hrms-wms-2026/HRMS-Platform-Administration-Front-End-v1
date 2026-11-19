@@ -1,26 +1,26 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
-import { SessionService } from '../../../core/auth/session.service';
-import { Button } from '../../../shared/ui/button/button';
-import { StatusBadge } from '../../../shared/ui/status-badge/status-badge';
+import { Component, computed, inject, input } from '@angular/core';
+import { ProfileMenu } from '../profile-menu/profile-menu';
+import { Breadcrumb } from '../breadcrumb/breadcrumb';
+import { MobileNavService } from '../mobile-nav.service';
+import { SupportBell } from '../support-bell/support-bell';
+import { PermissionStore } from '../../../core/permissions/permission.store';
 
 @Component({
   selector: 'app-navbar',
-  imports: [Button, StatusBadge, RouterLink],
+  imports: [ProfileMenu, Breadcrumb, SupportBell],
   templateUrl: './navbar.html',
 })
 export class Navbar {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly sessionService = inject(SessionService);
+  protected readonly mobileNav = inject(MobileNavService);
 
-  protected readonly currentUser = this.sessionService.currentUser;
+  /**
+   * F-02: while MFA enrollment is pending only the logo and the profile menu (sign-out) render,
+   * so the admin cannot navigate away from MFA setup but is never trapped.
+   */
+  readonly restricted = input(false);
 
-  logout(): void {
-    this.authService.logout().subscribe({
-      next: () => this.router.navigateByUrl('/auth/login'),
-      error: () => this.router.navigateByUrl('/auth/login'),
-    });
-  }
+  private readonly permissionStore = inject(PermissionStore);
+
+  /** The live support bell is for support staff only; everyone else keeps the placeholder. */
+  protected readonly showSupportBell = computed(() => this.permissionStore.hasPermission('platform.support.read'));
 }

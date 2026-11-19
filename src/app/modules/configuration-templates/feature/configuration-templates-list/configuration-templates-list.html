@@ -1,0 +1,146 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="page-title">Configuration Templates</h1>
+        <p class="page-subtitle">
+          Manage reusable configuration blueprints for tenant onboarding
+        </p>
+      </div>
+      @if (canManage()) {
+        <a routerLink="/configuration-templates/new">
+          <app-button label="Create Template" variant="indigo" />
+        </a>
+      }
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+      <div class="flex-1 min-w-[200px]">
+        <label for="templateType" class="text-sm font-medium text-slate-700 dark:text-slate-300">Template Type</label>
+        <select
+          id="templateType"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          [value]="filters().templateType"
+          (change)="onFilterChange(); filters.update(f => ({ ...f, templateType: $any($event.target).value }))"
+        >
+          @for (option of templateTypeOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="flex-1 min-w-[200px]">
+        <label for="industryTag" class="text-sm font-medium text-slate-700 dark:text-slate-300">Industry Tag</label>
+        <input
+          id="industryTag"
+          type="text"
+          class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          [value]="filters().industryTag"
+          (input)="onFilterChange(); filters.update(f => ({ ...f, industryTag: $any($event.target).value }))"
+          placeholder="e.g. technology"
+        />
+      </div>
+      <div class="flex items-end">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+            [checked]="filters().activeOnly"
+            (change)="onFilterChange(); filters.update(f => ({ ...f, activeOnly: $any($event.target).checked }))"
+          />
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Active only</span>
+        </label>
+      </div>
+      @if (filters().templateType || filters().activeOnly || filters().industryTag) {
+        <div class="flex items-end">
+          <app-button label="Clear Filters" variant="secondary" (clicked)="clearFilters()" />
+        </div>
+      }
+    </div>
+
+    @if (loading()) {
+      <app-table-skeleton
+        [rows]="8"
+        [columns]="['8rem', '7rem', '6rem', '4rem', '6rem', '5rem', '5rem']"
+      />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadTemplates()" />
+    } @else if (templates().length === 0) {
+      <app-empty-state title="No configuration templates yet" description="Create your first template to get started." />
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Template Key</th>
+              <th>Type</th>
+              <th>Version</th>
+              <th>Modules</th>
+              <th>Industry</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (template of templates(); track template.id) {
+              <tr
+                [routerLink]="['/configuration-templates', template.id]"
+                class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+              >
+                <td class="table-primary">{{ template.name }}</td>
+                <td class="py-3 pr-4 text-slate-600 dark:text-slate-300 font-mono text-xs">{{ template.templateKey }}</td>
+                <td class="table-secondary">{{ template.templateType }}</td>
+                <td class="table-secondary">v{{ template.version }}</td>
+                <td class="py-3 pr-4">
+                  @if (template.moduleKeys.length > 0) {
+                    <div class="flex flex-wrap gap-1">
+                      @for (moduleKey of template.moduleKeys; track moduleKey) {
+                        <span class="inline-flex items-center rounded bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                          {{ moduleKey }}
+                        </span>
+                      }
+                    </div>
+                  } @else {
+                    <span class="text-slate-400 dark:text-slate-500 text-xs">—</span>
+                  }
+                </td>
+                <td class="table-secondary">
+                  @if (template.industryProfileTag) {
+                    <span class="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      {{ template.industryProfileTag }}
+                    </span>
+                  } @else {
+                    <span class="text-slate-400 dark:text-slate-500 text-xs">—</span>
+                  }
+                </td>
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-2">
+                    <app-status-badge
+                      [label]="template.isActive ? 'Active' : 'Inactive'"
+                      [tone]="template.isActive ? 'success' : 'neutral'"
+                    />
+                    @if (template.isSystem) {
+                      <span class="inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                        System
+                      </span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <app-pagination
+        [page]="page()"
+        [pageSize]="pageSize()"
+        [total]="totalCount()"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+  </div>
+}

@@ -1,0 +1,64 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white dark:bg-slate-900 p-8 shadow-sm">
+    <p class="text-sm font-medium text-red-700">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="page-title">Subscription Plans</h1>
+        <p class="page-subtitle">Manage pricing tiers, module bundles, and billing terms</p>
+      </div>
+      @if (canManage()) {
+        <a routerLink="/subscription-plans/new">
+          <app-button label="Create Plan" variant="indigo" />
+        </a>
+      }
+    </div>
+
+    @if (loading()) {
+      <app-table-skeleton
+        [rows]="8"
+        [columns]="['8rem', '6rem', '5rem', '7rem', '6rem', '5rem']"
+        [showPagination]="false"
+      />
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="loadPlans()" />
+    } @else if (plans().length === 0) {
+      <app-empty-state title="No subscription plans yet" />
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Tier</th>
+            <th>Company Size</th>
+            <th>Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (plan of plans(); track plan.id) {
+            <tr
+              [routerLink]="['/subscription-plans', plan.id]"
+              class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              <td class="table-primary">{{ plan.name }}</td>
+              <td class="table-secondary">{{ plan.code }}</td>
+              <td class="table-secondary">{{ plan.tier }}</td>
+              <td class="table-secondary">{{ plan.companySizeRange }}</td>
+              <td class="table-secondary">{{ plan.currency }} {{ plan.effectiveMonthlyPrice }}/mo</td>
+              <td class="py-3 pr-4">
+                <app-status-badge
+                  [label]="plan.isActive ? 'Active' : 'Archived'"
+                  [tone]="plan.isActive ? 'success' : 'neutral'"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}

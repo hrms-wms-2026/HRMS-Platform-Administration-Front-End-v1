@@ -7,8 +7,9 @@ import { SessionService } from '../../../../core/auth/session.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { environment } from '../../../../../environments/environment';
 import { Button } from '../../../../shared/ui/button/button';
+import { MFA_SETUP_URL } from '../../../../core/guards/mfa-enrollment.guard';
 
-const REMEMBERED_EMAIL_KEY = 'onevo_admin_remembered_email';
+const REMEMBERED_EMAIL_KEY = 'crownus_admin_remembered_email';
 
 @Component({
   selector: 'app-login',
@@ -68,7 +69,8 @@ export class Login {
         this.logDebug('Login succeeded', { userId: context.userId, role: context.platformRole });
         this.sessionService.setSession(context);
         this.permissionStore.setAuthorizationContext(context);
-        this.router.navigateByUrl('/');
+        // F-02: a not-yet-enrolled admin holds an enrollment-only session; send them to setup.
+        this.router.navigateByUrl(context.mfaEnrollmentRequired ? MFA_SETUP_URL : '/');
       },
       error: (error: HttpErrorResponse) => {
         this.logDebug('Login failed', { status: error.status, url: error.url, message: error.message });

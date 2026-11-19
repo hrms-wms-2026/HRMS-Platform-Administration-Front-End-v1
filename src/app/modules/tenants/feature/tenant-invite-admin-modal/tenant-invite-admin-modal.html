@@ -1,0 +1,42 @@
+<app-modal [open]="open()" title="Invite Tenant Admin" (closed)="closed.emit()">
+  @if (errorMessage(); as message) {
+    <app-error-banner [message]="message" (retry)="loadRoles()" />
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-4 flex flex-col gap-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        <label for="inviteEmail" class="audit-filter-label">Email</label>
+        <input id="inviteEmail" type="email" formControlName="email" class="audit-filter-input" />
+      </div>
+      <div>
+        <label for="inviteFirstName" class="audit-filter-label">First Name</label>
+        <input id="inviteFirstName" type="text" formControlName="firstName" class="audit-filter-input" />
+      </div>
+      <div>
+        <label for="inviteLastName" class="audit-filter-label">Last Name</label>
+        <input id="inviteLastName" type="text" formControlName="lastName" class="audit-filter-input" />
+      </div>
+      <div class="sm:col-span-2">
+        <label for="inviteRole" class="audit-filter-label">Role</label>
+        <select id="inviteRole" formControlName="roleId" class="audit-filter-input">
+          <option value="">Select a role</option>
+          @for (role of roles(); track role.id) {
+            <option [value]="role.id">{{ role.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <app-button label="Cancel" variant="secondary" type="button" (clicked)="closed.emit()" />
+      <app-button
+        label="Send Invitation"
+        variant="indigo"
+        type="submit"
+        [loading]="submitting()"
+        [disabled]="loadingRoles()"
+      />
+    </div>
+  </form>
+</app-modal>

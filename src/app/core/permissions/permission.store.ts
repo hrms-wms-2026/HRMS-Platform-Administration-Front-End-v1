@@ -26,6 +26,15 @@ export const PermissionStore = signalStore(
       return store.permissions().includes(permission);
     },
 
+    /**
+     * Route/sidebar-gating check. No permission requirement → allowed;
+     * otherwise the caller must hold that exact code. admin/v1/auth/me returns
+     * the caller's permissions, so a user with none sees only ungated pages.
+     */
+    canAccess(permission?: string): boolean {
+      return !permission || store.permissions().includes(permission);
+    },
+
     hasAnyPermission(permissions: string[]): boolean {
       return permissions.some((permission) => store.permissions().includes(permission));
     },

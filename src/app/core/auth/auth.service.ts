@@ -20,6 +20,8 @@ interface AdminSessionResponse {
   platform_role: string;
   expires_at: string;
   mfa_required: boolean;
+  /** Absent on older backends; treated as false. */
+  mfa_enrollment_required?: boolean;
   permissions?: string[];
 }
 
@@ -30,6 +32,7 @@ function toAuthContext(response: AdminSessionResponse): AuthContext {
     platformRole: response.platform_role,
     expiresAt: response.expires_at,
     mfaRequired: response.mfa_required,
+    mfaEnrollmentRequired: response.mfa_enrollment_required ?? false,
     permissions: response.permissions ?? [],
     scopes: {},
     entitlements: [],
@@ -57,14 +60,6 @@ export class AuthService {
         withCredentials: true,
       })
       .pipe(map(toAuthContext));
-  }
-
-  refresh(): Observable<void> {
-    return this.http.post<void>(
-      `${this.baseUrl}${API_ENDPOINTS.auth.refresh}`,
-      {},
-      { withCredentials: true },
-    );
   }
 
   logout(): Observable<void> {
@@ -106,6 +101,14 @@ export class AuthService {
     return this.http.post<void>(
       `${this.baseUrl}${API_ENDPOINTS.auth.resetPassword}`,
       { token, newPassword },
+      { withCredentials: true },
+    );
+  }
+
+  acceptInvite(token: string, password: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}${API_ENDPOINTS.auth.acceptInvite}`,
+      { token, password },
       { withCredentials: true },
     );
   }

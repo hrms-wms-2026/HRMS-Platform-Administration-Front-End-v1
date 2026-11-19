@@ -1,0 +1,84 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div
+    class="fixed inset-0 bg-slate-900/50"
+    role="button"
+    tabindex="0"
+    aria-label="Close dialog"
+    (click)="onBackdropClick()"
+    (keydown.enter)="onBackdropClick()"
+    (keydown.space)="$event.preventDefault(); onBackdropClick()"
+  ></div>
+  <div
+    class="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-8 shadow-2xl dark:bg-slate-900"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="editPaymentGatewayTitle"
+  >
+    <h2 id="editPaymentGatewayTitle" class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+      Edit Payment Gateway
+    </h2>
+    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+      Update metadata and country routes for
+      <span class="font-medium">{{ gateway().displayName }}</span>
+      ({{ gateway().gatewayKey }}).
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 flex flex-col gap-4">
+      @if (errorMessage(); as message) {
+        <p class="text-sm text-red-700">{{ message }}</p>
+      }
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <p class="audit-filter-label">Provider</p>
+          <p class="audit-filter-input bg-slate-50 capitalize dark:bg-slate-800">{{ gateway().provider }}</p>
+        </div>
+        <div>
+          <p class="audit-filter-label">Environment</p>
+          <p class="audit-filter-input bg-slate-50 capitalize dark:bg-slate-800">{{ gateway().environment }}</p>
+        </div>
+        <div class="sm:col-span-2">
+          <label for="editDisplayName" class="audit-filter-label">Display Name</label>
+          <input id="editDisplayName" type="text" formControlName="displayName" class="audit-filter-input" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="editCountryCodes" class="audit-filter-label">Country Routes</label>
+          <input
+            id="editCountryCodes"
+            type="text"
+            formControlName="countryCodes"
+            class="audit-filter-input"
+            placeholder="US, GB, LK"
+          />
+          <p class="mt-1 text-xs text-slate-500">Comma-separated ISO 3166-1 alpha-2 codes</p>
+        </div>
+        <div>
+          <label for="editPublicKey" class="audit-filter-label">Public Key (optional)</label>
+          <input id="editPublicKey" type="text" formControlName="publicKey" class="audit-filter-input" />
+        </div>
+        <div>
+          <label for="editMerchantId" class="audit-filter-label">Merchant ID (optional)</label>
+          <input id="editMerchantId" type="text" formControlName="merchantId" class="audit-filter-input" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="editWebhookUrl" class="audit-filter-label">Webhook URL (optional)</label>
+          <input id="editWebhookUrl" type="url" formControlName="webhookUrl" class="audit-filter-input" />
+        </div>
+        <div class="sm:col-span-2">
+          <label for="editLogoUrl" class="audit-filter-label">Logo URL (optional)</label>
+          <input id="editLogoUrl" type="url" formControlName="logoUrl" class="audit-filter-input" />
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        Credential secrets are not shown here. Use Rotate to replace stored secrets. Use Activate/Deactivate in the
+        gateway list to change active status.
+      </p>
+
+      <div class="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <app-button label="Cancel" variant="secondary" type="button" (clicked)="cancel()" />
+        <app-button label="Save Changes" variant="indigo" type="submit" [loading]="loading()" />
+      </div>
+    </form>
+  </div>
+</div>

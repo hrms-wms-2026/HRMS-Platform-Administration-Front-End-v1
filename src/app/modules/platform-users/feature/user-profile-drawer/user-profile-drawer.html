@@ -1,0 +1,194 @@
+<div class="fixed inset-0 z-50 flex justify-end">
+  <div
+    class="fixed inset-0 bg-slate-900/50"
+    role="button"
+    tabindex="0"
+    aria-label="Close drawer"
+    (click)="close()"
+    (keydown.enter)="close()"
+    (keydown.space)="$event.preventDefault(); close()"
+  ></div>
+  <div class="relative z-10 flex h-full w-96 flex-col bg-white dark:bg-slate-900 shadow-2xl">
+    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">User Profile</h2>
+      <button
+        type="button"
+        (click)="close()"
+        class="text-xl leading-none text-slate-400 dark:text-slate-500 hover:text-slate-600"
+        aria-label="Close"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-6 py-4">
+      @if (loading()) {
+        <app-drawer-content-skeleton />
+      } @else if (errorMessage(); as message) {
+        <app-error-banner [message]="message" (retry)="close()" />
+      } @else if (user(); as u) {
+        <div class="flex items-center gap-3">
+          <span
+            class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700"
+          >
+            {{ initials(u.fullName) }}
+          </span>
+          <div class="min-w-0">
+            <p class="truncate font-medium text-slate-900 dark:text-slate-100">{{ u.fullName }}</p>
+            <p class="truncate text-sm text-slate-500 dark:text-slate-400">{{ u.email }}</p>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <app-status-badge [label]="labelFor(u.status)" [tone]="toneFor(u.status)" />
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Created</p>
+            <p class="text-slate-900 dark:text-slate-100">{{ u.createdAt | date: 'mediumDate' }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Last Login</p>
+            <p class="text-slate-900 dark:text-slate-100">{{ u.lastLoginAt ? (u.lastLoginAt | date: 'mediumDate') : 'Never' }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
+          <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Roles</p>
+          <div class="mt-2 flex flex-col gap-2">
+            @for (role of allRoles(); track role.id) {
+              <label class="flex select-none items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  [checked]="checkedRoleIds().has(role.id)"
+                  [disabled]="!canManageRoles()"
+                  (change)="toggleRole(role.id)"
+                  class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+                />
+                {{ role.name }}
+              </label>
+            }
+          </div>
+        </div>
+
+        @if (canManageRoles()) {
+          <div class="mt-6 flex justify-end">
+            <app-button
+              label="Save Changes"
+              variant="indigo"
+              [loading]="saving()"
+              [disabled]="!hasChanges()"
+              (clicked)="save()"
+            />
+          </div>
+        }
+
+        @if (user(); as mfaUser) {
+          <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4" data-testid="mfa-section">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Two-factor authentication</p>
+                <div class="mt-2">
+                  <app-status-badge [label]="mfaLabel(mfaUser.mfaStatus)" [tone]="mfaTone(mfaUser.mfaStatus)" />
+                </div>
+              </div>
+              @if (canResetMfa()) {
+                <app-button
+                  label="Reset MFA"
+                  variant="secondary"
+                  loadingText="Resetting…"
+                  [loading]="resettingMfa()"
+                  (clicked)="askMfaReset()"
+                />
+              }
+            </div>
+            @if (canResetMfa()) {
+              <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Use this when they lost their authenticator. They are signed out and must set up two-factor
+                authentication again at their next sign-in.
+              </p>
+            }
+          </div>
+
+          <app-confirmation-dialog
+            [open]="confirmingMfaReset()"
+            title="Reset two-factor authentication?"
+            [message]="mfaResetMessage()"
+            confirmLabel="Reset MFA"
+            (confirm)="confirmMfaReset()"
+            (cancelled)="cancelMfaReset()"
+          />
+        }
+
+        @if (canViewSessions()) {
+          <div class="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Sessions</p>
+              @if (canManageSessions() && activeSessionCount() > 0) {
+                <app-button
+                  label="Revoke All"
+                  variant="secondary"
+                  loadingText="Revoking…"
+                  [loading]="revokingAll()"
+                  (clicked)="revokeAllSessions()"
+                />
+              }
+            </div>
+
+            @if (sessionsLoading()) {
+              <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Loading sessions…</p>
+            } @else if (sessionsErrorMessage(); as sessionsError) {
+              <p class="mt-3 text-sm text-red-600">{{ sessionsError }}</p>
+            } @else if (sessions().length === 0) {
+              <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">No sessions recorded.</p>
+            } @else {
+              <div class="mt-3 flex flex-col gap-3">
+                @for (session of sessions(); track session.id) {
+                  @let status = sessionStatus(session);
+                  <div class="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
+                          {{ session.deviceInfo ?? 'Unknown device' }}
+                        </p>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          {{ session.ipAddress ?? 'Unknown IP' }}
+                        </p>
+                      </div>
+                      <app-status-badge
+                        [label]="sessionStatusLabel(status)"
+                        [tone]="sessionStatusTone(status)"
+                      />
+                    </div>
+                    <div class="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <div>
+                        <span class="font-medium uppercase">Created</span>
+                        <p class="text-slate-700 dark:text-slate-300">{{ session.createdAt | date: 'medium' }}</p>
+                      </div>
+                      <div>
+                        <span class="font-medium uppercase">Expires</span>
+                        <p class="text-slate-700 dark:text-slate-300">{{ session.expiresAt | date: 'medium' }}</p>
+                      </div>
+                    </div>
+                    @if (canManageSessions() && status === 'active') {
+                      <div class="mt-3">
+                        <app-button
+                          label="Revoke"
+                          variant="secondary"
+                          loadingText="Revoking…"
+                          [loading]="revokingSessionId() === session.id"
+                          (clicked)="revokeSession(session.id)"
+                        />
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

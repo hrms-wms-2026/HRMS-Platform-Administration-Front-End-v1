@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -7,6 +8,8 @@ import { SessionService } from '../../../../core/auth/session.service';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { environment } from '../../../../../environments/environment';
 import { Button } from '../../../../shared/ui/button/button';
+
+const CODE_PATTERN = /^\d{6}$/;
 
 @Component({
   selector: 'app-mfa-verify',
@@ -24,8 +27,27 @@ export class MfaVerify {
   protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly codeForm = this.formBuilder.nonNullable.group({
-    code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    code: ['', [Validators.required, Validators.pattern(CODE_PATTERN)]],
   });
+
+  private readonly codeValue = toSignal(this.codeForm.controls.code.valueChanges, {
+    initialValue: '',
+  });
+  private lastAutoSubmittedCode: string | null = null;
+
+  constructor() {
+    // Auto-submits once a full 6-digit code is present, so the user isn't forced to
+    // click Verify after typing/pasting/autofilling the code. Guarded by the code
+    // value itself (not `loading`) so re-running the effect when loading flips back
+    // to false doesn't re-trigger a submit for the same code.
+    effect(() => {
+      const code = this.codeValue();
+      if (CODE_PATTERN.test(code) && code !== this.lastAutoSubmittedCode) {
+        this.lastAutoSubmittedCode = code;
+        this.submit();
+      }
+    });
+  }
 
   submit(): void {
     if (this.codeForm.invalid) {

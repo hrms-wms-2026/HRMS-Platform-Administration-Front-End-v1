@@ -3,7 +3,8 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": "2837442d-4412-4c51-ab1b-f204a6680439"
+    "analytics": false,
+    "schematicCollections": ["angular-eslint"]
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -25,9 +26,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {
@@ -48,6 +47,28 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
+                }
+              ]
+            },
+            "singlehost": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
+              "baseHref": "/admin-console/",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.singlehost.ts"
                 }
               ]
             },
@@ -83,7 +104,10 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": ["admin.localhost"]
+            "allowedHosts": ["admin.crownus.test"],
+            "ssl": true,
+            "sslCert": ".certs/crownus-cert.pem",
+            "sslKey": ".certs/crownus-key.pem"
           },
           "configurations": {
             "production": {
@@ -94,9 +118,20 @@
             },
             "development": {
               "buildTarget": "platform-administration:build:development"
+            },
+            "e2e": {
+              "buildTarget": "platform-administration:build:development",
+              "ssl": false,
+              "allowedHosts": true
             }
           },
           "defaultConfiguration": "development"
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
         }
       }
     }

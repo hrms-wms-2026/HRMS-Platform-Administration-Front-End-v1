@@ -3,7 +3,7 @@ import { Component, computed, input, output } from '@angular/core';
 @Component({
   selector: 'app-pagination',
   template: `
-    <div class="flex items-center justify-between gap-4 px-2 py-3 text-sm text-slate-600">
+    <div class="flex items-center justify-between gap-4 px-2 py-3 text-sm text-slate-600 dark:text-slate-300">
       <span>Page {{ page() }} of {{ totalPages() }}</span>
       <div class="flex gap-2">
         <button

@@ -1,0 +1,57 @@
+<div class="relative">
+  <div class="relative">
+    <input
+      type="text"
+      class="w-full rounded-lg border px-3 py-2 pr-8 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-600/30 dark:bg-slate-900"
+      [class.border-slate-300]="!invalid()"
+      [class.border-red-500]="invalid()"
+      [class.bg-slate-50]="isDisabled() || disabled()"
+      [class.cursor-not-allowed]="isDisabled() || disabled()"
+      [disabled]="isDisabled() || disabled()"
+      [placeholder]="placeholder()"
+      [value]="inputDisplay()"
+      (focus)="onInputFocus()"
+      (input)="onInput($any($event.target).value)"
+      (keydown)="onInputKeydown($event)"
+    />
+    @if (value() && !(isDisabled() || disabled())) {
+      <button
+        type="button"
+        class="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+        aria-label="Clear selection"
+        (mousedown)="clearSelection($event)"
+      >
+        ×
+      </button>
+    }
+  </div>
+
+  @if (open()) {
+    <ul
+      class="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+    >
+      @if (visibleOptions().length === 0) {
+        <li class="px-3 py-2 text-sm text-slate-500">{{ emptyMessage() }}</li>
+      } @else {
+        @if (!query().trim() && pinnedOptions().length > 0) {
+          <li class="px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">
+            Popular — type to search all
+          </li>
+        }
+        @for (option of visibleOptions(); track option.value) {
+          <li>
+            <button
+              type="button"
+              class="w-full px-3 py-2 text-left text-sm hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+              [class.bg-indigo-50]="option.value === value()"
+              [class.font-medium]="option.value === value()"
+              (mousedown)="selectOption(option)"
+            >
+              {{ option.label }}
+            </button>
+          </li>
+        }
+      }
+    </ul>
+  }
+</div>

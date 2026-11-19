@@ -1,0 +1,94 @@
+<button
+  type="button"
+  class="audit-filter-input flex min-w-[220px] items-center justify-between gap-2 text-left"
+  [class.text-slate-400]="!hasValue()"
+  [class.dark:text-slate-500]="!hasValue()"
+  aria-haspopup="dialog"
+  [attr.aria-expanded]="open()"
+  (click)="toggle()"
+>
+  <span class="truncate">{{ displayLabel() }}</span>
+  <svg
+    class="h-4 w-4 flex-shrink-0 text-slate-400 dark:text-slate-500"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    aria-hidden="true"
+  >
+    <rect x="3.75" y="5.25" width="16.5" height="15" rx="1.5" />
+    <path stroke-linecap="round" d="M3.75 9.75h16.5M8.25 3v3M15.75 3v3" />
+  </svg>
+</button>
+
+@if (open()) {
+  <div
+    role="dialog"
+    aria-label="Select date range"
+    class="absolute left-0 z-20 mt-2 flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-lg sm:flex-row dark:border-slate-700 dark:bg-slate-900"
+  >
+    <div class="w-64">
+      <div class="mb-2 flex items-center justify-between">
+        <button
+          type="button"
+          class="rounded p-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          aria-label="Previous month"
+          (click)="prevMonth()"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ leftMonthLabel() }}</span>
+        <span class="h-6 w-6"></span>
+      </div>
+      <div class="grid grid-cols-7 gap-y-1 text-center">
+        @for (label of dayLabels; track $index) {
+          <span class="text-xs font-medium text-slate-400 dark:text-slate-500">{{ label }}</span>
+        }
+        @for (day of leftMonthDays(); track day.iso) {
+          <button
+            type="button"
+            [class]="dayButtonClasses(day.iso, day.inCurrentMonth)"
+            (click)="selectDay(day.iso)"
+            (mouseenter)="onDayHover(day.iso)"
+          >
+            {{ day.dayNumber }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="w-64">
+      <div class="mb-2 flex items-center justify-between">
+        <span class="h-6 w-6"></span>
+        <span class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ rightMonthLabel() }}</span>
+        <button
+          type="button"
+          class="rounded p-1 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          aria-label="Next month"
+          (click)="nextMonth()"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-7 gap-y-1 text-center">
+        @for (label of dayLabels; track $index) {
+          <span class="text-xs font-medium text-slate-400 dark:text-slate-500">{{ label }}</span>
+        }
+        @for (day of rightMonthDays(); track day.iso) {
+          <button
+            type="button"
+            [class]="dayButtonClasses(day.iso, day.inCurrentMonth)"
+            (click)="selectDay(day.iso)"
+            (mouseenter)="onDayHover(day.iso)"
+          >
+            {{ day.dayNumber }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,187 @@
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { ServiceKeysService } from '../../data/service-keys.service';
+import {
+  ServiceKey,
+  ServiceKeyProviderOption,
+  ServiceKeyVerificationMode,
+  formatServiceKeyVerificationToast,
+  getServiceKeyVerificationBadgeLabel,
+} from '../../data/service-key.model';
+import { PermissionStore } from '../../../../core/permissions/permission.store';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { Button } from '../../../../shared/ui/button/button';
+import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
+import { TableSkeleton } from '../../../../shared/ui/table-skeleton/table-skeleton';
+import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
+import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
+import { AddServiceKeyModal } from '../add-service-key-modal/add-service-key-modal';
+import { RotateServiceKeyModal } from '../rotate-service-key-modal/rotate-service-key-modal';
+
+@Component({
+  selector: 'app-service-keys-list',
+  imports: [
+    Button,
+    StatusBadge,
+    TableSkeleton,
+    ErrorBanner,
+    EmptyState,
+    DatePipe,
+    AddServiceKeyModal,
+    RotateServiceKeyModal,
+    NgTemplateOutlet,
+  ],
+  templateUrl: './service-keys-list.html',
+})
+export class ServiceKeysList implements OnInit {
+  private readonly serviceKeysService = inject(ServiceKeysService);
+  private readonly notificationService = inject(NotificationService);
+  protected readonly permissionStore = inject(PermissionStore);
+
+  protected readonly canView = computed(() => this.permissionStore.hasPermission('platform.system_config.read'));
+  protected readonly canManage = computed(() =>
+    this.permissionStore.hasPermission('platform.system_config.manage'),
+  );
+
+  protected readonly loading = signal(false);
+  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly keys = signal<ServiceKey[]>([]);
+  private readonly providers = signal<ServiceKeyProviderOption[]>([]);
+  protected readonly verifyingKey = signal<string | null>(null);
+  protected readonly editingKey = signal<string | null>(null);
+  protected readonly editingName = signal('');
+  protected readonly showAddModal = signal(false);
+  protected readonly rotatingKey = signal<string | null>(null);
+
+  ngOnInit(): void {
+    if (!this.canView()) {
+      return;
+    }
+    this.loadKeys();
+    this.serviceKeysService.listProviders().subscribe({
+      next: (providers) => this.providers.set(providers),
+      error: () => this.providers.set([]),
+    });
+  }
+
+  protected loadKeys(): void {
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    this.serviceKeysService.list().subscribe({
+      next: (keys) => {
+        this.keys.set(keys);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('Something went wrong. Please try again.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  /** Verification style comes from the backend; unknown providers read as the safer "format only". */
+  private verificationMode(serviceKey: string): ServiceKeyVerificationMode {
+    return (
+      this.providers().find((provider) => provider.providerKey === serviceKey)?.verificationMode ??
+      'format-only'
+    );
+  }
+
+  protected verificationBadgeLabel(serviceKey: string): string {
+    return getServiceKeyVerificationBadgeLabel(this.verificationMode(serviceKey));
+  }
+
+  protected verificationBadgeTone(serviceKey: string): 'indigo' | 'neutral' {
+    return this.verificationMode(serviceKey) === 'live' ? 'indigo' : 'neutral';
+  }
+
+  protected verifyKey(serviceKey: string): void {
+    this.verifyingKey.set(serviceKey);
+    this.serviceKeysService.verify(serviceKey).subscribe({
+      next: (result) => {
+        this.verifyingKey.set(null);
+        const message = formatServiceKeyVerificationToast(this.verificationMode(serviceKey), result);
+        if (result.success) {
+          this.notificationService.success(message);
+        } else {
+          this.notificationService.error(message);
+        }
+        this.loadKeys();
+      },
+      error: () => {
+        this.verifyingKey.set(null);
+        this.notificationService.error('Could not verify the service key.');
+      },
+    });
+  }
+
+  protected toggleActive(key: ServiceKey): void {
+    this.serviceKeysService.setActive(key.serviceKey, !key.isActive).subscribe({
+      next: () => {
+        this.notificationService.success(key.isActive ? 'Service key deactivated.' : 'Service key activated.');
+        this.loadKeys();
+      },
+      error: (error) => {
+        this.notificationService.error(error.error?.detail ?? 'Could not update the service key.');
+      },
+    });
+  }
+
+  protected startEditName(key: ServiceKey): void {
+    this.editingKey.set(key.serviceKey);
+    this.editingName.set(key.displayName);
+  }
+
+  protected cancelEditName(): void {
+    this.editingKey.set(null);
+  }
+
+  protected saveEditName(serviceKey: string): void {
+    const displayName = this.editingName().trim();
+    if (!displayName) {
+      this.editingKey.set(null);
+      return;
+    }
+
+    this.serviceKeysService.updateDisplayName(serviceKey, displayName).subscribe({
+      next: () => {
+        this.editingKey.set(null);
+        this.notificationService.success('Display name updated.');
+        this.loadKeys();
+      },
+      error: (error) => {
+        this.editingKey.set(null);
+        this.notificationService.error(error.error?.detail ?? 'Could not update the display name.');
+      },
+    });
+  }
+
+  protected openAddModal(): void {
+    this.showAddModal.set(true);
+  }
+
+  protected onAddModalClosed(): void {
+    this.showAddModal.set(false);
+  }
+
+  protected onServiceKeyCreated(): void {
+    this.showAddModal.set(false);
+    this.notificationService.success('Service key created.');
+    this.loadKeys();
+  }
+
+  protected openRotateModal(serviceKey: string): void {
+    this.rotatingKey.set(serviceKey);
+  }
+
+  protected onRotateModalClosed(): void {
+    this.rotatingKey.set(null);
+  }
+
+  protected onKeyRotated(): void {
+    this.rotatingKey.set(null);
+    this.notificationService.success('Service key rotated.');
+    this.loadKeys();
+  }
+}

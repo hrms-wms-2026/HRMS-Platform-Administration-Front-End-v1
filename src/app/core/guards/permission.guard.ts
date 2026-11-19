@@ -6,7 +6,7 @@ export const permissionGuard: CanActivateFn = (route) => {
   const store = inject(PermissionStore);
   const router = inject(Router);
 
-  const permission = route.data['permission'] as string;
+  const permission = route.data['permission'] as string | undefined;
 
-  return store.hasPermission(permission) ? true : router.createUrlTree(['/access-denied']);
+  return store.canAccess(permission) ? true : router.createUrlTree(['/access-denied']);
 };

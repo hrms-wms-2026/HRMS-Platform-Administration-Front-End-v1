@@ -1,0 +1,172 @@
+<div class="flex flex-col gap-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Tenant Roles</h2>
+      <p class="text-xs text-slate-500">Roles and permissions scoped to this tenant</p>
+    </div>
+    @if (canManage()) {
+      <app-button label="Create Role" variant="secondary" (clicked)="openCreate()" />
+    }
+  </div>
+
+  @if (loading()) {
+    <app-table-skeleton [rows]="4" [columns]="['8rem', '5rem', '4rem', '5rem']" />
+  } @else if (errorMessage(); as message) {
+    <app-error-banner [message]="message" (retry)="loadRoles()" />
+  } @else if (roles().length === 0) {
+    <app-empty-state title="No tenant roles yet" description="Create a role or apply a role template." />
+  } @else {
+    <div class="overflow-x-auto scrollbar-hidden">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Permissions</th>
+            <th>Source</th>
+            <th>Updated</th>
+            @if (canManage()) {
+              <th></th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (role of roles(); track role.id) {
+            <tr>
+              <td>
+                <div class="table-primary">{{ role.name }}</div>
+                @if (role.description) {
+                  <div class="table-secondary">{{ role.description }}</div>
+                }
+              </td>
+              <td class="table-secondary">{{ role.permissionCount }}</td>
+              <td>
+                @if (role.isSystem) {
+                  <app-status-badge label="System" tone="indigo" />
+                } @else if (role.sourceTemplateId) {
+                  <app-status-badge label="Template" tone="neutral" />
+                } @else {
+                  <span class="text-slate-400">Custom</span>
+                }
+              </td>
+              <td class="table-meta whitespace-nowrap">
+                {{ role.updatedAt ? (role.updatedAt | date: 'mediumDate') : (role.createdAt | date: 'mediumDate') }}
+              </td>
+              @if (canManage()) {
+                <td class="text-right">
+                  <app-button label="Permissions" variant="secondary" (clicked)="openPermissions(role)" />
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<app-modal [open]="createOpen()" title="Create Tenant Role" (closed)="closeCreate()">
+  @if (catalogError(); as message) {
+    <app-error-banner [message]="message" />
+  }
+
+  <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="mt-4 flex flex-col gap-4">
+    <div>
+      <label for="roleName" class="audit-filter-label">Role Name</label>
+      <input id="roleName" type="text" formControlName="name" class="audit-filter-input" />
+    </div>
+    <div>
+      <label for="roleDescription" class="audit-filter-label">Description</label>
+      <textarea
+        id="roleDescription"
+        formControlName="description"
+        rows="2"
+        class="audit-filter-input !h-auto min-h-[72px] py-2"
+      ></textarea>
+    </div>
+
+    <div>
+      <p class="audit-filter-label">Permissions</p>
+      @if (loadingCatalog()) {
+        <app-checkbox-grid-skeleton [items]="8" />
+      } @else {
+        <div class="max-h-64 overflow-y-auto rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+          @for (group of permissionGroups(); track group.moduleKey) {
+            <div class="mb-4 last:mb-0">
+              <p class="sidebar-section-title mb-2 mt-0 px-0">{{ group.moduleKey }}</p>
+              <div class="flex flex-col gap-2">
+                @for (permission of group.permissions; track permission.id) {
+                  <label class="flex items-start gap-3 text-sm">
+                    <input
+                      type="checkbox"
+                      [checked]="createPermissionIds().has(permission.id!)"
+                      (change)="toggleCreatePermission(permission.id!)"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+                    />
+                    <span>
+                      <span class="font-medium text-slate-900 dark:text-slate-100">{{ permission.code }}</span>
+                      <span class="block text-xs text-slate-500">{{ permission.description }}</span>
+                    </span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <app-button label="Cancel" variant="secondary" type="button" (clicked)="closeCreate()" />
+      <app-button label="Create Role" variant="indigo" type="submit" [loading]="creating()" />
+    </div>
+  </form>
+</app-modal>
+
+<app-modal
+  [open]="permissionsOpen()"
+  [title]="'Permissions · ' + (activeRole()?.name ?? '')"
+  (closed)="closePermissions()"
+>
+  @if (catalogError(); as message) {
+    <app-error-banner [message]="message" />
+  }
+
+  <p class="mt-2 text-xs text-slate-500">
+    Assigning permissions replaces the role's full permission set for this tenant.
+  </p>
+
+  @if (loadingCatalog()) {
+    <div class="mt-4">
+      <app-checkbox-grid-skeleton [items]="8" />
+    </div>
+  } @else {
+    <div class="mt-4 max-h-80 overflow-y-auto rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+      @for (group of permissionGroups(); track group.moduleKey) {
+        <div class="mb-4 last:mb-0">
+          <p class="sidebar-section-title mb-2 mt-0 px-0">{{ group.moduleKey }}</p>
+          <div class="flex flex-col gap-2">
+            @for (permission of group.permissions; track permission.id) {
+              <label class="flex items-start gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  [checked]="selectedPermissionIds().has(permission.id!)"
+                  (change)="togglePermission(permission.id!)"
+                  class="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600/30"
+                />
+                <span>
+                  <span class="font-medium text-slate-900 dark:text-slate-100">{{ permission.code }}</span>
+                  <span class="block text-xs text-slate-500">{{ permission.description }}</span>
+                </span>
+              </label>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="mt-4 flex justify-end gap-2">
+    <app-button label="Cancel" variant="secondary" type="button" (clicked)="closePermissions()" />
+    <app-button label="Save Permissions" variant="indigo" (clicked)="savePermissions()" [loading]="savingPermissions()" />
+  </div>
+</app-modal>
