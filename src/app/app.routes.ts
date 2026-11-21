@@ -427,6 +427,18 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'system-config/rate-limits',
+        canActivate: [permissionGuard],
+        data: {
+          breadcrumb: { section: 'Platform Configuration', page: 'Rate Limits' },
+          permission: 'platform.system_config.read',
+        },
+        loadComponent: () =>
+          import('./modules/system-config/feature/rate-limits-list/rate-limits-list').then(
+            (m) => m.RateLimitsList,
+          ),
+      },
+      {
         path: 'system-config/tray-releases',
         canActivate: [permissionGuard],
         data: {

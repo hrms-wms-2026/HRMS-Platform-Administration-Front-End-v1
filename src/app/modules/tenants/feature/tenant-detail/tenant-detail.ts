@@ -20,6 +20,7 @@ import { TenantSubscriptionPanel } from '../tenant-subscription-panel/tenant-sub
 import { TenantInvoicesPanel } from '../tenant-invoices-panel/tenant-invoices-panel';
 import { TenantSessionsPanel } from '../tenant-sessions-panel/tenant-sessions-panel';
 import { TenantAuditLogPanel } from '../tenant-audit-log-panel/tenant-audit-log-panel';
+import { ScopedRateLimitsPanel } from '../../../system-config/feature/scoped-rate-limits-panel/scoped-rate-limits-panel';
 
 interface StatusAction {
   action: string;
@@ -60,6 +61,7 @@ const ACTIONS_BY_STATUS: Record<string, StatusAction[]> = {
     TenantInvoicesPanel,
     TenantSessionsPanel,
     TenantAuditLogPanel,
+    ScopedRateLimitsPanel,
   ],
   templateUrl: './tenant-detail.html',
 })
@@ -71,6 +73,7 @@ export class TenantDetailComponent implements OnInit {
   protected readonly permissionStore = inject(PermissionStore);
 
   protected readonly tenantId = this.route.snapshot.paramMap.get('id')!;
+  protected readonly rateLimitTarget = { scope: 'tenant' as const, tenantId: this.tenantId };
 
   protected readonly canManage = computed(() => this.permissionStore.hasPermission('platform.tenants.manage'));
   protected readonly canRead = computed(() => this.permissionStore.hasPermission('platform.tenants.read'));

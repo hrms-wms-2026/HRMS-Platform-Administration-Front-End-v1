@@ -1,0 +1,59 @@
+@if (canView()) {
+  <section class="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900" data-testid="scoped-rate-limits">
+    <div>
+      <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Rate limits</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        @if (isPlan()) {
+          Applies to every tenant on this plan, unless the tenant has its own override.
+        } @else {
+          The limits this tenant gets now, and where each one comes from.
+        }
+      </p>
+    </div>
+
+    @if (loading()) {
+      <p class="text-sm text-slate-500 dark:text-slate-400">Loading…</p>
+    } @else if (errorMessage(); as message) {
+      <app-error-banner [message]="message" (retry)="load()" />
+    } @else {
+      <ul class="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+        @for (limit of limits(); track limit.limitName) {
+          <li class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between" [attr.data-limit]="limit.limitName">
+            <div class="min-w-0">
+              <div class="font-medium text-slate-900 dark:text-slate-100">{{ labels[limit.limitName].title }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">{{ labels[limit.limitName].countedBy }}</div>
+            </div>
+            <div class="flex flex-col gap-1 text-sm sm:items-end">
+              @if (limit.override) {
+                <span class="font-medium text-slate-900 dark:text-slate-100">{{ format(limit.override, hasBurst(limit)) }}</span>
+                <app-status-badge [label]="isPlan() ? 'Plan override' : 'Tenant override'" tone="indigo" />
+              } @else {
+                <span class="font-medium text-slate-900 dark:text-slate-100">{{ format(limit.effective, hasBurst(limit)) }}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400" data-testid="rate-limit-source">{{ inheritedText(limit) }}</span>
+              }
+            </div>
+            @if (canManage()) {
+              <div class="flex flex-wrap gap-2">
+                <app-button [label]="limit.override ? 'Edit' : 'Override'" variant="secondary" (clicked)="startEdit(limit)" />
+                @if (limit.override) {
+                  <app-button label="Remove" variant="secondary" (clicked)="startRemove(limit)" />
+                }
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (editing(); as edit) {
+    <app-edit-rate-limit-modal
+      [target]="target()"
+      [limit]="edit.limit"
+      [mode]="edit.mode"
+      [scopeLabel]="scopeLabel()"
+      (saved)="onSaved()"
+      (closed)="closeEdit()"
+    />
+  }
+}

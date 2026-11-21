@@ -67,6 +67,9 @@
         </div>
       }
     </div>
+
+    <!-- Task 48: gated by platform.system_config.read/manage inside the panel, not by plan permissions. -->
+    <app-scoped-rate-limits-panel class="mt-4 block" [target]="rateLimitTarget" [scopeLabel]="'Plan: ' + p.name" />
   }
 
   @if (pendingArchive()) {
