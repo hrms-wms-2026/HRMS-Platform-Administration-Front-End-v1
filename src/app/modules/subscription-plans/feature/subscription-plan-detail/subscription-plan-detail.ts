@@ -16,9 +16,19 @@ import { ErrorBanner } from '../../../../shared/ui/error-banner/error-banner';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
 import { SubscriptionPlanForm } from '../subscription-plan-form/subscription-plan-form';
 
+import { ScopedRateLimitsPanel } from '../../../system-config/feature/scoped-rate-limits-panel/scoped-rate-limits-panel';
+
 @Component({
   selector: 'app-subscription-plan-detail',
-  imports: [Button, StatusBadge, PageDetailSkeleton, ErrorBanner, ConfirmationDialog, SubscriptionPlanForm],
+  imports: [
+    Button,
+    StatusBadge,
+    PageDetailSkeleton,
+    ErrorBanner,
+    ConfirmationDialog,
+    SubscriptionPlanForm,
+    ScopedRateLimitsPanel,
+  ],
   templateUrl: './subscription-plan-detail.html',
 })
 export class SubscriptionPlanDetail implements OnInit {
@@ -29,6 +39,7 @@ export class SubscriptionPlanDetail implements OnInit {
   protected readonly permissionStore = inject(PermissionStore);
 
   private readonly planId = this.route.snapshot.paramMap.get('id')!;
+  protected readonly rateLimitTarget = { scope: 'plan' as const, planId: this.planId };
 
   protected readonly canManage = computed(() =>
     this.permissionStore.hasPermission('platform.subscriptions.manage'),
