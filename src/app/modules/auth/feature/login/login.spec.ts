@@ -69,6 +69,21 @@ describe('Login', () => {
     expect(component['loginForm'].getRawValue().rememberEmail).toBe(true);
   });
 
+  it('pre-fills the invited email over a remembered one after accepting an invite', () => {
+    localStorage.setItem(REMEMBERED_EMAIL_KEY, 'dev@onevo.io');
+    (router as unknown as { getCurrentNavigation: jest.Mock }).getCurrentNavigation = jest
+      .fn()
+      .mockReturnValue({ extras: { state: { invitedEmail: 'new.manager@onevo.io' } } });
+
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    expect(component['loginForm'].getRawValue().email).toBe('new.manager@onevo.io');
+    expect(component['loginForm'].getRawValue().rememberEmail).toBe(false);
+    // The remembered email of whoever used this browser before is left as it was.
+    expect(localStorage.getItem(REMEMBERED_EMAIL_KEY)).toBe('dev@onevo.io');
+  });
+
   it('saves the email to localStorage on successful login when remember is checked', () => {
     authService.login.mockReturnValue(of(buildContext()));
     const fixture = createComponent();
