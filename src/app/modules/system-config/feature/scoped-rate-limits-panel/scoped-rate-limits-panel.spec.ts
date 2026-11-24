@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { ScopedRateLimitsPanel } from './scoped-rate-limits-panel';
 import { RateLimitsService } from '../../data/rate-limits.service';
-import { EffectiveRateLimit, PlanRateLimit } from '../../data/rate-limit.model';
+import { EffectiveRateLimit, PlanRateLimit, RateLimitRejections, TenantRateLimitRejections } from '../../data/rate-limit.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -32,12 +32,31 @@ describe('ScopedRateLimitsPanel', () => {
     },
   ];
 
-  let service: { getTenant: jest.Mock; getPlan: jest.Mock };
+  const rejections = (tenants: TenantRateLimitRejections[]): RateLimitRejections => ({
+    scope: 'instance',
+    note: '',
+    minutes: 60,
+    generatedAt: '2026-11-24T10:00:00Z',
+    countingSince: '2026-11-24T08:00:00Z',
+    totalRejections: tenants.reduce((sum, t) => sum + t.totalRejections, 0),
+    tenants,
+  });
+  const tenantRow = (tenantId: string, totalRejections: number): TenantRateLimitRejections => ({
+    tenantId,
+    tenantName: tenantId,
+    totalRejections,
+    byKind: [{ kind: 'User', count: totalRejections }],
+    effectiveLimits: [],
+  });
+
+  let service: { getTenant: jest.Mock; getPlan: jest.Mock; listRejections: jest.Mock };
+  let rejectionData = rejections([]);
 
   function setup(target: { scope: 'tenant'; tenantId: string } | { scope: 'plan'; planId: string }, permissions: string[]) {
     service = {
       getTenant: jest.fn().mockReturnValue(of({ tenantId: 't1', limits: tenantLimits })),
       getPlan: jest.fn().mockReturnValue(of({ subscriptionPlanId: 'p1', limits: planLimits })),
+      listRejections: jest.fn().mockImplementation(() => of(rejectionData)),
     };
     TestBed.configureTestingModule({
       imports: [ScopedRateLimitsPanel],
@@ -94,5 +113,38 @@ describe('ScopedRateLimitsPanel', () => {
     const fixture = setup({ scope: 'plan', planId: 'p1' }, ['platform.subscription_plans.read']);
     expect(service.getPlan).not.toHaveBeenCalled();
     expect(fixture.nativeElement.querySelector('[data-testid="scoped-rate-limits"]')).toBeNull();
+  });
+
+  describe('429s in the last hour (task 49)', () => {
+    const line = (fixture: ReturnType<typeof setup>) =>
+      (fixture.nativeElement.querySelector('[data-testid="tenant-recent-rejections"]') as HTMLElement | null)?.textContent ?? '';
+
+    afterEach(() => (rejectionData = rejections([])));
+
+    it('shows the tenant count when the tenant is in the list', () => {
+      rejectionData = rejections([tenantRow('t9', 40), tenantRow('t1', 12)]);
+      const fixture = setup({ scope: 'tenant', tenantId: 't1' }, ['platform.system_config.read']);
+      expect(service.listRejections).toHaveBeenCalledWith(60);
+      expect(line(fixture)).toContain('429s in the last hour: 12');
+      expect(line(fixture)).toContain('this API server only');
+    });
+
+    it('shows 0 when a short list does not have the tenant', () => {
+      rejectionData = rejections([tenantRow('t9', 40)]);
+      const fixture = setup({ scope: 'tenant', tenantId: 't1' }, ['platform.system_config.read']);
+      expect(line(fixture)).toContain('429s in the last hour: 0');
+    });
+
+    it('shows "at most" the 50th count when a full list does not have the tenant', () => {
+      rejectionData = rejections(Array.from({ length: 50 }, (_, i) => tenantRow(`x${i}`, 100 - i)));
+      const fixture = setup({ scope: 'tenant', tenantId: 't1' }, ['platform.system_config.read']);
+      expect(line(fixture)).toContain('429s in the last hour: at most 51');
+    });
+
+    it('is not loaded for a plan', () => {
+      const fixture = setup({ scope: 'plan', planId: 'p1' }, ['platform.system_config.read']);
+      expect(service.listRejections).not.toHaveBeenCalled();
+      expect(line(fixture)).toBe('');
+    });
   });
 });

@@ -100,6 +100,62 @@ export interface SetRateLimitRequest {
   rowVersion: string | null;
 }
 
+/** The limiter partition a 429 came from (task 49). */
+export type RateLimitRejectionKind =
+  | 'User'
+  | 'TrayDevice'
+  | 'Anonymous'
+  | 'AdminAnonymous'
+  | 'Admin'
+  | 'PreAuthentication';
+
+export interface RateLimitRejectionKindCount {
+  kind: RateLimitRejectionKind | string;
+  count: number;
+}
+
+export interface RateLimitRejectionLimit {
+  limitName: RateLimitName;
+  perMinute: number;
+  burst?: number | null;
+}
+
+/** One tenant's 429s. tenantId is null for requests with no tenant (signed-out, pre-sign-in, admin). */
+export interface TenantRateLimitRejections {
+  tenantId?: string | null;
+  tenantName?: string | null;
+  totalRejections: number;
+  byKind: RateLimitRejectionKindCount[];
+  effectiveLimits: RateLimitRejectionLimit[];
+}
+
+/** 429s on one API server (scope "instance") in the last `minutes` minutes, top 50 tenants. */
+export interface RateLimitRejections {
+  scope: 'instance' | string;
+  note: string;
+  minutes: number;
+  generatedAt: string;
+  countingSince: string;
+  totalRejections: number;
+  tenants: TenantRateLimitRejections[];
+}
+
+/** The API returns at most this many tenants. */
+export const MAX_REJECTION_TENANTS = 50;
+
+export const REJECTION_KIND_LABELS: Record<RateLimitRejectionKind, string> = {
+  User: 'Signed-in users',
+  TrayDevice: 'Tray devices',
+  Anonymous: 'Signed-out visitors',
+  AdminAnonymous: 'Admin sign-in page',
+  Admin: 'Platform admins',
+  PreAuthentication: 'Before sign-in (per IP)',
+};
+
+export function rejectionKindLabel(kind: string): string {
+  return REJECTION_KIND_LABELS[kind as RateLimitRejectionKind] ?? kind;
+}
+
 /** Plain-English labels from the admin-managed rate limits guide. */
 export const RATE_LIMIT_LABELS: Record<RateLimitName, { title: string; countedBy: string }> = {
   Anonymous: { title: 'Signed-out visitors', countedBy: 'Each IP address, tenant API' },

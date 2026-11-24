@@ -145,6 +145,7 @@ export const API_ENDPOINTS = {
     rateLimits: {
       list: '/system-config/rate-limits',
       changes: '/system-config/rate-limits/changes',
+      rejections: '/system-config/rate-limits/rejections',
       byName: (limitName: string) => `/system-config/rate-limits/${limitName}`,
     },
     oauthApps: {

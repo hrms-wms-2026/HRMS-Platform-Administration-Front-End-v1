@@ -7,6 +7,7 @@ import {
   GlobalRateLimit,
   PlanRateLimits,
   RateLimitChangesPage,
+  RateLimitRejections,
   RateLimitName,
   RateLimitScope,
   SetRateLimitRequest,
@@ -62,6 +63,14 @@ export class RateLimitsService {
     return this.http.get<RateLimitChangesPage>(
       `${this.baseUrl}${API_ENDPOINTS.systemConfig.rateLimits.changes}`,
       { params, withCredentials: true },
+    );
+  }
+
+  /** Task 49: the tenants with the most 429s on this API server in the last 1 to 60 minutes. */
+  listRejections(minutes = 60): Observable<RateLimitRejections> {
+    return this.http.get<RateLimitRejections>(
+      `${this.baseUrl}${API_ENDPOINTS.systemConfig.rateLimits.rejections}`,
+      { params: new HttpParams().set('minutes', minutes), withCredentials: true },
     );
   }
 

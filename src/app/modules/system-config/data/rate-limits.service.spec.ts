@@ -26,6 +26,14 @@ describe('RateLimitsService', () => {
     req.flush([]);
   });
 
+  it('reads the rejection counts for the given minutes with credentials', () => {
+    service.listRejections(15).subscribe();
+    const req = httpMock.expectOne(`${api}/system-config/rate-limits/rejections?minutes=15`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBe(true);
+    req.flush({ scope: 'instance', note: '', minutes: 15, generatedAt: '', countingSince: '', totalRejections: 0, tenants: [] });
+  });
+
   it('reads a plan and a tenant', () => {
     service.getPlan('p1').subscribe();
     service.getTenant('t1').subscribe();

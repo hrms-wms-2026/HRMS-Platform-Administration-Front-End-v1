@@ -18,6 +18,7 @@ import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { Pagination } from '../../../../shared/ui/pagination/pagination';
 import { StatusBadge } from '../../../../shared/ui/status-badge/status-badge';
 import { EditRateLimitModal, EditRateLimitMode } from '../edit-rate-limit-modal/edit-rate-limit-modal';
+import { RateLimitRejections } from '../rate-limit-rejections/rate-limit-rejections';
 
 /**
  * Platform rate limits (Improvements task 48): the six limits an admin may change, their
@@ -26,7 +27,7 @@ import { EditRateLimitModal, EditRateLimitMode } from '../edit-rate-limit-modal/
  */
 @Component({
   selector: 'app-rate-limits-list',
-  imports: [Button, TableSkeleton, ErrorBanner, EmptyState, Pagination, StatusBadge, DatePipe, EditRateLimitModal],
+  imports: [Button, TableSkeleton, ErrorBanner, EmptyState, Pagination, StatusBadge, DatePipe, EditRateLimitModal, RateLimitRejections],
   templateUrl: './rate-limits-list.html',
 })
 export class RateLimitsList implements OnInit {
