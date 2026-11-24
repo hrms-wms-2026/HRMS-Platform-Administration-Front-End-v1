@@ -8,6 +8,16 @@ export interface PlatformUser {
   status: 'active' | 'inactive' | 'pending';
   createdAt: string;
   lastLoginAt: string | null;
+  /** A revoked invite and a deactivated account are both `inactive`; this tells them apart. */
+  inviteStatus: 'pending' | 'accepted' | 'revoked' | 'expired';
+}
+
+/** Values the invite modal starts with when re-inviting a revoked user. */
+export interface InvitePrefill {
+  email: string;
+  fullName: string;
+  /** Role name from the list row; matched to a role id once roles load. */
+  roleName: string;
 }
 
 export interface PlatformUserDetail {
