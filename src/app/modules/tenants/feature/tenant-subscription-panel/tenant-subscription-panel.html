@@ -28,6 +28,9 @@
         [label]="sub.status | titlecase"
         [tone]="tenantSubscriptionStatusTone(sub.status, sub)"
       />
+      @if (sub.isTest) {
+        <app-status-badge label="Test tenant – not billed" tone="indigo" />
+      }
     </div>
 
     <div class="grid grid-cols-2 gap-4 text-sm">
@@ -67,7 +70,7 @@
           <p class="text-slate-900 dark:text-slate-100">{{ sub.accessEndsAt | date: 'medium' }}</p>
         </div>
       }
-      @if (sub.daysUntilAccessEnds !== null) {
+      @if ((sub.daysUntilAccessEnds ?? null) !== null) {
         <div>
           <p class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Access Ends In</p>
           <p class="text-slate-900 dark:text-slate-100">{{ sub.daysUntilAccessEnds }} days</p>
@@ -80,6 +83,106 @@
         </div>
       }
     </div>
+
+    <section
+      class="rounded-lg border border-slate-200 p-3 dark:border-slate-700"
+      aria-labelledby="seat-allocation-heading"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h3 id="seat-allocation-heading" class="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            Seats
+          </h3>
+          @if (sub.includedSeats === null) {
+            <p class="text-sm font-semibold text-amber-700 dark:text-amber-400">{{ seatUsageLabel(sub) }}</p>
+            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              Employees can't be invited until seats are set.
+            </p>
+          } @else {
+            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">{{ seatUsageLabel(sub) }}</p>
+            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {{ sub.overageAllowed ? 'Can go over the limit' : 'Hard limit' }}
+            </p>
+          }
+        </div>
+        @if (canManageSeats() && !editingSeats()) {
+          <button
+            type="button"
+            class="h-10 shrink-0 rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+            (click)="startEditSeats(sub)"
+          >
+            {{ sub.includedSeats === null ? 'Set seats' : 'Edit' }}
+          </button>
+        }
+      </div>
+
+      @if (editingSeats()) {
+        <form [formGroup]="seatForm" class="mt-3 flex flex-col gap-3" (ngSubmit)="saveSeats()">
+          <div>
+            <label for="included-seats" class="block text-xs font-medium text-slate-700 dark:text-slate-300">
+              Included seats
+            </label>
+            <input
+              id="included-seats"
+              type="number"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              formControlName="includedSeats"
+              class="mt-1 h-10 w-full max-w-[10rem] rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            />
+            @if (seatForm.controls.includedSeats.invalid && seatForm.controls.includedSeats.touched) {
+              <p class="mt-1 text-xs text-red-600 dark:text-red-400">Enter a whole number from 0 to 100,000.</p>
+            }
+            @if (sub.usedSeats !== null) {
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ sub.usedSeats }} currently in use.</p>
+            }
+            @if (noFreeSeats()) {
+              <p class="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400" role="status">
+                No free seats – new employees will be blocked.
+              </p>
+            }
+          </div>
+
+          <label class="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <input type="checkbox" formControlName="overageAllowed" class="mt-0.5 h-4 w-4" />
+            <span>Allow going over the limit</span>
+          </label>
+
+          <label class="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <input type="checkbox" formControlName="isTest" class="mt-0.5 h-4 w-4" />
+            <span>
+              Test tenant
+              <span class="block text-xs text-slate-500 dark:text-slate-400">
+                Never billed, no trial expiry, Stripe events ignored.
+              </span>
+            </span>
+          </label>
+
+          @if (seatError(); as message) {
+            <p class="text-xs text-red-600 dark:text-red-400" role="alert">{{ message }}</p>
+          }
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="submit"
+              class="h-10 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              [disabled]="savingSeats()"
+            >
+              {{ savingSeats() ? 'Saving…' : 'Save' }}
+            </button>
+            <button
+              type="button"
+              class="h-10 rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+              [disabled]="savingSeats()"
+              (click)="cancelEditSeats()"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      }
+    </section>
 
     @if (sub.gatewayProvider || sub.gatewayCustomerRef || sub.gatewaySubscriptionRef) {
       <div class="rounded-lg bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">

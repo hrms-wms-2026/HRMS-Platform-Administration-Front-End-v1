@@ -1,0 +1,116 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+  <div
+    class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl sm:p-8 dark:bg-slate-900"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="edit-rate-limit-title"
+  >
+    <h2 id="edit-rate-limit-title" class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+      @if (mode() === 'remove') {
+        Remove override — {{ label().title }}
+      } @else {
+        Edit rate limit — {{ label().title }}
+      }
+    </h2>
+    <p class="page-subtitle">{{ scopeLabel() }} · {{ label().countedBy }}</p>
+
+    <div
+      class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200"
+      role="note"
+    >
+      Limits are counted per API server until shared counters are added (task 21). With two servers,
+      users get up to twice this number.
+    </div>
+
+    <form class="mt-6 flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (errorMessage()) {
+        <div
+          class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+          role="alert"
+        >
+          {{ errorMessage() }}
+        </div>
+      }
+
+      @if (mode() === 'remove') {
+        <p class="text-sm text-slate-700 dark:text-slate-300">
+          The limit goes back to the value it inherits. Current override:
+          <strong>{{ limit().override?.perMinute }} per minute</strong>
+          @if (withBurst()) {
+            , burst <strong>{{ limit().override?.burst }}</strong>
+          }
+          .
+        </p>
+      } @else {
+        <label class="flex flex-col gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
+          Per minute
+          <input
+            type="number"
+            formControlName="perMinute"
+            [min]="bounds().minPerMinute"
+            [max]="bounds().maxPerMinute"
+            class="h-10 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            data-testid="rate-limit-per-minute"
+          />
+          <span class="text-xs font-normal text-slate-500 dark:text-slate-400">
+            Allowed: {{ bounds().minPerMinute }} to {{ bounds().maxPerMinute }}
+          </span>
+          @if (form.controls.perMinute.invalid && form.controls.perMinute.touched) {
+            <p class="text-xs font-medium text-red-600 dark:text-red-400">
+              Enter a number from {{ bounds().minPerMinute }} to {{ bounds().maxPerMinute }}.
+            </p>
+          }
+        </label>
+
+        @if (withBurst()) {
+          <label class="flex flex-col gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
+            Burst
+            <input
+              type="number"
+              formControlName="burst"
+              [min]="bounds().minBurst ?? 1"
+              [max]="bounds().maxBurst ?? null"
+              class="h-10 rounded-lg border border-slate-300 bg-white px-3 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              data-testid="rate-limit-burst"
+            />
+            <span class="text-xs font-normal text-slate-500 dark:text-slate-400">
+              How many requests at once, for example one page load. Allowed: {{ bounds().minBurst }} to
+              {{ bounds().maxBurst }}
+            </span>
+            @if (form.controls.burst.invalid && form.controls.burst.touched) {
+              <p class="text-xs font-medium text-red-600 dark:text-red-400">
+                Enter a number from {{ bounds().minBurst }} to {{ bounds().maxBurst }}.
+              </p>
+            }
+          </label>
+        }
+      }
+
+      <label class="flex flex-col gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
+        Reason
+        <textarea
+          formControlName="reason"
+          rows="3"
+          maxlength="500"
+          placeholder="Why this change? It is kept in the change history."
+          class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          data-testid="rate-limit-reason"
+        ></textarea>
+        @if (form.controls.reason.invalid && form.controls.reason.touched) {
+          <p class="text-xs font-medium text-red-600 dark:text-red-400">A reason is required.</p>
+        }
+      </label>
+
+      <div class="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <app-button label="Cancel" variant="secondary" (clicked)="cancel()" />
+        <app-button
+          type="submit"
+          [label]="mode() === 'remove' ? 'Remove override' : 'Save'"
+          [variant]="mode() === 'remove' ? 'danger' : 'primary'"
+          [loading]="loading()"
+          loadingText="Saving…"
+        />
+      </div>
+    </form>
+  </div>
+</div>

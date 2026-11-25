@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 import { environment } from '../../../../environments/environment';
-import { TenantSubscription } from './tenant-subscription.model';
+import { TenantSubscription, TenantSubscriptionUpdate } from './tenant-subscription.model';
 
 interface TenantSubscriptionApi {
   tenant_id: string;
@@ -38,6 +38,10 @@ interface TenantSubscriptionApi {
   is_in_grace_period: boolean;
   days_until_renewal: number | null;
   days_until_access_ends: number | null;
+  included_seats?: number | null;
+  overage_allowed?: boolean | null;
+  used_seats?: number | null;
+  is_test?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -48,6 +52,19 @@ export class TenantSubscriptionService {
   get(tenantId: string): Observable<TenantSubscription> {
     return this.http
       .get<TenantSubscriptionApi>(`${this.baseUrl}${API_ENDPOINTS.tenantSubscriptions.get(tenantId)}`, {
+        withCredentials: true,
+      })
+      .pipe(map((item) => this.mapSubscription(item)));
+  }
+
+  update(tenantId: string, changes: TenantSubscriptionUpdate): Observable<TenantSubscription> {
+    const body: Record<string, number | boolean> = {};
+    if (changes.includedSeats !== undefined) body['included_seats'] = changes.includedSeats;
+    if (changes.overageAllowed !== undefined) body['overage_allowed'] = changes.overageAllowed;
+    if (changes.isTest !== undefined) body['is_test'] = changes.isTest;
+
+    return this.http
+      .patch<TenantSubscriptionApi>(`${this.baseUrl}${API_ENDPOINTS.tenantSubscriptions.update(tenantId)}`, body, {
         withCredentials: true,
       })
       .pipe(map((item) => this.mapSubscription(item)));
@@ -87,6 +104,10 @@ export class TenantSubscriptionService {
       isInGracePeriod: item.is_in_grace_period,
       daysUntilRenewal: item.days_until_renewal,
       daysUntilAccessEnds: item.days_until_access_ends,
+      includedSeats: item.included_seats ?? null,
+      overageAllowed: item.overage_allowed ?? null,
+      usedSeats: item.used_seats ?? null,
+      isTest: item.is_test ?? false,
     };
   }
 }

@@ -78,6 +78,8 @@
               <td class="py-3 pr-4">
                 @if (user.status === 'pending') {
                   <app-status-badge label="Pending" tone="warning" />
+                } @else if (user.inviteStatus === 'revoked') {
+                  <app-status-badge label="Revoked" tone="neutral" />
                 } @else {
                   <app-status-badge
                     [label]="user.status === 'active' ? 'Active' : 'Inactive'"
@@ -93,6 +95,14 @@
                     class="text-sm font-medium text-red-700 hover:text-red-800"
                   >
                     Revoke
+                  </button>
+                } @else if (user.inviteStatus === 'revoked' && canInvite()) {
+                  <button
+                    type="button"
+                    (click)="onReinviteClicked(user); $event.stopPropagation()"
+                    class="text-sm font-medium text-blue-700 hover:text-blue-800"
+                  >
+                    Re-invite
                   </button>
                 }
               </td>
@@ -111,7 +121,11 @@
   </div>
 
   @if (showInviteModal()) {
-    <app-invite-manager-modal (invited)="onInviteSuccess()" (closed)="onInviteModalClosed()" />
+    <app-invite-manager-modal
+      [prefill]="invitePrefill()"
+      (invited)="onInviteSuccess()"
+      (closed)="onInviteModalClosed()"
+    />
   }
 
   @if (selectedUserId(); as userId) {

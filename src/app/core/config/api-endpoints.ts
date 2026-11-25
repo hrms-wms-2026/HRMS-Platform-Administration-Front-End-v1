@@ -36,6 +36,7 @@ export const API_ENDPOINTS = {
     provisioningSummary: (id: string) => `/tenants/${id}/provisioning-summary`,
     confirmProvisioning: (id: string) => `/tenants/${id}/provision/confirm`,
     inviteAdmin: (id: string) => `/tenants/${id}/invite-admin`,
+    rateLimits: (id: string) => `/tenants/${id}/rate-limits`,
     roles: {
       list: (tenantId: string) => `/tenants/${tenantId}/roles`,
       create: (tenantId: string) => `/tenants/${tenantId}/roles`,
@@ -59,6 +60,7 @@ export const API_ENDPOINTS = {
   },
   tenantSubscriptions: {
     get: (tenantId: string) => `/tenants/${tenantId}/subscription`,
+    update: (tenantId: string) => `/tenants/${tenantId}/subscription`,
   },
   roles: {
     list: '/platform-access/roles',
@@ -72,6 +74,7 @@ export const API_ENDPOINTS = {
     create: '/subscription-plans',
     update: (id: string) => `/subscription-plans/${id}`,
     archive: (id: string) => `/subscription-plans/${id}`,
+    rateLimits: (id: string) => `/subscription-plans/${id}/rate-limits`,
   },
   invoices: {
     list: '/invoices',
@@ -140,6 +143,11 @@ export const API_ENDPOINTS = {
     logo: (id: string) => `/app-catalog/${id}/logo`,
   },
   systemConfig: {
+    rateLimits: {
+      list: '/system-config/rate-limits',
+      changes: '/system-config/rate-limits/changes',
+      byName: (limitName: string) => `/system-config/rate-limits/${limitName}`,
+    },
     oauthApps: {
       list: '/system-config/oauth-apps',
       byId: (provider: string) => `/system-config/oauth-apps/${provider}`,

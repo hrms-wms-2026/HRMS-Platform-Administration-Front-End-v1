@@ -66,6 +66,20 @@ describe('AcceptInvite', () => {
   it('navigates to login when Sign in is clicked', () => {
     const fixture = setup('raw-token');
     fixture.componentInstance.continueToSignIn();
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login', { state: {} });
+  });
+
+  it('hands the accepted email to sign-in (in navigation state, not the URL)', () => {
+    const fixture = setup('raw-token');
+    const component = fixture.componentInstance;
+    authService.acceptInvite.mockReturnValue(of({ email: 'new.manager@onevo.io' }));
+    component['acceptInviteForm'].setValue({ password: 'NewPassword1!', confirmPassword: 'NewPassword1!' });
+
+    component.submit();
+    component.continueToSignIn();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/auth/login', {
+      state: { invitedEmail: 'new.manager@onevo.io' },
+    });
   });
 });

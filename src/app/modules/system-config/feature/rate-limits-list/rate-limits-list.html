@@ -1,0 +1,128 @@
+@if (!canView()) {
+  <div class="rounded-2xl bg-white p-8 shadow-sm dark:bg-slate-900">
+    <p class="text-sm font-medium text-red-700 dark:text-red-400">No permission to view page</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900">
+      <div>
+        <h1 class="page-title">Rate Limits</h1>
+        <p class="page-subtitle">
+          How many API requests each kind of caller may make. A change applies on the next request. Plans and
+          tenants can override the signed-in, tray and whole-tenant limits from their own pages. Sign-in, MFA and
+          password reset limits are fixed and not listed here.
+        </p>
+      </div>
+
+      @if (loading()) {
+        <app-table-skeleton [rows]="6" [columns]="['12rem', '8rem', '8rem', '8rem', '10rem', '6rem']" [showPagination]="false" />
+      } @else if (errorMessage(); as message) {
+        <app-error-banner [message]="message" (retry)="loadLimits()" />
+      } @else if (limits().length === 0) {
+        <app-empty-state title="No rate limits returned" />
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="data-table" data-testid="rate-limits-table">
+            <thead>
+              <tr>
+                <th>Limit</th>
+                <th>Per minute</th>
+                <th>Burst</th>
+                <th>Default (appsettings)</th>
+                <th>Allowed range</th>
+                @if (canManage()) {
+                  <th>Actions</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (limit of limits(); track limit.limitName) {
+                <tr [attr.data-limit]="limit.limitName">
+                  <td>
+                    <div class="font-medium text-slate-900 dark:text-slate-100">{{ labels[limit.limitName].title }}</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ labels[limit.limitName].countedBy }}</div>
+                    @if (limit.override) {
+                      <app-status-badge class="mt-1 inline-block" label="Overridden" tone="indigo" />
+                    }
+                  </td>
+                  <td data-testid="effective-per-minute">{{ limit.effective.perMinute }}</td>
+                  <td>{{ hasBurst(limit) ? limit.effective.burst : '' }}</td>
+                  <td>{{ format(limit.appSettings, hasBurst(limit)) }}</td>
+                  <td class="text-xs text-slate-600 dark:text-slate-400">
+                    {{ limit.bounds.minPerMinute }}–{{ limit.bounds.maxPerMinute }} / min
+                    @if (hasBurst(limit)) {
+                      <br />burst {{ limit.bounds.minBurst }}–{{ limit.bounds.maxBurst }}
+                    }
+                  </td>
+                  @if (canManage()) {
+                    <td>
+                      <div class="flex flex-wrap gap-2">
+                        <app-button label="Edit" variant="secondary" (clicked)="startEdit(limit)" />
+                        @if (limit.override) {
+                          <app-button label="Reset to default" variant="secondary" (clicked)="startReset(limit)" />
+                        }
+                      </div>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900">
+      <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Recent changes</h2>
+      @if (changesLoading()) {
+        <app-table-skeleton [rows]="4" [columns]="['9rem', '10rem', '10rem', '100%']" [showPagination]="false" />
+      } @else if (changesError(); as message) {
+        <app-error-banner [message]="message" (retry)="loadChanges(changesPage())" />
+      } @else if (changes().length === 0) {
+        <app-empty-state title="No changes yet" description="Every change made here is listed with who made it and why." />
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="data-table" data-testid="rate-limit-changes-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Limit</th>
+                <th>Change</th>
+                <th>By</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (change of changes(); track change.id) {
+                <tr>
+                  <td>{{ change.changedAt | date: 'medium' }}</td>
+                  <td>{{ labels[change.limitName].title }}</td>
+                  <td>{{ describeChange(change) }}</td>
+                  <td>{{ change.platformUserName ?? change.platformUserId }}</td>
+                  <td class="max-w-xs whitespace-normal break-words">{{ change.reason }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <app-pagination
+          [page]="changesPage()"
+          [pageSize]="changesPageSize"
+          [total]="changesTotal()"
+          (pageChange)="loadChanges($event)"
+        />
+      }
+    </div>
+  </div>
+
+  @if (editing(); as edit) {
+    <app-edit-rate-limit-modal
+      [target]="globalTarget"
+      [limit]="edit.limit"
+      [mode]="edit.mode"
+      scopeLabel="Global"
+      (saved)="onSaved()"
+      (closed)="closeEdit()"
+    />
+  }
+}

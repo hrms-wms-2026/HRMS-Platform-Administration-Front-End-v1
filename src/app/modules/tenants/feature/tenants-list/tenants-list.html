@@ -62,7 +62,14 @@
               [routerLink]="['/tenants', tenant.id]"
               class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
             >
-              <td class="table-primary">{{ tenant.name }}</td>
+              <td class="table-primary">
+                <span class="inline-flex flex-wrap items-center gap-2">
+                  {{ tenant.name }}
+                  @if (tenant.isTest) {
+                    <app-status-badge label="Test" tone="indigo" />
+                  }
+                </span>
+              </td>
               <td class="table-secondary">{{ tenant.slug }}</td>
               <td>
                 <app-status-badge [label]="tenant.status" [tone]="toneFor(tenant.status)" />

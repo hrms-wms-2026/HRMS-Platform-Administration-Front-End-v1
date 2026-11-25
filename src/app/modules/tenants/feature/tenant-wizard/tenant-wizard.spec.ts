@@ -156,6 +156,7 @@ describe('TenantWizard', () => {
     });
     component['nextStep']();
     component['selectPlan']('plan-1');
+    component['subscriptionForm'].controls.includedSeats.setValue(25);
     component['nextStep']();
     fixture.detectChanges();
 
@@ -188,6 +189,7 @@ describe('TenantWizard', () => {
     expect(component['currentStep']()).toBe(2);
 
     component['selectPlan']('plan-1');
+    component['subscriptionForm'].controls.includedSeats.setValue(25);
     component['nextStep']();
     expect(component['currentStep']()).toBe(3);
 
@@ -214,7 +216,13 @@ describe('TenantWizard', () => {
       timezone: 'America/New_York',
       currency: 'USD',
     });
-    component['subscriptionForm'].setValue({ planId: 'plan-1', billingCycle: 'monthly' });
+    component['subscriptionForm'].setValue({
+      planId: 'plan-1',
+      billingCycle: 'monthly',
+      includedSeats: 25,
+      overageAllowed: false,
+      isTest: false,
+    });
     component['ownerForm'].setValue({ email: 'owner@acme.com', firstName: 'Ada', lastName: 'Owner' });
 
     component['submit']();
@@ -231,6 +239,9 @@ describe('TenantWizard', () => {
       currency: 'USD',
       planId: 'plan-1',
       billingCycle: 'monthly',
+      includedSeats: 25,
+      overageAllowed: false,
+      isTest: false,
       ownerInvite: { email: 'owner@acme.com', firstName: 'Ada', lastName: 'Owner' },
     });
     expect(notificationService.success).toHaveBeenCalledWith('Tenant created.');
@@ -255,7 +266,13 @@ describe('TenantWizard', () => {
       timezone: 'America/New_York',
       currency: 'USD',
     });
-    component['subscriptionForm'].setValue({ planId: 'plan-1', billingCycle: 'monthly' });
+    component['subscriptionForm'].setValue({
+      planId: 'plan-1',
+      billingCycle: 'monthly',
+      includedSeats: 25,
+      overageAllowed: false,
+      isTest: false,
+    });
     component['ownerForm'].setValue({ email: 'owner@acme.com', firstName: 'Ada', lastName: 'Owner' });
 
     component['submit']();

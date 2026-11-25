@@ -169,14 +169,55 @@
       @if (subscriptionForm.controls.planId.invalid && subscriptionForm.controls.planId.touched) {
         <p class="mt-2 text-xs text-red-700">Please select a plan.</p>
       }
-      <form [formGroup]="subscriptionForm" class="mt-4 flex gap-4">
-        <label class="flex items-center gap-2 text-sm">
-          <input type="radio" formControlName="billingCycle" value="monthly" />
-          Monthly
+      <form [formGroup]="subscriptionForm" class="mt-4 flex flex-col gap-4">
+        <div class="flex gap-4">
+          <label class="flex items-center gap-2 text-sm">
+            <input type="radio" formControlName="billingCycle" value="monthly" />
+            Monthly
+          </label>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="radio" formControlName="billingCycle" value="annual" />
+            Annual
+          </label>
+        </div>
+
+        <div>
+          <label for="tenantIncludedSeats" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+            Seats
+          </label>
+          <input
+            id="tenantIncludedSeats"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            formControlName="includedSeats"
+            class="mt-1 h-10 w-full max-w-[10rem] rounded-lg border bg-white px-3 text-sm text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+            [class.border-slate-300]="!(subscriptionForm.controls.includedSeats.invalid && subscriptionForm.controls.includedSeats.touched)"
+            [class.border-red-500]="subscriptionForm.controls.includedSeats.invalid && subscriptionForm.controls.includedSeats.touched"
+          />
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">How many employees this company can have.</p>
+          @if (subscriptionForm.controls.includedSeats.invalid && subscriptionForm.controls.includedSeats.touched) {
+            <p class="mt-1 text-xs text-red-700 dark:text-red-400">Enter a whole number of seats (0 to 100,000).</p>
+          }
+        </div>
+
+        <label class="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+          <input type="checkbox" formControlName="overageAllowed" class="mt-0.5 h-4 w-4" />
+          <span>Allow going over the seat limit</span>
         </label>
-        <label class="flex items-center gap-2 text-sm">
-          <input type="radio" formControlName="billingCycle" value="annual" />
-          Annual
+
+        <label
+          class="flex items-start gap-2 rounded-lg border border-slate-200 p-3 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-300"
+        >
+          <input type="checkbox" formControlName="isTest" class="mt-0.5 h-4 w-4" />
+          <span>
+            Test tenant
+            <span class="block text-xs text-slate-500 dark:text-slate-400">
+              For testing only. Active straight away with no trial, never billed, and Stripe payments are not
+              needed.
+            </span>
+          </span>
         </label>
       </form>
     }
@@ -243,6 +284,13 @@
       <div>
         <h2 class="font-semibold text-slate-900 dark:text-slate-100">Subscription</h2>
         <p>{{ selectedPlan()?.name }} · {{ subscriptionForm.controls.billingCycle.value }}</p>
+        <p>
+          {{ subscriptionForm.controls.includedSeats.value }} seats ·
+          {{ subscriptionForm.controls.overageAllowed.value ? 'can go over' : 'hard limit' }}
+        </p>
+        @if (subscriptionForm.controls.isTest.value) {
+          <p class="font-medium text-indigo-700 dark:text-indigo-300">Test tenant – not billed</p>
+        }
       </div>
       <div>
         <h2 class="font-semibold text-slate-900 dark:text-slate-100">Owner Invite</h2>
