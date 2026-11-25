@@ -33,6 +33,7 @@ export class AcceptInvite implements OnInit {
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private token = '';
+  private acceptedEmail: string | null = null;
 
   protected readonly acceptInviteForm = this.formBuilder.nonNullable.group(
     {
@@ -63,8 +64,9 @@ export class AcceptInvite implements OnInit {
     const { password } = this.acceptInviteForm.getRawValue();
 
     this.authService.acceptInvite(this.token, password).subscribe({
-      next: () => {
+      next: (response) => {
         this.loading.set(false);
+        this.acceptedEmail = response?.email ?? null;
         this.view.set('success');
       },
       error: (err: HttpErrorResponse) => {
@@ -76,6 +78,10 @@ export class AcceptInvite implements OnInit {
   }
 
   continueToSignIn(): void {
-    this.router.navigateByUrl('/auth/login');
+    // Sign-in starts with the invited account, not whatever email this browser remembered.
+    // Passed as navigation state so the email never lands in the URL or browser history.
+    this.router.navigateByUrl('/auth/login', {
+      state: this.acceptedEmail ? { invitedEmail: this.acceptedEmail } : {},
+    });
   }
 }

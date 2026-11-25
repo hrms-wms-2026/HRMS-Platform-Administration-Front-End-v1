@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { PlatformUsersService } from '../../data/platform-users.service';
-import { PlatformUser } from '../../data/platform-user.model';
+import { InvitePrefill, PlatformUser } from '../../data/platform-user.model';
 import { PermissionStore } from '../../../../core/permissions/permission.store';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Button } from '../../../../shared/ui/button/button';
@@ -90,17 +90,26 @@ export class PlatformUsersList implements OnInit {
   }
 
   protected readonly showInviteModal = signal(false);
+  protected readonly invitePrefill = signal<InvitePrefill | null>(null);
 
   protected onInviteManagerClicked(): void {
+    this.invitePrefill.set(null);
+    this.showInviteModal.set(true);
+  }
+
+  protected onReinviteClicked(user: PlatformUser): void {
+    this.invitePrefill.set({ email: user.email, fullName: user.fullName, roleName: user.role });
     this.showInviteModal.set(true);
   }
 
   protected onInviteModalClosed(): void {
     this.showInviteModal.set(false);
+    this.invitePrefill.set(null);
   }
 
   protected onInviteSuccess(): void {
     this.showInviteModal.set(false);
+    this.invitePrefill.set(null);
     this.notificationService.success('Invitation sent.');
     this.loadUsers();
   }

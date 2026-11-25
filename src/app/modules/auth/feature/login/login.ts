@@ -28,10 +28,14 @@ export class Login {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly showPassword = signal(false);
 
+  // Set when arriving from accept-invite: the new manager must sign in as themself,
+  // not as the admin whose email this browser remembered.
+  private readonly invitedEmail = this.readInvitedEmail();
+
   protected readonly loginForm = this.formBuilder.nonNullable.group({
-    email: [this.readRememberedEmail() ?? '', [Validators.required, Validators.email]],
+    email: [this.invitedEmail ?? this.readRememberedEmail() ?? '', [Validators.required, Validators.email]],
     password: ['', Validators.required],
-    rememberEmail: [this.readRememberedEmail() !== null],
+    rememberEmail: [this.invitedEmail === null && this.readRememberedEmail() !== null],
   });
 
   togglePasswordVisibility(): void {
@@ -112,5 +116,11 @@ export class Login {
 
   private readRememberedEmail(): string | null {
     return localStorage.getItem(REMEMBERED_EMAIL_KEY);
+  }
+
+  private readInvitedEmail(): string | null {
+    const state = this.router.getCurrentNavigation?.()?.extras.state;
+    const email = state?.['invitedEmail'];
+    return typeof email === 'string' && email.length > 0 ? email : null;
   }
 }

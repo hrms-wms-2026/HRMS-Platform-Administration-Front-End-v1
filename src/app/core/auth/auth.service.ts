@@ -105,8 +105,9 @@ export class AuthService {
     );
   }
 
-  acceptInvite(token: string, password: string): Observable<void> {
-    return this.http.post<void>(
+  /** Resolves with the accepted account's email (null from an older backend that sent 204). */
+  acceptInvite(token: string, password: string): Observable<{ email: string } | null> {
+    return this.http.post<{ email: string } | null>(
       `${this.baseUrl}${API_ENDPOINTS.auth.acceptInvite}`,
       { token, password },
       { withCredentials: true },

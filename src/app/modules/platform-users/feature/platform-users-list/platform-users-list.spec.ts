@@ -16,7 +16,21 @@ function buildUsers(count: number): PlatformUser[] {
     status: i % 3 !== 0 ? 'active' : 'inactive',
     createdAt: '2026-08-01T00:00:00Z',
     lastLoginAt: null,
+    inviteStatus: 'accepted',
   }));
+}
+
+function buildRevokedUser(): PlatformUser {
+  return {
+    id: 'revoked-1',
+    email: 'revoked@onevo.io',
+    fullName: 'Revoked Person',
+    role: 'Platform Manager',
+    status: 'inactive',
+    createdAt: '2026-08-01T00:00:00Z',
+    lastLoginAt: null,
+    inviteStatus: 'revoked',
+  };
 }
 
 function buildAuthContext(permissions: string[]): AuthContext {
@@ -197,6 +211,76 @@ describe('PlatformUsersList', () => {
 
     expect(usersService.revokeInvite).toHaveBeenCalledWith('user-id-1');
     expect(loadUsersSpy).toHaveBeenCalled();
+  });
+
+  it('shows a Revoked badge and a Re-invite action for a revoked invite', () => {
+    permissionStore.setAuthorizationContext(
+      buildAuthContext(['platform.accounts.read', 'platform.accounts.manage']),
+    );
+    usersService.list.mockReturnValue(of([buildRevokedUser()]));
+    const fixture = createComponent();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Revoked');
+    expect(text).toContain('Re-invite');
+  });
+
+  it('does not offer Re-invite for a deactivated account', () => {
+    permissionStore.setAuthorizationContext(
+      buildAuthContext(['platform.accounts.read', 'platform.accounts.manage']),
+    );
+    usersService.list.mockReturnValue(of([{ ...buildRevokedUser(), inviteStatus: 'accepted' }]));
+    const fixture = createComponent();
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Inactive');
+    expect(text).not.toContain('Re-invite');
+  });
+
+  it('hides Re-invite without platform.accounts.manage', () => {
+    permissionStore.setAuthorizationContext(buildAuthContext(['platform.accounts.read']));
+    usersService.list.mockReturnValue(of([buildRevokedUser()]));
+    const fixture = createComponent();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Re-invite');
+  });
+
+  it('opens the invite modal prefilled from the revoked user on Re-invite', () => {
+    permissionStore.setAuthorizationContext(
+      buildAuthContext(['platform.accounts.read', 'platform.accounts.manage']),
+    );
+    usersService.list.mockReturnValue(of([]));
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['onReinviteClicked'](buildRevokedUser());
+
+    expect(component['showInviteModal']()).toBe(true);
+    expect(component['invitePrefill']()).toEqual({
+      email: 'revoked@onevo.io',
+      fullName: 'Revoked Person',
+      roleName: 'Platform Manager',
+    });
+
+    component['onInviteModalClosed']();
+    expect(component['invitePrefill']()).toBeNull();
+  });
+
+  it('opens an empty invite modal from Invite Manager after a re-invite was cancelled', () => {
+    permissionStore.setAuthorizationContext(
+      buildAuthContext(['platform.accounts.read', 'platform.accounts.manage']),
+    );
+    usersService.list.mockReturnValue(of([]));
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['onReinviteClicked'](buildRevokedUser());
+    component['onInviteManagerClicked']();
+
+    expect(component['invitePrefill']()).toBeNull();
   });
 
   it('opens the profile drawer with the clicked user id on row click', () => {

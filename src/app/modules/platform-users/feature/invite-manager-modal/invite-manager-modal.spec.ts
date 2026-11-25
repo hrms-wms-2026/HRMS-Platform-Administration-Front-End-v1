@@ -75,4 +75,74 @@ describe('InviteManagerModal', () => {
     expect(component['errorMessage']()).toBeTruthy();
     expect(invitedEmitted).toBe(false);
   });
+
+  it('shows the server reason when the invite is rejected', () => {
+    usersService.invite.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { detail: "A platform user with email 'x@example.com' already exists or has a pending invite." },
+          }),
+      ),
+    );
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    component['inviteForm'].patchValue({ email: 'x@example.com', fullName: 'X' });
+    component['toggleRole']('role-1');
+    component.submit();
+
+    expect(component['errorMessage']()).toBe(
+      "A platform user with email 'x@example.com' already exists or has a pending invite.",
+    );
+  });
+
+  describe('re-invite (prefilled)', () => {
+    function createPrefilled() {
+      const fixture = TestBed.createComponent(InviteManagerModal);
+      fixture.componentRef.setInput('prefill', {
+        email: 'revoked@example.com',
+        fullName: 'Revoked Person',
+        roleName: 'Support',
+      });
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    it('fills name and email, locks the email and preselects the previous role', () => {
+      const fixture = createPrefilled();
+      const component = fixture.componentInstance;
+
+      expect(component['inviteForm'].getRawValue()).toEqual({
+        email: 'revoked@example.com',
+        fullName: 'Revoked Person',
+      });
+      expect(component['inviteForm'].controls.email.disabled).toBe(true);
+      expect(component['selectedRoleIds']()).toEqual(['role-2']);
+      expect(fixture.nativeElement.textContent).toContain('Re-invite Platform Manager');
+    });
+
+    it('submits the locked email with the chosen roles', () => {
+      usersService.invite.mockReturnValue(of(undefined));
+      const fixture = createPrefilled();
+      const component = fixture.componentInstance;
+
+      component.submit();
+
+      expect(usersService.invite).toHaveBeenCalledWith('revoked@example.com', 'Revoked Person', ['role-2']);
+    });
+
+    it('selects no role when the previous role no longer exists', () => {
+      const fixture = TestBed.createComponent(InviteManagerModal);
+      fixture.componentRef.setInput('prefill', {
+        email: 'revoked@example.com',
+        fullName: 'Revoked Person',
+        roleName: 'Deleted Role',
+      });
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance['selectedRoleIds']()).toEqual([]);
+    });
+  });
 });
