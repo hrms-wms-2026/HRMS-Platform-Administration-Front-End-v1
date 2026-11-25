@@ -1,0 +1,71 @@
+<section class="flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm sm:p-6 dark:bg-slate-900" data-testid="rate-limit-rejections">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Rejections (last hour)</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400" data-testid="rejections-scope-note">
+        This API server only, last {{ minutes }} minutes, since it last started.
+        @if (data(); as d) {
+          Counting since {{ d.countingSince | date: 'medium' }}.
+        }
+        With more than one API server, the others keep their own counts.
+      </p>
+    </div>
+    <app-button label="Refresh" variant="secondary" (clicked)="load()" />
+  </div>
+
+  <p class="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+    A signed-in user or tray device rejection can come from the person's own limit or from the tenant ceiling. If one
+    tenant shows many rejections across many users, the ceiling is the likely cause.
+  </p>
+
+  @if (loading()) {
+    <app-table-skeleton [rows]="3" [columns]="['14rem', '6rem', '100%', '10rem']" [showPagination]="false" />
+  } @else if (errorMessage(); as message) {
+    <app-error-banner [message]="message" (retry)="load()" />
+  } @else if (data(); as d) {
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <app-metric-card label="429s" [value]="d.totalRejections" [hint]="'Last ' + minutes + ' minutes'" />
+      <app-metric-card label="Tenants limited" [value]="tenantRows().length" hint="Top 50 shown" />
+      <app-metric-card
+        label="No tenant"
+        [value]="noTenantRow()?.totalRejections ?? 0"
+        hint="Signed-out, before sign-in and admin requests"
+      />
+    </div>
+
+    @if (tenantRows().length === 0) {
+      <app-empty-state title="No tenant was limited" description="No tenant got a 429 on this API server in the last hour." />
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="data-table" data-testid="rate-limit-rejections-table">
+          <thead>
+            <tr>
+              <th>Tenant</th>
+              <th>429s</th>
+              <th>By kind</th>
+              <th>{{ labels.SignedIn.title }}</th>
+              <th>{{ labels.TrayDevice.title }}</th>
+              <th>{{ labels.TenantCeiling.title }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of tenantRows(); track row.tenantId) {
+              <tr [attr.data-tenant]="row.tenantId">
+                <td>
+                  <a class="font-medium text-indigo-600 hover:underline dark:text-indigo-400" [routerLink]="['/tenants', row.tenantId]">
+                    {{ row.tenantName ?? row.tenantId }}
+                  </a>
+                </td>
+                <td data-testid="tenant-rejections">{{ row.totalRejections }}</td>
+                <td class="whitespace-normal text-xs text-slate-600 dark:text-slate-400">{{ kinds(row) }}</td>
+                <td class="text-xs">{{ limit(row, 'SignedIn') }}</td>
+                <td class="text-xs">{{ limit(row, 'TrayDevice') }}</td>
+                <td class="text-xs">{{ limit(row, 'TenantCeiling') }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</section>

@@ -6,6 +6,7 @@ import {
   PlanRateLimit,
   RATE_LIMIT_LABELS,
   RATE_LIMIT_SOURCE_LABELS,
+  MAX_REJECTION_TENANTS,
   RateLimitSetting,
   hasBurst,
 } from '../../data/rate-limit.model';
@@ -50,6 +51,9 @@ export class ScopedRateLimitsPanel {
   protected readonly limits = signal<EffectiveRateLimit[]>([]);
   protected readonly editing = signal<{ limit: EffectiveRateLimit; mode: EditRateLimitMode } | null>(null);
 
+  /** Task 49, tenant scope only: "N", "0" or "at most N" 429s on this API server in the last hour. */
+  protected readonly recentRejections = signal<string | null>(null);
+
   protected readonly isPlan = computed(() => this.target().scope === 'plan');
   protected readonly ownSource = computed(() => (this.isPlan() ? 'plan' : 'tenant'));
 
@@ -57,7 +61,10 @@ export class ScopedRateLimitsPanel {
     effect(() => {
       this.target();
       untracked(() => {
-        if (this.canView()) this.load();
+        if (this.canView()) {
+          this.load();
+          this.loadRejections();
+        }
       });
     });
   }
@@ -79,6 +86,29 @@ export class ScopedRateLimitsPanel {
         this.errorMessage.set('Could not load the rate limits.');
         this.loading.set(false);
       },
+    });
+  }
+
+  /**
+   * The rejections read returns the top 50 tenants only. A tenant missing from a full list may still
+   * have 429s, at most as many as the 50th row; a tenant missing from a shorter list has none.
+   */
+  private loadRejections(): void {
+    const target = this.target();
+    this.recentRejections.set(null);
+    if (target.scope !== 'tenant') return;
+    this.rateLimitsService.listRejections(60).subscribe({
+      next: (data) => {
+        const row = data.tenants.find((t) => t.tenantId === target.tenantId);
+        if (row) {
+          this.recentRejections.set(String(row.totalRejections));
+          return;
+        }
+        const full = data.tenants.length >= MAX_REJECTION_TENANTS;
+        const lowest = full ? Math.min(...data.tenants.map((t) => t.totalRejections)) : 0;
+        this.recentRejections.set(full ? `at most ${lowest}` : '0');
+      },
+      error: () => this.recentRejections.set(null),
     });
   }
 

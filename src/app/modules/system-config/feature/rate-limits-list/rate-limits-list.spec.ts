@@ -27,11 +27,14 @@ describe('RateLimitsList', () => {
     },
   ];
 
-  let service: { listGlobal: jest.Mock; listChanges: jest.Mock };
+  let service: { listGlobal: jest.Mock; listChanges: jest.Mock; listRejections: jest.Mock };
 
   function setup(permissions: string[]) {
     service = {
       listGlobal: jest.fn().mockReturnValue(of(limits)),
+      listRejections: jest.fn().mockReturnValue(
+        of({ scope: 'instance', note: '', minutes: 60, generatedAt: '', countingSince: '', totalRejections: 0, tenants: [] }),
+      ),
       listChanges: jest.fn().mockReturnValue(
         of({
           items: [
@@ -107,9 +110,16 @@ describe('RateLimitsList', () => {
     expect(fixture.nativeElement.textContent).toContain('Signed-in user');
   });
 
+  it('shows the rejections section for the last hour', () => {
+    const fixture = setup(['platform.system_config.read']);
+    expect(service.listRejections).toHaveBeenCalledWith(60);
+    expect(fixture.nativeElement.querySelector('[data-testid="rate-limit-rejections"]')).not.toBeNull();
+  });
+
   it('loads nothing without read', () => {
     const fixture = setup([]);
     expect(service.listGlobal).not.toHaveBeenCalled();
+    expect(service.listRejections).not.toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('No permission to view page');
   });
 
