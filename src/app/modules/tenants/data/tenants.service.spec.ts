@@ -122,6 +122,9 @@ describe('TenantsService', () => {
         currency: 'USD',
         planId: 'plan-1',
         billingCycle: 'monthly',
+        includedSeats: 25,
+        overageAllowed: false,
+        isTest: true,
         ownerInvite: { email: 'owner@acme.com', firstName: 'Ada', lastName: 'Owner' },
       })
       .subscribe((r) => (result = r));
@@ -140,7 +143,14 @@ describe('TenantsService', () => {
       country: 'USA',
       timezone: 'America/New_York',
       currency: 'USD',
-      subscription: { plan_id: 'plan-1', billing_cycle: 'monthly', commercial_model: 'standard' },
+      subscription: {
+        plan_id: 'plan-1',
+        billing_cycle: 'monthly',
+        commercial_model: 'standard',
+        included_seats: 25,
+        overage_allowed: false,
+        is_test: true,
+      },
       owner_invite: { email: 'owner@acme.com', first_name: 'Ada', last_name: 'Owner' },
     });
 

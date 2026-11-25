@@ -33,6 +33,26 @@ export interface TenantSubscription {
   isInGracePeriod: boolean;
   daysUntilRenewal: number | null;
   daysUntilAccessEnds: number | null;
+  /** Seats the tenant may use. null = not configured, so onboarding can't be finalized. */
+  includedSeats: number | null;
+  overageAllowed: boolean | null;
+  /** Employees counted against seats (same count that gates onboarding). */
+  usedSeats: number | null;
+  /** Internal/testing tenant: never billed, never trials out, ignores Stripe events. */
+  isTest: boolean;
+}
+
+export interface TenantSubscriptionUpdate {
+  includedSeats?: number;
+  overageAllowed?: boolean;
+  isTest?: boolean;
+}
+
+export function seatUsageLabel(sub: Pick<TenantSubscription, 'includedSeats' | 'usedSeats'>): string {
+  if (sub.includedSeats === null) {
+    return 'Not configured';
+  }
+  return `${sub.usedSeats ?? 0} of ${sub.includedSeats} used`;
 }
 
 export function tenantSubscriptionStatusTone(

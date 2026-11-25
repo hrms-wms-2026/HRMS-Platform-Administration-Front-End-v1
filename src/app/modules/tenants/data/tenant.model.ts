@@ -4,6 +4,7 @@ export interface TenantListItem {
   slug: string;
   status: string;
   createdAt: string;
+  isTest?: boolean;
 }
 
 export interface TenantListResponse {
@@ -64,6 +65,10 @@ export interface CreateTenantRequest {
   currency: string;
   planId: string;
   billingCycle: 'monthly' | 'annual';
+  includedSeats: number;
+  overageAllowed: boolean;
+  /** Internal/testing tenant: active immediately, never billed. */
+  isTest: boolean;
   ownerInvite: CreateTenantOwnerInvite;
 }
 
