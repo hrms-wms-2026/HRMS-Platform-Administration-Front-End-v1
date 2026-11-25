@@ -106,6 +106,12 @@ const NAV_SECTIONS: SidebarNavSection[] = [
         permission: 'platform.system_config.read',
       },
       {
+        label: 'Rate Limits',
+        route: '/system-config/rate-limits',
+        icon: 'rate-limits',
+        permission: 'platform.system_config.read',
+      },
+      {
         label: 'Tray Releases',
         route: '/system-config/tray-releases',
         icon: 'tray-releases',
