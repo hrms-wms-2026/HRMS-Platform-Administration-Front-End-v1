@@ -71,6 +71,15 @@ export class TenantWizard implements OnInit {
   protected readonly subscriptionForm = this.formBuilder.nonNullable.group({
     planId: ['', Validators.required],
     billingCycle: this.formBuilder.nonNullable.control<'monthly' | 'annual'>('monthly'),
+    // Without a seat count the tenant can't finalize any employee onboarding.
+    includedSeats: this.formBuilder.nonNullable.control<number | null>(null, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(100000),
+      Validators.pattern(/^\d+$/),
+    ]),
+    overageAllowed: false,
+    isTest: false,
   });
 
   protected readonly ownerForm = this.formBuilder.nonNullable.group({
@@ -236,6 +245,9 @@ export class TenantWizard implements OnInit {
       currency: company.currency,
       planId: subscription.planId,
       billingCycle: subscription.billingCycle,
+      includedSeats: Number(subscription.includedSeats),
+      overageAllowed: subscription.overageAllowed,
+      isTest: subscription.isTest,
       ownerInvite: {
         email: owner.email,
         firstName: owner.firstName,

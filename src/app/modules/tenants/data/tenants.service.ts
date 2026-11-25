@@ -130,6 +130,9 @@ export class TenantsService {
         plan_id: request.planId,
         billing_cycle: request.billingCycle,
         commercial_model: 'standard',
+        included_seats: request.includedSeats,
+        overage_allowed: request.overageAllowed,
+        is_test: request.isTest,
       },
       owner_invite: {
         email: request.ownerInvite.email,

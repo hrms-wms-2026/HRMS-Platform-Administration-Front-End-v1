@@ -95,6 +95,25 @@ describe('TenantSubscriptionService', () => {
       isInGracePeriod: false,
       daysUntilRenewal: 12,
       daysUntilAccessEnds: null,
+      includedSeats: null,
+      overageAllowed: null,
+      usedSeats: null,
+      isTest: false,
     });
+  });
+
+  it('maps seat fields and sends only the changed fields on update', () => {
+    let result: unknown;
+    service.update('tenant-1', { includedSeats: 20, isTest: true }).subscribe((value) => (result = value));
+
+    const req = httpMock.expectOne((r) => r.url.endsWith('/tenants/tenant-1/subscription'));
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.withCredentials).toBe(true);
+    expect(req.request.body).toEqual({ included_seats: 20, is_test: true });
+    req.flush({ ...subscriptionApi, included_seats: 20, overage_allowed: false, used_seats: 4, is_test: true });
+
+    expect(result).toEqual(
+      expect.objectContaining({ includedSeats: 20, overageAllowed: false, usedSeats: 4, isTest: true }),
+    );
   });
 });
