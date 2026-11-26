@@ -64,6 +64,8 @@ interface SupportTicketDetailApi {
   ticket: SupportTicketApi;
   comments: SupportTicketCommentApi[];
   attachments: SupportTicketAttachmentApi[];
+  /** Empty for tickets without references; tolerated as missing/null for older backends. */
+  correlation_ids?: string[] | null;
 }
 
 interface SupportTicketListResponseApi {
@@ -318,6 +320,7 @@ export class SupportTicketsService {
       ticket: this.mapTicket(item.ticket),
       comments: item.comments.map((comment) => this.mapComment(comment)),
       attachments: (item.attachments ?? []).map((attachment) => this.mapAttachment(attachment)),
+      correlationIds: item.correlation_ids ?? [],
     };
   }
 }

@@ -54,6 +54,11 @@ export interface SupportTicketDetail {
   ticket: SupportTicketSummary;
   comments: SupportTicketComment[];
   attachments: SupportTicketAttachment[];
+  /**
+   * Correlation ids of the tenant user's recent failed requests, attached when they raised the
+   * ticket (DEC-114). Empty for tickets raised before references existed or by the support team.
+   */
+  correlationIds: string[];
 }
 
 export interface SupportTicketListResponse {
@@ -142,6 +147,11 @@ export function supportTicketPriorityTone(priority: SupportTicketPriority | stri
     default:
       return 'neutral';
   }
+}
+
+/** Application Insights (KQL) query that finds every log line, request and exception for one reference. */
+export function appInsightsQuery(correlationId: string): string {
+  return `union traces, requests, exceptions | where customDimensions.CorrelationId == "${correlationId}" or customDimensions["crownus.correlation_id"] == "${correlationId}"`;
 }
 
 export function shortTicketId(id: string): string {

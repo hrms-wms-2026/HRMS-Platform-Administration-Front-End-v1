@@ -164,7 +164,36 @@ describe('SupportTicketsService', () => {
           createdAt: '2026-08-14T10:05:00Z',
         },
       ],
+      correlationIds: [],
     });
+  });
+
+  it('maps the correlation id list on the ticket detail', () => {
+    let result: { correlationIds: string[] } | undefined;
+    service.getById('ticket-1').subscribe((detail) => (result = detail));
+
+    httpMock.expectOne(`${environment.apiUrl}/support/tickets/ticket-1`).flush({
+      ticket: ticketApi,
+      comments: [],
+      attachments: [],
+      correlation_ids: ['0f8fad5b-d9cb-469f-a165-70867728950e', 'req-42'],
+    });
+
+    expect(result?.correlationIds).toEqual(['0f8fad5b-d9cb-469f-a165-70867728950e', 'req-42']);
+  });
+
+  it('maps a null correlation id list (older tickets) to an empty list', () => {
+    let result: { correlationIds: string[] } | undefined;
+    service.getById('ticket-1').subscribe((detail) => (result = detail));
+
+    httpMock.expectOne(`${environment.apiUrl}/support/tickets/ticket-1`).flush({
+      ticket: ticketApi,
+      comments: [],
+      attachments: [],
+      correlation_ids: null,
+    });
+
+    expect(result?.correlationIds).toEqual([]);
   });
 
   it('creates a support ticket with snake_case body', () => {

@@ -64,9 +64,14 @@ describe('SupportTicketDetail', () => {
     createdAt: '2026-08-14T10:05:00Z',
   };
 
-  function setup(permissions: string[] = ['platform.support.read', 'platform.support.manage']) {
+  function setup(
+    permissions: string[] = ['platform.support.read', 'platform.support.manage'],
+    correlationIds: string[] = [],
+  ) {
     ticketsService = {
-      getById: jest.fn().mockReturnValue(of({ ticket, comments: [tenantComment], attachments: [attachment] })),
+      getById: jest
+        .fn()
+        .mockReturnValue(of({ ticket, comments: [tenantComment], attachments: [attachment], correlationIds })),
       update: jest.fn(),
       updateStatus: jest.fn(),
       assign: jest.fn(),
@@ -301,5 +306,71 @@ describe('SupportTicketDetail', () => {
 
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
     expect(buttons.some((button) => button.textContent?.trim() === 'Edit')).toBe(false);
+  });
+  describe('references', () => {
+    const fullId = '0f8fad5b-d9cb-469f-a165-70867728950e';
+    let writeText: jest.Mock;
+
+    beforeEach(() => {
+      writeText = jest.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    });
+
+    afterEach(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+    });
+
+    it('hides the References section when the ticket has no correlation ids', () => {
+      const fixture = setup();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('[data-testid="ticket-references"]')).toBeNull();
+      expect(el.textContent).not.toContain('References');
+    });
+
+    it('lists each reference with its Application Insights query', () => {
+      const fixture = setup(undefined, [fullId, 'req-42']);
+      const section: HTMLElement = fixture.nativeElement.querySelector('[data-testid="ticket-references"]');
+      expect(section).not.toBeNull();
+      expect(section.textContent).toContain('References (2)');
+      expect(section.textContent).toContain(fullId);
+      expect(section.textContent).toContain(
+        `union traces, requests, exceptions | where customDimensions.CorrelationId == "${fullId}" or customDimensions["crownus.correlation_id"] == "${fullId}"`,
+      );
+    });
+
+    it('copies the full id when Copy id is pressed', async () => {
+      const fixture = setup(undefined, [fullId]);
+      const button: HTMLButtonElement = fixture.nativeElement.querySelector(
+        `button[aria-label="Copy reference ${fullId}"]`,
+      );
+      button.click();
+      await Promise.resolve();
+
+      expect(writeText).toHaveBeenCalledWith(fullId);
+      expect(notificationService.success).toHaveBeenCalledWith('Reference copied.');
+    });
+
+    it('copies the Application Insights query for the reference', async () => {
+      const fixture = setup(undefined, [fullId]);
+      const button: HTMLButtonElement = fixture.nativeElement.querySelector(
+        `button[aria-label="Copy Application Insights query for reference ${fullId}"]`,
+      );
+      button.click();
+      await Promise.resolve();
+
+      expect(writeText).toHaveBeenCalledWith(
+        `union traces, requests, exceptions | where customDimensions.CorrelationId == "${fullId}" or customDimensions["crownus.correlation_id"] == "${fullId}"`,
+      );
+    });
+
+    it('shows an error when the clipboard write fails', async () => {
+      writeText.mockRejectedValue(new Error('denied'));
+      const fixture = setup(undefined, [fullId]);
+      fixture.nativeElement.querySelector(`button[aria-label="Copy reference ${fullId}"]`).click();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(notificationService.error).toHaveBeenCalledWith('Could not copy. Select the text and copy it instead.');
+    });
   });
 });

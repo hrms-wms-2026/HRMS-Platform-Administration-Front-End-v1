@@ -144,6 +144,54 @@
       }
     </div>
 
+    @if (references().length > 0) {
+      <section
+        aria-labelledby="referencesHeading"
+        data-testid="ticket-references"
+        class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm"
+      >
+        <div>
+          <h2 id="referencesHeading" class="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">
+            References ({{ references().length }})
+          </h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Ids of the tenant user's recent failed requests. Paste the query into Application Insights
+            (Logs) to see the request, its errors and SQL calls.
+          </p>
+        </div>
+        <ul class="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
+          @for (reference of references(); track reference) {
+            <li class="flex flex-col gap-3 py-3">
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <code class="break-all font-mono text-sm text-slate-900 dark:text-slate-100">{{ reference }}</code>
+                <button
+                  type="button"
+                  (click)="copyReference(reference)"
+                  [attr.aria-label]="'Copy reference ' + reference"
+                  class="shrink-0 rounded-lg border border-slate-300 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600/50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  Copy id
+                </button>
+              </div>
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <pre
+                  class="min-w-0 flex-1 whitespace-pre-wrap break-all rounded-lg bg-slate-50 p-3 font-mono text-xs text-slate-700 dark:bg-slate-800/60 dark:text-slate-300"
+                >{{ appInsightsQuery(reference) }}</pre>
+                <button
+                  type="button"
+                  (click)="copyQuery(reference)"
+                  [attr.aria-label]="'Copy Application Insights query for reference ' + reference"
+                  class="shrink-0 rounded-lg border border-slate-300 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600/50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  Copy query
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     <div class="flex flex-col gap-4 rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 class="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">

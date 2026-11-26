@@ -15,6 +15,7 @@ import {
   SupportTicketDetail as SupportTicketDetailModel,
   SupportTicketPriority,
   SupportTicketSummary,
+  appInsightsQuery,
   formatFileSize,
   supportTicketPriorityTone,
   supportTicketStatusTone,
@@ -61,6 +62,10 @@ export class SupportTicketDetail implements OnInit {
   protected readonly priorityTone = supportTicketPriorityTone;
   protected readonly fileSize = formatFileSize;
   protected readonly attachmentAccept = SUPPORT_ATTACHMENT_ACCEPT;
+  protected readonly appInsightsQuery = appInsightsQuery;
+
+  /** Correlation ids the tenant attached; the References section is hidden when there are none. */
+  protected readonly references = computed(() => this.detail()?.correlationIds ?? []);
 
   protected readonly commentForm = this.formBuilder.nonNullable.group({
     body: ['', [Validators.required, Validators.maxLength(10000)]],
@@ -247,6 +252,25 @@ export class SupportTicketDetail implements OnInit {
         this.notificationService.error(error.error?.detail ?? 'Could not download the file.');
       },
     });
+  }
+
+  protected copyReference(correlationId: string): void {
+    this.copyToClipboard(correlationId, 'Reference copied.');
+  }
+
+  protected copyQuery(correlationId: string): void {
+    this.copyToClipboard(appInsightsQuery(correlationId), 'Application Insights query copied.');
+  }
+
+  private copyToClipboard(text: string, successMessage: string): void {
+    if (!navigator.clipboard) {
+      this.notificationService.error('Copy is not available in this browser. Select the text and copy it instead.');
+      return;
+    }
+    navigator.clipboard.writeText(text).then(
+      () => this.notificationService.success(successMessage),
+      () => this.notificationService.error('Could not copy. Select the text and copy it instead.'),
+    );
   }
 
   private replaceTicket(ticket: SupportTicketSummary): void {
